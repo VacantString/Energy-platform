@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>碳足迹核算模块 - 国家级绿色工厂能源管理平台</title>
+    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-react@latest/dist/css/arco.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; color: #333; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #1e80ff 0%, #0e5fd8 100%); color: white; padding: 25px 30px; border-radius: 8px; margin-bottom: 20px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .header h1 { font-size: 2rem; font-weight: 600; }
+        .back-btn { background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; text-decoration: none; }
+        
+        .lca-container { background: white; padding: 30px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); position: relative; }
+        .lca-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; text-align: center; }
+        
+        .lca-process { display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .process-stage { text-align: center; flex: 1; position: relative; }
+        .stage-icon { width: 60px; height: 60px; background: #1e80ff; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; }
+        .stage-name { font-weight: 600; margin-bottom: 5px; }
+        .stage-desc { color: #666; font-size: 0.9rem; }
+        .stage-contribution { margin-top: 10px; font-weight: 600; color: #f53f3f; }
+        
+        .process-arrow { position: absolute; top: 30px; right: -15px; color: #666; font-size: 1.5rem; }
+        
+        .boundary-selector { text-align: center; margin: 20px 0; }
+        .boundary-btn { padding: 8px 16px; border: 1px solid #d9d9d9; background: white; border-radius: 4px; cursor: pointer; margin: 0 5px; }
+        .boundary-btn.active { background: #1e80ff; color: white; border-color: #1e80ff; }
+        
+        .supplier-ranking { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); overflow: hidden; margin-bottom: 20px; }
+        .ranking-header { padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .ranking-table { width: 100%; border-collapse: collapse; }
+        .ranking-table th, .ranking-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .ranking-table th { background: #fafafa; font-weight: 600; color: #666; }
+        
+        .carbon-label { text-align: center; padding: 30px; background: linear-gradient(135deg, #00b42a, #52c41a); color: white; border-radius: 8px; margin-bottom: 20px; }
+        .label-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 10px; }
+        .label-value { font-size: 2.5rem; font-weight: 600; margin-bottom: 15px; }
+        .label-qr { width: 100px; height: 100px; background: white; margin: 0 auto; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #333; }
+        
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: #1e80ff; color: white; }
+        .btn-secondary { background: #f0f0f0; color: #666; }
+        
+        @media (max-width: 768px) {
+            .lca-process { flex-direction: column; }
+            .process-stage { margin-bottom: 30px; }
+            .process-arrow { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>👣 碳足迹核算模块</h1>
+                <a href="index.html" class="back-btn">← 返回首页</a>
+            </div>
+            <p>产品全生命周期碳足迹计算，供应商对比与碳标签认证</p>
+        </div>
+        
+        <!-- 生命周期边界选择 -->
+        <div class="boundary-selector">
+            <button class="boundary-btn active">摇篮到大门 (Cradle-to-Gate)</button>
+            <button class="boundary-btn">摇篮到坟墓 (Cradle-to-Grave)</button>
+            <button class="boundary-btn">版本对比</button>
+        </div>
+        
+        <!-- 生命周期分析 -->
+        <div class="lca-container">
+            <div class="lca-title">产品全生命周期碳足迹追踪</div>
+            
+            <div class="lca-process">
+                <div class="process-stage">
+                    <div class="stage-icon">🏭</div>
+                    <div class="stage-name">原材料获取</div>
+                    <div class="stage-desc">采矿、种植、提取</div>
+                    <div class="stage-contribution">贡献率: 25.3%</div>
+                </div>
+                <div class="process-arrow">→</div>
+                
+                <div class="process-stage">
+                    <div class="stage-icon">⚙️</div>
+                    <div class="stage-name">制造加工</div>
+                    <div class="stage-desc">生产、组装、测试</div>
+                    <div class="stage-contribution">贡献率: 45.8%</div>
+                </div>
+                <div class="process-arrow">→</div>
+                
+                <div class="process-stage">
+                    <div class="stage-icon">🚚</div>
+                    <div class="stage-name">仓储物流</div>
+                    <div class="stage-desc">存储、运输、分销</div>
+                    <div class="stage-contribution">贡献率: 18.6%</div>
+                </div>
+                <div class="process-arrow">→</div>
+                
+                <div class="process-stage" style="opacity: 0.5;">
+                    <div class="stage-icon">♻️</div>
+                    <div class="stage-name">废弃回收</div>
+                    <div class="stage-desc">处理、回收、处置</div>
+                    <div class="stage-contribution">贡献率: 10.3%</div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-primary">生成碳标签 (QR Code)</button>
+            </div>
+        </div>
+        
+        <!-- 碳标签展示 -->
+        <div class="carbon-label">
+            <div class="label-title">产品碳足迹标签</div>
+            <div class="label-value">2.45 kg CO₂e</div>
+            <div style="margin-bottom: 15px;">每件产品碳足迹</div>
+            <div class="label-qr">QR Code</div>
+            <div style="margin-top: 15px; font-size: 0.9rem;">扫描二维码查看详细碳足迹</div>
+        </div>
+        
+        <!-- 供应商对比 -->
+        <div class="supplier-ranking">
+            <div class="ranking-header">
+                <h3>不同供应商碳足迹对比</h3>
+                <div>
+                    <button class="btn btn-secondary">数据版本管理</button>
+                    <button class="btn btn-primary">生成碳足迹报告</button>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>供应商名称</th>
+                            <th>产品型号</th>
+                            <th>碳足迹 (kg CO₂e)</th>
+                            <th>同比变化</th>
+                            <th>行业排名</th>
+                            <th>认证状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ABC材料公司</td>
+                            <td>MX-2025</td>
+                            <td style="color: #00b42a; font-weight: 600;">1.85</td>
+                            <td style="color: #00b42a;">↓8.2%</td>
+                            <td>1/25</td>
+                            <td><span style="color: #00b42a;">已认证</span></td>
+                            <td><button class="btn btn-secondary">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>XYZ制造集团</td>
+                            <td>PRO-3000</td>
+                            <td style="color: #ff7d00; font-weight: 600;">2.45</td>
+                            <td style="color: #ff7d00;">→0.0%</td>
+                            <td>8/25</td>
+                            <td><span style="color: #ff7d00;">审核中</span></td>
+                            <td><button class="btn btn-secondary">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>DEF工业有限公司</td>
+                            <td>ECO-150</td>
+                            <td style="color: #f53f3f; font-weight: 600;">3.12</td>
+                            <td style="color: #f53f3f;">↑5.6%</td>
+                            <td>15/25</td>
+                            <td><span style="color: #f53f3f;">未认证</span></td>
+                            <td><button class="btn btn-secondary">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>GHK新材料</td>
+                            <td>GREEN-500</td>
+                            <td style="color: #00b42a; font-weight: 600;">1.92</td>
+                            <td style="color: #00b42a;">↓3.8%</td>
+                            <td>3/25</td>
+                            <td><span style="color: #00b42a;">已认证</span></td>
+                            <td><button class="btn btn-secondary">详情</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 版本管理 -->
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+            <h3>碳足迹数据版本管理</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div style="padding: 15px; border: 1px solid #d9d9d9; border-radius: 6px;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">V2.1 (当前)</div>
+                    <div style="color: #666; font-size: 0.9rem;">更新时间: 2025-06-12</div>
+                    <div style="color: #666; font-size: 0.9rem;">碳足迹: 2.45 kg CO₂e</div>
+                </div>
+                <div style="padding: 15px; border: 1px solid #d9d9d9; border-radius: 6px; opacity: 0.7;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">V2.0</div>
+                    <div style="color: #666; font-size: 0.9rem;">更新时间: 2025-03-15</div>
+                    <div style="color: #666; font-size: 0.9rem;">碳足迹: 2.52 kg CO₂e</div>
+                </div>
+                <div style="padding: 15px; border: 1px solid #d9d9d9; border-radius: 6px; opacity: 0.7;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">V1.2</div>
+                    <div style="color: #666; font-size: 0.9rem;">更新时间: 2024-12-20</div>
+                    <div style="color: #666; font-size: 0.9rem;">碳足迹: 2.68 kg CO₂e</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@arco-design/web-react@latest/dist/arco.development.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 边界选择
+            const boundaryBtns = document.querySelectorAll('.boundary-btn');
+            boundaryBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    boundaryBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 根据选择的边界更新显示
+                    if (this.textContent.includes('摇篮到大门')) {
+                        document.querySelector('.process-stage:last-child').style.opacity = '0.5';
+                    } else {
+                        document.querySelector('.process-stage:last-child').style.opacity = '1';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能流分析模块 - 国家级绿色工厂能源管理平台</title>
+    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-react@latest/dist/css/arco.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; color: #333; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #1e80ff 0%, #0e5fd8 100%); color: white; padding: 25px 30px; border-radius: 8px; margin-bottom: 20px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .header h1 { font-size: 2rem; font-weight: 600; }
+        .back-btn { background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; text-decoration: none; }
+        
+        .sankey-container { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); height: 600px; position: relative; }
+        .sankey-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; }
+        
+        .control-panel { position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); z-index: 10; }
+        .control-group { margin-bottom: 10px; }
+        .control-label { font-weight: 500; margin-bottom: 5px; display: block; }
+        .control-select { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; width: 100%; }
+        
+        .analysis-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .detail-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .detail-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; }
+        
+        .loss-table { width: 100%; border-collapse: collapse; }
+        .loss-table th, .loss-table td { padding: 10px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .loss-table th { background: #fafafa; font-weight: 600; color: #666; }
+        .loss-rate { font-weight: 600; }
+        .rate-high { color: #f53f3f; }
+        .rate-medium { color: #ff7d00; }
+        .rate-low { color: #00b42a; }
+        
+        .efficiency-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .metric-item { text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px; }
+        .metric-value { font-size: 1.5rem; font-weight: 600; color: #1e80ff; margin-bottom: 5px; }
+        .metric-label { color: #666; font-size: 0.9rem; }
+        
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: #1e80ff; color: white; }
+        .btn-secondary { background: #f0f0f0; color: #666; }
+        
+        @media (max-width: 768px) {
+            .analysis-details { grid-template-columns: 1fr; }
+            .control-panel { position: static; margin-bottom: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>🌊 能流分析模块</h1>
+                <a href="index.html" class="back-btn">← 返回首页</a>
+            </div>
+            <p>Sankey图展示能源流向，损耗分析，转换效率评估与优化</p>
+        </div>
+        
+        <!-- Sankey图容器 -->
+        <div class="sankey-container">
+            <div class="sankey-title">全厂能源流向分析图</div>
+            
+            <!-- 控制面板 -->
+            <div class="control-panel">
+                <div class="control-group">
+                    <label class="control-label">层级选择</label>
+                    <select class="control-select">
+                        <option value="factory">全厂级</option>
+                        <option value="workshop">车间级</option>
+                        <option value="equipment">设备级</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">能源类型</label>
+                    <select class="control-select">
+                        <option value="all">全部能源</option>
+                        <option value="electric">电力</option>
+                        <option value="gas">天然气</option>
+                        <option value="steam">蒸汽</option>
+                        <option value="water">水</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">损耗阈值</label>
+                    <select class="control-select">
+                        <option value="5">≥5%</option>
+                        <option value="10">≥10%</option>
+                        <option value="15">≥15%</option>
+                    </select>
+                </div>
+                <div style="text-align: center; margin-top: 10px;">
+                    <button class="btn btn-primary">导出能流图</button>
+                </div>
+            </div>
+            
+            <!-- Sankey图 -->
+            <div id="sankey-chart" style="width: 100%; height: 500px;"></div>
+        </div>
+        
+        <!-- 分析详情 -->
+        <div class="analysis-details">
+            <!-- 左侧：损耗分析 -->
+            <div class="detail-card">
+                <div class="detail-title">能源损耗分析</div>
+                <table class="loss-table">
+                    <thead>
+                        <tr>
+                            <th>环节名称</th>
+                            <th>输入能量</th>
+                            <th>输出能量</th>
+                            <th>损耗量</th>
+                            <th>损耗率</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>锅炉转换</td>
+                            <td>1,856.3 kWh</td>
+                            <td>1,612.8 kWh</td>
+                            <td>243.5 kWh</td>
+                            <td class="loss-rate rate-high">13.1%</td>
+                        </tr>
+                        <tr>
+                            <td>空压机运行</td>
+                            <td>856.2 kWh</td>
+                            <td>785.4 kWh</td>
+                            <td>70.8 kWh</td>
+                            <td class="loss-rate rate-medium">8.3%</td>
+                        </tr>
+                        <tr>
+                            <td>输配系统</td>
+                            <td>2,456.7 kWh</td>
+                            <td>2,385.2 kWh</td>
+                            <td>71.5 kWh</td>
+                            <td class="loss-rate rate-low">2.9%</td>
+                        </tr>
+                        <tr>
+                            <td>冷却系统</td>
+                            <td>456.3 kWh</td>
+                            <td>432.8 kWh</td>
+                            <td>23.5 kWh</td>
+                            <td class="loss-rate rate-low">5.2%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 右侧：效率评估 -->
+            <div class="detail-card">
+                <div class="detail-title">转换效率评估</div>
+                <div class="efficiency-metrics">
+                    <div class="metric-item">
+                        <div class="metric-value">86.9%</div>
+                        <div class="metric-label">锅炉效率</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">91.7%</div>
+                        <div class="metric-label">空压机效率</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">97.1%</div>
+                        <div class="metric-label">输配效率</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">94.8%</div>
+                        <div class="metric-label">冷却效率</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <div class="detail-title">优化建议</div>
+                    <ul style="color: #666; line-height: 1.6;">
+                        <li>锅炉热效率偏低，建议优化燃烧控制系统</li>
+                        <li>空压机存在较大节能空间，可考虑变频改造</li>
+                        <li>输配系统效率良好，继续保持</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@arco-design/web-react@latest/dist/arco.development.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sankey图配置
+            const sankeyChart = echarts.init(document.getElementById('sankey-chart'));
+            sankeyChart.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: {c} kWh'
+                },
+                series: {
+                    type: 'sankey',
+                    layout: 'none',
+                    emphasis: {
+                        focus: 'adjacency'
+                    },
+                    data: [
+                        { name: '电力输入' },
+                        { name: '天然气输入' },
+                        { name: '锅炉房' },
+                        { name: '空压站' },
+                        { name: '生产工艺' },
+                        { name: '采暖系统' },
+                        { name: '照明系统' },
+                        { name: '转换损耗' },
+                        { name: '输配损耗' }
+                    ],
+                    links: [
+                        { source: '电力输入', target: '空压站', value: 856.2 },
+                        { source: '电力输入', target: '生产工艺', value: 1245.6 },
+                        { source: '电力输入', target: '照明系统', value: 245.3 },
+                        { source: '天然气输入', target: '锅炉房', value: 1856.3 },
+                        { source: '锅炉房', target: '生产工艺', value: 1211.2 },
+                        { source: '锅炉房', target: '采暖系统', value: 500.1 },
+                        { source: '锅炉房', target: '转换损耗', value: 145.0 },
+                        { source: '空压站', target: '生产工艺', value: 785.4 },
+                        { source: '空压站', target: '输配损耗', value: 70.8 }
+                    ],
+                    lineStyle: {
+                        color: 'gradient',
+                        curveness: 0.5
+                    }
+                }
+            });
+            
+            // 节点点击事件
+            sankeyChart.on('click', function(params) {
+                if (params.dataType === 'node') {
+                    alert('点击节点: ' + params.name);
+                }
+            });
+            
+            window.addEventListener('resize', function() {
+                sankeyChart.resize();
+            });
+        });
+    </script>
+</body>
+</html>

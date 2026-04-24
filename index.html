@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>国家级绿色工厂能源管理平台</title>
+    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-react@latest/dist/css/arco.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .platform-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* 顶部导航栏 */
+        .top-navbar {
+            background: linear-gradient(135deg, #1e80ff 0%, #0e5fd8 100%);
+            color: white;
+            padding: 0 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            position: relative;
+        }
+        
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .platform-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .platform-title h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .platform-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-left: 10px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 2px;
+            overflow-x: auto;
+            padding: 10px 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .nav-tab {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .nav-tab.active {
+            background: white;
+            color: #1e80ff;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-tab.active:hover {
+            background: white;
+            transform: none;
+        }
+        
+        /* 内容区域 */
+        .content-area {
+            flex: 1;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .module-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
+        
+        .module-frame.active {
+            display: block;
+        }
+        
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #666;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #1e80ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .nav-tabs {
+                gap: 1px;
+            }
+            
+            .nav-tab {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .platform-title h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .top-navbar {
+                padding: 0 10px;
+            }
+            
+            .nav-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .nav-tabs {
+                justify-content: flex-start;
+            }
+            
+            .nav-tab {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .platform-title h1 {
+                font-size: 1.3rem;
+            }
+            
+            .platform-subtitle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="platform-container">
+        <!-- 顶部导航栏 -->
+        <div class="top-navbar">
+            <div class="nav-header">
+                <div class="platform-title">
+                    <h1>🌱 国家级绿色工厂能源管理平台</h1>
+                    <span class="platform-subtitle">能源+碳+生产一体化智能管理解决方案</span>
+                </div>
+            </div>
+            
+            <!-- 功能模块导航标签 -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-module="energy-consumption-query">
+                    📊 能耗查询
+                </button>
+                <button class="nav-tab" data-module="energy-consumption-calculation">
+                    🧮 能耗计算
+                </button>
+                <button class="nav-tab" data-module="energy-consumption-analysis">
+                    📈 能耗分析
+                </button>
+                <button class="nav-tab" data-module="energy-efficiency-benchmarking">
+                    🎯 能效对标
+                </button>
+                <button class="nav-tab" data-module="energy-flow-analysis">
+                    🌊 能流分析
+                </button>
+                <button class="nav-tab" data-module="energy-balance-optimization">
+                    ⚖️ 能效优化
+                </button>
+                <button class="nav-tab" data-module="budget-management">
+                    💰 预算管理
+                </button>
+                <button class="nav-tab" data-module="carbon-emission-accounting">
+                    🌍 碳排放核算
+                </button>
+                <button class="nav-tab" data-module="carbon-footprint-accounting">
+                    👣 碳足迹核算
+                </button>
+                <button class="nav-tab" data-module="supply-chain-carbon-management">
+                    🔗 供应链碳管理
+                </button>
+                <button class="nav-tab" data-module="carbon-audit-support">
+                    🔍 碳核查支撑
+                </button>
+                <button class="nav-tab" data-module="carbon-asset-management">
+                    💼 碳资产管理
+                </button>
+            </div>
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <!-- 加载指示器 -->
+            <div class="loading-indicator" id="loadingIndicator">
+                <div class="loading-spinner"></div>
+                <p>正在加载模块内容...</p>
+            </div>
+            
+            <!-- 能耗查询模块 -->
+            <iframe 
+                class="module-frame active" 
+                id="energy-consumption-query" 
+                src="energy-consumption-query.html"
+                data-loaded="false">
+            </iframe>
+            
+            <!-- 能源消费量计算模块 -->
+            <iframe 
+                class="module-frame" 
+                id="energy-consumption-calculation" 
+                src="energy-consumption-calculation.html"
+                data-loaded="false">
+            </iframe>
+            
+            <!-- 能源消费分析模块 -->
+            <iframe 
+                class="module-frame" 
+                id="energy-consumption-analysis" 
+                src="energy-consumption-analysis.html"
+                data-loaded="false">
+            </iframe>
+            
+            <!-- 能效对标模块 -->
+            <iframe 
+                class="module-frame" 
+                id="energy-efficiency-benchmarking" 
+                src="energy-efficiency-benchmarking.html"
+                data-loaded="false">
+            </iframe>
+            
+            <!-- 能流分析模块 -->
+            <iframe 
+                class="module-frame" 
+                id="energy-flow-analysis" 
+                src="energy-flow-analysis.html"
+                data-loaded="false">
+            </iframe>
+            
+            <!-- 能效平衡与优化模块 -->
+            <iframe 
+                class="module-frame" 
+                id="energy-balance-optimization" 
+                src="energy-balance-optimization.html"
+                data-loaded="false">
+            </iframe>
+            
+            <!-- 预算管理模块 -->
+            <iframe 
+                class="module-frame" 
+                id="budget-management" 
+                src="budget-management.html"
+                data-loaded="false">
+            </iframe>
+            
+            <!-- 碳排放核算模块 -->
+            <iframe 
+                class="module-frame" 
+                id="carbon-emission-accounting" 
+                src="carbon-emission-accounting.html"
+                data-loaded="false">
+            </iframe>
+            
+            <!-- 碳足迹核算模块 -->
+            <iframe 
+                class="module-frame" 
+                id="carbon-footprint-accounting" 
+                src="carbon-footprint-accounting.html"
+                data-loaded="false">
+            </iframe>
+            
+            <!-- 供应链碳管理模块 -->
+            <iframe 
+                class="module-frame" 
+                id="supply-chain-carbon-management" 
+                src="supply-chain-carbon-management.html"
+                data-loaded="false">
+            </iframe>
+            
+            <!-- 碳核查支撑模块 -->
+            <iframe 
+                class="module-frame" 
+                id="carbon-audit-support" 
+                src="carbon-audit-support.html"
+                data-loaded="false">
+            </iframe>
+            
+            <!-- 碳资产管理模块 -->
+            <iframe 
+                class="module-frame" 
+                id="carbon-asset-management" 
+                src="carbon-asset-management.html"
+                data-loaded="false">
+            </iframe>
+        </div>
+    </div>
+
+    <!-- Arco Design 组件库 -->
+    <script src="https://unpkg.com/@arco-design/web-react@latest/dist/arco.development.js"></script>
+    <script src="https://unpkg.com/@arco-design/web-react@latest/dist/arco-icon.min.js"></script>
+    
+    <script>
+        // 平台管理类
+        class EnergyManagementPlatform {
+            constructor() {
+                this.currentModule = 'energy-consumption-query';
+                this.modules = {
+                    'energy-consumption-query': '能耗查询模块',
+                    'energy-consumption-calculation': '能源消费量计算',
+                    'energy-consumption-analysis': '能源消费分析',
+                    'energy-efficiency-benchmarking': '能效对标模块',
+                    'energy-flow-analysis': '能流分析模块',
+                    'energy-balance-optimization': '能效平衡与优化',
+                    'budget-management': '用能与碳排放预算管理',
+                    'carbon-emission-accounting': '碳排放核算模块',
+                    'carbon-footprint-accounting': '碳足迹核算模块',
+                    'supply-chain-carbon-management': '供应链碳管理模块',
+                    'carbon-audit-support': '碳核查支撑模块',
+                    'carbon-asset-management': '碳资产管理模块'
+                };
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.loadDefaultModule();
+                this.hideLoadingIndicator();
+            }
+            
+            bindEvents() {
+                // 导航标签点击事件
+                const navTabs = document.querySelectorAll('.nav-tab');
+                navTabs.forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        this.switchModule(e.target.dataset.module);
+                    });
+                });
+                
+                // iframe加载完成事件
+                const iframes = document.querySelectorAll('.module-frame');
+                iframes.forEach(iframe => {
+                    iframe.addEventListener('load', () => {
+                        iframe.dataset.loaded = 'true';
+                        this.hideLoadingIndicator();
+                    });
+                    
+                    iframe.addEventListener('error', () => {
+                        console.error(`模块加载失败: ${iframe.id}`);
+                        this.hideLoadingIndicator();
+                    });
+                });
+            }
+            
+            switchModule(moduleId) {
+                if (this.currentModule === moduleId) return;
+                
+                // 显示加载指示器
+                this.showLoadingIndicator();
+                
+                // 更新导航状态
+                this.updateNavTabs(moduleId);
+                
+                // 隐藏当前模块
+                const currentIframe = document.getElementById(this.currentModule);
+                if (currentIframe) {
+                    currentIframe.classList.remove('active');
+                }
+                
+                // 显示新模块
+                const newIframe = document.getElementById(moduleId);
+                if (newIframe) {
+                    newIframe.classList.add('active');
+                    
+                    // 如果模块已经加载过，直接显示
+                    if (newIframe.dataset.loaded === 'true') {
+                        this.hideLoadingIndicator();
+                    }
+                }
+                
+                this.currentModule = moduleId;
+                
+                // 更新页面标题
+                document.title = `${this.modules[moduleId]} - 国家级绿色工厂能源管理平台`;
+            }
+            
+            updateNavTabs(activeModuleId) {
+                const navTabs = document.querySelectorAll('.nav-tab');
+                navTabs.forEach(tab => {
+                    if (tab.dataset.module === activeModuleId) {
+                        tab.classList.add('active');
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                });
+            }
+            
+            loadDefaultModule() {
+                // 默认加载能耗查询模块
+                const defaultIframe = document.getElementById(this.currentModule);
+                if (defaultIframe) {
+                    defaultIframe.classList.add('active');
+                }
+            }
+            
+            showLoadingIndicator() {
+                const indicator = document.getElementById('loadingIndicator');
+                if (indicator) {
+                    indicator.style.display = 'block';
+                }
+            }
+            
+            hideLoadingIndicator() {
+                const indicator = document.getElementById('loadingIndicator');
+                if (indicator) {
+                    indicator.style.display = 'none';
+                }
+            }
+        }
+        
+        // 页面交互逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化平台
+            const platform = new EnergyManagementPlatform();
+            
+            // 添加页面加载动画
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+                document.body.style.transition = 'opacity 0.5s ease';
+            }, 100);
+            
+            // 键盘快捷键支持
+            document.addEventListener('keydown', (e) => {
+                // Ctrl + 数字键切换模块 (1-9, 0, -, =)
+                if (e.ctrlKey && e.key >= '1' && e.key <= '9') {
+                    e.preventDefault();
+                    const moduleIndex = parseInt(e.key) - 1;
+                    const modules = Object.keys(platform.modules);
+                    if (modules[moduleIndex]) {
+                        platform.switchModule(modules[moduleIndex]);
+                    }
+                }
+                
+                // Ctrl + 0 切换到第10个模块
+                if (e.ctrlKey && e.key === '0') {
+                    e.preventDefault();
+                    const modules = Object.keys(platform.modules);
+                    if (modules[9]) {
+                        platform.switchModule(modules[9]);
+                    }
+                }
+                
+                // Ctrl + - 切换到第11个模块
+                if (e.ctrlKey && e.key === '-') {
+                    e.preventDefault();
+                    const modules = Object.keys(platform.modules);
+                    if (modules[10]) {
+                        platform.switchModule(modules[10]);
+                    }
+                }
+                
+                // Ctrl + = 切换到第12个模块
+                if (e.ctrlKey && e.key === '=') {
+                    e.preventDefault();
+                    const modules = Object.keys(platform.modules);
+                    if (modules[11]) {
+                        platform.switchModule(modules[11]);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

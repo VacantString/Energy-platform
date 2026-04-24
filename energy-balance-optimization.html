@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能效平衡与优化 - 国家级绿色工厂能源管理平台</title>
+    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-react@latest/dist/css/arco.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; color: #333; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #1e80ff 0%, #0e5fd8 100%); color: white; padding: 25px 30px; border-radius: 8px; margin-bottom: 20px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .header h1 { font-size: 2rem; font-weight: 600; }
+        .back-btn { background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; text-decoration: none; }
+        
+        .balance-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .balance-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .section-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; }
+        
+        .balance-topology { height: 400px; position: relative; }
+        .topology-node { position: absolute; padding: 15px; border-radius: 8px; text-align: center; color: white; min-width: 120px; }
+        .node-input { background: #1e80ff; top: 50px; left: 50px; }
+        .node-output { background: #00b42a; top: 50px; right: 50px; }
+        .node-loss { background: #f53f3f; bottom: 50px; left: 50%; transform: translateX(-50%); }
+        .node-connector { position: absolute; height: 4px; background: #666; transform-origin: left center; }
+        
+        .comparison-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .comparison-item { text-align: center; padding: 20px; border-radius: 8px; background: #f8f9fa; }
+        .comparison-value { font-size: 2rem; font-weight: 600; margin-bottom: 10px; }
+        .comparison-label { color: #666; }
+        
+        .simulation-controls { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 20px; }
+        .control-group { margin-bottom: 15px; }
+        .control-label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .control-slider { width: 100%; }
+        
+        .loss-analysis { margin-top: 20px; }
+        .loss-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #f0f0f0; }
+        .loss-name { font-weight: 500; }
+        .loss-value { color: #f53f3f; font-weight: 600; }
+        
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: #1e80ff; color: white; }
+        .btn-secondary { background: #f0f0f0; color: #666; }
+        
+        @media (max-width: 768px) {
+            .balance-layout { grid-template-columns: 1fr; }
+            .comparison-panel { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>⚖️ 能效平衡与优化模块</h1>
+                <a href="index.html" class="back-btn">← 返回首页</a>
+            </div>
+            <p>系统能量平衡分析，损耗识别，优化方案生成与效果模拟</p>
+        </div>
+        
+        <div class="balance-layout">
+            <!-- 左侧：能量平衡拓扑图 -->
+            <div class="balance-section">
+                <div class="section-title">系统能量平衡拓扑图</div>
+                <div class="balance-topology">
+                    <div class="topology-node node-input">
+                        <div style="font-size: 1.2rem; font-weight: 600;">12,568.3 kWh</div>
+                        <div>能量输入</div>
+                    </div>
+                    <div class="topology-node node-output">
+                        <div style="font-size: 1.2rem; font-weight: 600;">10,245.6 kWh</div>
+                        <div>有效输出</div>
+                    </div>
+                    <div class="topology-node node-loss">
+                        <div style="font-size: 1.2rem; font-weight: 600;">2,322.7 kWh</div>
+                        <div>系统损耗 (18.5%)</div>
+                    </div>
+                    
+                    <!-- 连接线 -->
+                    <div class="node-connector" style="top: 100px; left: 170px; width: 200px; transform: rotate(0deg);"></div>
+                    <div class="node-connector" style="top: 100px; left: 370px; width: 200px; transform: rotate(0deg);"></div>
+                    <div class="node-connector" style="top: 200px; left: 285px; width: 100px; transform: rotate(90deg);"></div>
+                </div>
+                
+                <div class="loss-analysis">
+                    <div class="section-title">损耗环节分析</div>
+                    <div class="loss-item">
+                        <span class="loss-name">锅炉转换损耗</span>
+                        <span class="loss-value">243.5 kWh (13.1%)</span>
+                    </div>
+                    <div class="loss-item">
+                        <span class="loss-name">空压机运行损耗</span>
+                        <span class="loss-value">70.8 kWh (8.3%)</span>
+                    </div>
+                    <div class="loss-item">
+                        <span class="loss-name">输配系统损耗</span>
+                        <span class="loss-value">71.5 kWh (2.9%)</span>
+                    </div>
+                    <div class="loss-item">
+                        <span class="loss-name">其他损耗</span>
+                        <span class="loss-value">1,936.9 kWh</span>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-primary">运行平衡诊断</button>
+                </div>
+            </div>
+            
+            <!-- 右侧：优化模拟 -->
+            <div class="balance-section">
+                <div class="section-title">AI节能策略仿真</div>
+                
+                <div class="comparison-panel">
+                    <div class="comparison-item">
+                        <div class="comparison-value" style="color: #1e80ff;">12,568.3</div>
+                        <div class="comparison-label">优化前能耗 (kWh)</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="comparison-value" style="color: #00b42a;">11,245.8</div>
+                        <div class="comparison-label">优化后能耗 (kWh)</div>
+                    </div>
+                </div>
+                
+                <div class="simulation-controls">
+                    <div class="control-group">
+                        <label class="control-label">锅炉温度设定 (°C)</label>
+                        <input type="range" class="control-slider" min="200" max="300" value="250">
+                        <div style="text-align: center; color: #666;">当前: 250°C</div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">空压机压力设定 (bar)</label>
+                        <input type="range" class="control-slider" min="6" max="10" value="8">
+                        <div style="text-align: center; color: #666;">当前: 8 bar</div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">冷却水温度设定 (°C)</label>
+                        <input type="range" class="control-slider" min="20" max="35" value="28">
+                        <div style="text-align: center; color: #666;">当前: 28°C</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-primary">执行仿真模拟</button>
+                    <button class="btn btn-secondary">生成优化方案</button>
+                </div>
+                
+                <div class="simulation-results" style="margin-top: 20px; padding: 15px; background: #f6ffed; border-radius: 6px; border: 1px solid #b7eb8f;">
+                    <div style="font-weight: 600; color: #52c41a; margin-bottom: 10px;">仿真结果</div>
+                    <div style="color: #666; line-height: 1.6;">
+                        <div>• 预计节能: 1,322.5 kWh (10.5%)</div>
+                        <div>• 投资回收期: 1.8年</div>
+                        <div>• 年节约成本: ¥85,600</div>
+                        <div>• 碳排放减少: 1.2吨 CO₂</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 多层级平衡分析 -->
+        <div class="balance-section" style="margin-top: 20px;">
+            <div class="section-title">多层级平衡分析</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div style="text-align: center; padding: 20px; background: #f0f7ff; border-radius: 6px;">
+                    <div style="font-size: 1.5rem; font-weight: 600; color: #1e80ff;">设备级</div>
+                    <div style="color: #666; margin: 10px 0;">空压机效率: 91.7%</div>
+                    <button class="btn btn-secondary">查看详情</button>
+                </div>
+                <div style="text-align: center; padding: 20px; background: #f6ffed; border-radius: 6px;">
+                    <div style="font-size: 1.5rem; font-weight: 600; color: #52c41a;">车间级</div>
+                    <div style="color: #666; margin: 10px 0;">一车间能耗: 5,245.6 kWh</div>
+                    <button class="btn btn-secondary">查看详情</button>
+                </div>
+                <div style="text-align: center; padding: 20px; background: #fff7e6; border-radius: 6px;">
+                    <div style="font-size: 1.5rem; font-weight: 600; color: #fa8c16;">系统级</div>
+                    <div style="color: #666; margin: 10px 0;">全厂综合效率: 81.5%</div>
+                    <button class="btn btn-secondary">查看详情</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@arco-design/web-react@latest/dist/arco.development.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 滑块控制事件
+            const sliders = document.querySelectorAll('.control-slider');
+            sliders.forEach(slider => {
+                slider.addEventListener('input', function() {
+                    const valueDisplay = this.nextElementSibling;
+                    valueDisplay.textContent = `当前: ${this.value}${this.min === '200' ? '°C' : 'bar'}`;
+                });
+            });
+            
+            // 仿真按钮事件
+            const simulateBtn = document.querySelector('.btn-primary');
+            simulateBtn.addEventListener('click', function() {
+                // 模拟仿真计算
+                const results = document.querySelector('.simulation-results');
+                results.style.display = 'block';
+                
+                // 更新优化后能耗值
+                const optimizedValue = document.querySelector('.comparison-value:last-child');
+                optimizedValue.textContent = '11,245.8';
+            });
+        });
+    </script>
+</body>
+</html>

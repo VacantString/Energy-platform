@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能效对标模块 - 国家级绿色工厂能源管理平台</title>
+    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-react@latest/dist/css/arco.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; color: #333; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #1e80ff 0%, #0e5fd8 100%); color: white; padding: 25px 30px; border-radius: 8px; margin-bottom: 20px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .header h1 { font-size: 2rem; font-weight: 600; }
+        .back-btn { background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; text-decoration: none; }
+        
+        .benchmark-selector { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .selector-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .selector-item { display: flex; flex-direction: column; gap: 5px; }
+        .selector-label { font-weight: 500; color: #666; font-size: 0.9rem; }
+        .selector-input { padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 4px; }
+        
+        .traffic-lights { display: flex; justify-content: center; gap: 30px; margin: 30px 0; }
+        .traffic-light { text-align: center; }
+        .light { width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; }
+        .light-red { background: #f53f3f; box-shadow: 0 0 20px rgba(245, 63, 63, 0.5); animation: pulse 2s infinite; }
+        .light-yellow { background: #ff7d00; }
+        .light-green { background: #00b42a; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .comparison-chart { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); height: 400px; }
+        .chart-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; }
+        
+        .gap-table { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        .table-header { padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .table-container { overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .data-table th { background: #fafafa; font-weight: 600; color: #666; }
+        .gap-value { font-weight: 600; }
+        .gap-positive { color: #00b42a; }
+        .gap-negative { color: #f53f3f; }
+        
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: #1e80ff; color: white; }
+        .btn-secondary { background: #f0f0f0; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>🎯 能效对标模块</h1>
+                <a href="index.html" class="back-btn">← 返回首页</a>
+            </div>
+            <p>多维度能效对标分析，红黄绿状态显示，超标预警与差距分析</p>
+        </div>
+        
+        <!-- 对标对象选择器 -->
+        <div class="benchmark-selector">
+            <div class="selector-row">
+                <div class="selector-item">
+                    <label class="selector-label">对标类型</label>
+                    <select class="selector-input">
+                        <option value="internal">内部历史对标</option>
+                        <option value="industry">行业标准对标</option>
+                        <option value="national">国家标准对标</option>
+                        <option value="custom">自定义标杆</option>
+                    </select>
+                </div>
+                <div class="selector-item">
+                    <label class="selector-label">时间周期</label>
+                    <select class="selector-input">
+                        <option value="month">月度</option>
+                        <option value="quarter">季度</option>
+                        <option value="year">年度</option>
+                    </select>
+                </div>
+                <div class="selector-item">
+                    <label class="selector-label">指标类型</label>
+                    <select class="selector-input">
+                        <option value="intensity">单位产值能耗</option>
+                        <option value="product">单位产品能耗</option>
+                        <option value="total">总能耗</option>
+                    </select>
+                </div>
+                <div class="selector-item">
+                    <label class="selector-label">组织范围</label>
+                    <select class="selector-input">
+                        <option value="all">全厂</option>
+                        <option value="factory1">一车间</option>
+                        <option value="factory2">二车间</option>
+                    </select>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <button class="btn btn-secondary">设定对标基准线</button>
+                <button class="btn btn-primary">开始对标分析</button>
+            </div>
+        </div>
+        
+        <!-- 交通灯状态显示 -->
+        <div class="traffic-lights">
+            <div class="traffic-light">
+                <div class="light light-green">✓</div>
+                <div>一车间</div>
+                <div style="color: #00b42a; font-weight: 600;">达标</div>
+            </div>
+            <div class="traffic-light">
+                <div class="light light-yellow">⚠</div>
+                <div>二车间</div>
+                <div style="color: #ff7d00; font-weight: 600;">预警</div>
+            </div>
+            <div class="traffic-light">
+                <div class="light light-red">✗</div>
+                <div>三车间</div>
+                <div style="color: #f53f3f; font-weight: 600;">超标</div>
+            </div>
+        </div>
+        
+        <!-- 对标分析图表 -->
+        <div class="comparison-chart">
+            <div class="chart-title">能效对标分析 - 单位产值能耗 (kWh/万元)</div>
+            <div id="benchmark-chart" style="width: 100%; height: 350px;"></div>
+        </div>
+        
+        <!-- 差距明细表格 -->
+        <div class="gap-table">
+            <div class="table-header">
+                <h3>详细指标差距分析</h3>
+                <div>
+                    <button class="btn btn-secondary">导出对标报告</button>
+                    <button class="btn btn-primary">配置预警规则</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>指标名称</th>
+                            <th>实际值</th>
+                            <th>标杆值</th>
+                            <th>绝对差距</th>
+                            <th>相对差距</th>
+                            <th>达标状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>单位产值能耗</td>
+                            <td>0.85 kWh/万元</td>
+                            <td>0.78 kWh/万元</td>
+                            <td class="gap-value gap-negative">+0.07</td>
+                            <td class="gap-value gap-negative">+8.97%</td>
+                            <td><span style="color: #f53f3f; font-weight: 600;">超标</span></td>
+                            <td><button class="btn btn-secondary">分析原因</button></td>
+                        </tr>
+                        <tr>
+                            <td>单位产品能耗</td>
+                            <td>1.23 kWh/件</td>
+                            <td>1.20 kWh/件</td>
+                            <td class="gap-value gap-negative">+0.03</td>
+                            <td class="gap-value gap-negative">+2.50%</td>
+                            <td><span style="color: #ff7d00; font-weight: 600;">预警</span></td>
+                            <td><button class="btn btn-secondary">分析原因</button></td>
+                        </tr>
+                        <tr>
+                            <td>电力消耗强度</td>
+                            <td>0.65 kWh/万元</td>
+                            <td>0.68 kWh/万元</td>
+                            <td class="gap-value gap-positive">-0.03</td>
+                            <td class="gap-value gap-positive">-4.41%</td>
+                            <td><span style="color: #00b42a; font-weight: 600;">达标</span></td>
+                            <td><button class="btn btn-secondary">分析原因</button></td>
+                        </tr>
+                        <tr>
+                            <td>综合能耗</td>
+                            <td>3,856.2 tce</td>
+                            <td>3,750.0 tce</td>
+                            <td class="gap-value gap-negative">+106.2</td>
+                            <td class="gap-value gap-negative">+2.83%</td>
+                            <td><span style="color: #ff7d00; font-weight: 600;">预警</span></td>
+                            <td><button class="btn btn-secondary">分析原因</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@arco-design/web-react@latest/dist/arco.development.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 对标分析柱状图
+            const benchmarkChart = echarts.init(document.getElementById('benchmark-chart'));
+            benchmarkChart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' }
+                },
+                legend: {
+                    data: ['实际值', '标杆值', '差距']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['一车间', '二车间', '三车间', '全厂平均']
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'kWh/万元'
+                },
+                series: [
+                    {
+                        name: '实际值',
+                        type: 'bar',
+                        data: [0.78, 0.92, 1.05, 0.85],
+                        itemStyle: {
+                            color: '#1e80ff'
+                        }
+                    },
+                    {
+                        name: '标杆值',
+                        type: 'bar',
+                        data: [0.75, 0.85, 0.95, 0.78],
+                        itemStyle: {
+                            color: '#00b42a'
+                        }
+                    },
+                    {
+                        name: '差距',
+                        type: 'line',
+                        data: [0.03, 0.07, 0.10, 0.07],
+                        symbol: 'circle',
+                        symbolSize: 8,
+                        lineStyle: {
+                            color: '#f53f3f',
+                            width: 2
+                        },
+                        itemStyle: {
+                            color: '#f53f3f'
+                        }
+                    }
+                ]
+            });
+            
+            window.addEventListener('resize', function() {
+                benchmarkChart.resize();
+            });
+        });
+    </script>
+</body>
+</html>
