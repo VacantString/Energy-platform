@@ -8,48 +8,78 @@
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; color: #333; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #1e80ff 0%, #0e5fd8 100%); color: white; padding: 25px 30px; border-radius: 8px; margin-bottom: 20px; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .header h1 { font-size: 2rem; font-weight: 600; }
-        .back-btn { background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; text-decoration: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; }
+        .container { width: 1920px; margin: 0 auto; padding: 24px; }
+
+
+
+
         
-        .lca-container { background: white; padding: 30px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); position: relative; }
-        .lca-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; text-align: center; }
+        .header { background: linear-gradient(135deg, #00b42a 0%, #009c25 100%); color: white; padding: 32px 36px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0, 180, 42, 0.25); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .header h1 { font-size: 2.5rem; font-weight: 600; }
+        .back-btn { background: rgba(255, 255, 255, 0.25); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+        .header p { font-size: 1.15rem; opacity: 0.92; line-height: 1.6; }
         
-        .lca-process { display: flex; justify-content: space-between; align-items: center; position: relative; }
-        .process-stage { text-align: center; flex: 1; position: relative; }
-        .stage-icon { width: 60px; height: 60px; background: #1e80ff; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; }
-        .stage-name { font-weight: 600; margin-bottom: 5px; }
-        .stage-desc { color: #666; font-size: 0.9rem; }
-        .stage-contribution { margin-top: 10px; font-weight: 600; color: #f53f3f; }
+        .config-section { background: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+        .section-title { font-size: 1.2rem; font-weight: 600; color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .config-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; margin-bottom: 20px; }
+        .config-item { display: flex; flex-direction: column; gap: 8px; }
+        .config-label { font-weight: 600; color: #555; font-size: 0.95rem; }
+        .config-select { padding: 10px 14px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 0.95rem; transition: all 0.3s; }
+        .config-select:focus { border-color: #00b42a; box-shadow: 0 0 0 3px rgba(0, 180, 42, 0.1); outline: none; }
+        .config-actions { display: flex; gap: 12px; justify-content: flex-end; padding-top: 8px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 500; transition: all 0.3s ease; }
+        .btn-primary { background: #00b42a; color: white; }
+        .btn-secondary { background: #f5f5f5; color: #333; border: 1px solid #d9d9d9; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         
-        .process-arrow { position: absolute; top: 30px; right: -15px; color: #666; font-size: 1.5rem; }
+        .kpi-section { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; margin-bottom: 24px; }
+        .kpi-card { background: white; padding: 28px 24px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); text-align: center; border-top: 4px solid #00b42a; }
+        .kpi-card:nth-child(2) { border-top-color: #1e80ff; }
+        .kpi-card:nth-child(3) { border-top-color: #ff7d00; }
+        .kpi-card:nth-child(4) { border-top-color: #722ed1; }
+        .kpi-card:nth-child(5) { border-top-color: #14c9c9; }
+        .kpi-card:nth-child(6) { border-top-color: #f53f3f; }
+        .kpi-value { font-size: 2.2rem; font-weight: 700; color: #00b42a; margin-bottom: 8px; }
+        .kpi-label { color: #666; font-size: 0.95rem; font-weight: 500; margin-bottom: 12px; }
+        .kpi-trend { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.9rem; padding: 6px 12px; border-radius: 4px; background: #f8f9fa; }
+        .trend-up { color: #f53f3f; }
+        .trend-down { color: #00b42a; }
         
-        .boundary-selector { text-align: center; margin: 20px 0; }
-        .boundary-btn { padding: 8px 16px; border: 1px solid #d9d9d9; background: white; border-radius: 4px; cursor: pointer; margin: 0 5px; }
-        .boundary-btn.active { background: #1e80ff; color: white; border-color: #1e80ff; }
+        .chart-section { background: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .chart-title { font-size: 1.15rem; font-weight: 600; color: #333; }
+        .chart-actions { display: flex; gap: 10px; }
+        .chart-large { height: 400px; }
         
-        .supplier-ranking { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); overflow: hidden; margin-bottom: 20px; }
-        .ranking-header { padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
-        .ranking-table { width: 100%; border-collapse: collapse; }
-        .ranking-table th, .ranking-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
-        .ranking-table th { background: #fafafa; font-weight: 600; color: #666; }
+        .charts-section { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        .chart-container { background: white; padding: 28px 24px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+        .chart-small { height: 380px; }
         
-        .carbon-label { text-align: center; padding: 30px; background: linear-gradient(135deg, #00b42a, #52c41a); color: white; border-radius: 8px; margin-bottom: 20px; }
-        .label-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 10px; }
-        .label-value { font-size: 2.5rem; font-weight: 600; margin-bottom: 15px; }
-        .label-qr { width: 100px; height: 100px; background: white; margin: 0 auto; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #333; }
+        .table-section { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); overflow: hidden; }
+        .table-header { padding: 24px 32px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .table-title { font-size: 1.15rem; font-weight: 600; color: #333; }
+        .table-actions { display: flex; gap: 12px; }
+        .table-container { overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 16px 20px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 0.95rem; }
+        .data-table th { background: #fafafa; font-weight: 600; color: #666; }
+        .data-table tr:hover { background: #f8f9fa; }
         
-        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; transition: all 0.3s; }
-        .btn-primary { background: #1e80ff; color: white; }
-        .btn-secondary { background: #f0f0f0; color: #666; }
+        .pagination { padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; }
+        .pagination-info { color: #666; font-size: 0.95rem; }
+        .pagination-controls { display: flex; gap: 8px; }
+        .page-btn { padding: 8px 16px; border: 1px solid #d9d9d9; background: white; border-radius: 6px; cursor: pointer; font-size: 0.95rem; transition: all 0.3s; }
+        .page-btn:hover { border-color: #00b42a; color: #00b42a; }
+        .page-btn.active { background: #00b42a; color: white; border-color: #00b42a; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        @media (max-width: 768px) {
-            .lca-process { flex-direction: column; }
-            .process-stage { margin-bottom: 30px; }
-            .process-arrow { display: none; }
+        @media (max-width: 1400px) {
+            .container { width: 100%; }
+            .kpi-section { grid-template-columns: repeat(3, 1fr); }
+            .charts-section { grid-template-columns: 1fr; }
+            .config-grid { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
 </head>
@@ -57,174 +87,278 @@
     <div class="container">
         <div class="header">
             <div class="header-top">
-                <h1>👣 碳足迹核算模块</h1>
+                <h1>🌍 碳足迹核算模块</h1>
                 <a href="index.html" class="back-btn">← 返回首页</a>
             </div>
-            <p>产品全生命周期碳足迹计算，供应商对比与碳标签认证</p>
+            <p>基于PAS2050/ISO14067标准，核算产品全生命周期碳足迹，助力绿色认证 | 全生命周期管理</p>
         </div>
         
-        <!-- 生命周期边界选择 -->
-        <div class="boundary-selector">
-            <button class="boundary-btn active">摇篮到大门 (Cradle-to-Gate)</button>
-            <button class="boundary-btn">摇篮到坟墓 (Cradle-to-Grave)</button>
-            <button class="boundary-btn">版本对比</button>
-        </div>
-        
-        <!-- 生命周期分析 -->
-        <div class="lca-container">
-            <div class="lca-title">产品全生命周期碳足迹追踪</div>
-            
-            <div class="lca-process">
-                <div class="process-stage">
-                    <div class="stage-icon">🏭</div>
-                    <div class="stage-name">原材料获取</div>
-                    <div class="stage-desc">采矿、种植、提取</div>
-                    <div class="stage-contribution">贡献率: 25.3%</div>
+        <div class="config-section">
+            <div class="section-title">⚙️ 核算参数配置</div>
+            <div class="config-grid">
+                <div class="config-item">
+                    <label class="config-label">产品选择</label>
+                    <select class="config-select">
+                        <option value="product1">主产品A</option>
+                        <option value="product2">主产品B</option>
+                        <option value="product3">主产品C</option>
+                    </select>
                 </div>
-                <div class="process-arrow">→</div>
-                
-                <div class="process-stage">
-                    <div class="stage-icon">⚙️</div>
-                    <div class="stage-name">制造加工</div>
-                    <div class="stage-desc">生产、组装、测试</div>
-                    <div class="stage-contribution">贡献率: 45.8%</div>
+                <div class="config-item">
+                    <label class="config-label">核算标准</label>
+                    <select class="config-select">
+                        <option value="iso14067">ISO14067</option>
+                        <option value="pas2050">PAS2050</option>
+                        <option value="ghg">GHG Protocol</option>
+                    </select>
                 </div>
-                <div class="process-arrow">→</div>
-                
-                <div class="process-stage">
-                    <div class="stage-icon">🚚</div>
-                    <div class="stage-name">仓储物流</div>
-                    <div class="stage-desc">存储、运输、分销</div>
-                    <div class="stage-contribution">贡献率: 18.6%</div>
+                <div class="config-item">
+                    <label class="config-label">核算范围</label>
+                    <select class="config-select">
+                        <option value="cradle-to-gate">从摇篮到大门</option>
+                        <option value="cradle-to-grave">从摇篮到坟墓</option>
+                        <option value="gate-to-gate">从大门到大门</option>
+                    </select>
                 </div>
-                <div class="process-arrow">→</div>
-                
-                <div class="process-stage" style="opacity: 0.5;">
-                    <div class="stage-icon">♻️</div>
-                    <div class="stage-name">废弃回收</div>
-                    <div class="stage-desc">处理、回收、处置</div>
-                    <div class="stage-contribution">贡献率: 10.3%</div>
+                <div class="config-item">
+                    <label class="config-label">数据来源</label>
+                    <select class="config-select">
+                        <option value="primary">原始数据</option>
+                        <option value="secondary">次级数据</option>
+                        <option value="hybrid">混合数据</option>
+                    </select>
+                </div>
+                <div class="config-item">
+                    <label class="config-label">功能单位</label>
+                    <select class="config-select">
+                        <option value="unit">1件产品</option>
+                        <option value="kg">1千克</option>
+                        <option value="m2">1平方米</option>
+                    </select>
+                </div>
+                <div class="config-item">
+                    <label class="config-label">基准年</label>
+                    <select class="config-select">
+                        <option value="2023">2023年</option>
+                        <option value="2022">2022年</option>
+                        <option value="2021">2021年</option>
+                    </select>
                 </div>
             </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-                <button class="btn btn-primary">生成碳标签 (QR Code)</button>
+            <div class="config-actions">
+                <button class="btn btn-secondary">重置配置</button>
+                <button class="btn btn-primary">开始核算</button>
             </div>
         </div>
         
-        <!-- 碳标签展示 -->
-        <div class="carbon-label">
-            <div class="label-title">产品碳足迹标签</div>
-            <div class="label-value">2.45 kg CO₂e</div>
-            <div style="margin-bottom: 15px;">每件产品碳足迹</div>
-            <div class="label-qr">QR Code</div>
-            <div style="margin-top: 15px; font-size: 0.9rem;">扫描二维码查看详细碳足迹</div>
+        <div class="kpi-section">
+            <div class="kpi-card">
+                <div class="kpi-value">15.8</div>
+                <div class="kpi-label">碳足迹</div>
+                <div class="kpi-trend trend-down">↓ kgCO2e/件</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">-12.5%</div>
+                <div class="kpi-label">同比变化</div>
+                <div class="kpi-trend trend-down">↓ 优秀</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">5.8</div>
+                <div class="kpi-label">上游原材料</div>
+                <div class="kpi-trend trend-down">↓ kgCO2e</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">6.5</div>
+                <div class="kpi-label">生产制造</div>
+                <div class="kpi-trend trend-down">↓ kgCO2e</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">2.2</div>
+                <div class="kpi-label">运输配送</div>
+                <div class="kpi-trend trend-down">↓ kgCO2e</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">1.3</div>
+                <div class="kpi-label">其他环节</div>
+                <div class="kpi-trend trend-down">↓ kgCO2e</div>
+            </div>
         </div>
         
-        <!-- 供应商对比 -->
-        <div class="supplier-ranking">
-            <div class="ranking-header">
-                <h3>不同供应商碳足迹对比</h3>
-                <div>
-                    <button class="btn btn-secondary">数据版本管理</button>
-                    <button class="btn btn-primary">生成碳足迹报告</button>
+        <div class="chart-section">
+            <div class="chart-header">
+                <div class="chart-title">📊 产品碳足迹全生命周期分布</div>
+                <div class="chart-actions">
+                    <button class="btn btn-secondary">刷新数据</button>
+                    <button class="btn btn-secondary">导出图表</button>
+                    <button class="btn btn-primary">生成报告</button>
                 </div>
             </div>
-            <div style="overflow-x: auto;">
-                <table class="ranking-table">
+            <div id="lca-chart" class="chart-large"></div>
+        </div>
+        
+        <div class="charts-section">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">📊 各环节碳排放占比</div>
+                    <div class="chart-actions">
+                        <button class="btn btn-secondary">刷新数据</button>
+                        <button class="btn btn-secondary">导出图表</button>
+                    </div>
+                </div>
+                <div id="composition-chart" class="chart-small"></div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">📈 历史碳足迹对比</div>
+                    <div class="chart-actions">
+                        <button class="btn btn-secondary">2D/3D切换</button>
+                    </div>
+                </div>
+                <div id="history-chart" class="chart-small"></div>
+            </div>
+        </div>
+        
+        <div class="table-section">
+            <div class="table-header">
+                <div class="table-title">📋 碳足迹核算明细</div>
+                <div class="table-actions">
+                    <button class="btn btn-secondary">列设置</button>
+                    <button class="btn btn-secondary">导出CSV</button>
+                    <button class="btn btn-secondary">导出Excel</button>
+                    <button class="btn btn-primary">生成报告</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
                     <thead>
                         <tr>
-                            <th>供应商名称</th>
-                            <th>产品型号</th>
-                            <th>碳足迹 (kg CO₂e)</th>
+                            <th>生命周期阶段</th>
+                            <th>排放源</th>
+                            <th>排放量(kgCO2e)</th>
+                            <th>占比</th>
                             <th>同比变化</th>
-                            <th>行业排名</th>
-                            <th>认证状态</th>
-                            <th>操作</th>
+                            <th>数据质量</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>ABC材料公司</td>
-                            <td>MX-2025</td>
-                            <td style="color: #00b42a; font-weight: 600;">1.85</td>
-                            <td style="color: #00b42a;">↓8.2%</td>
-                            <td>1/25</td>
-                            <td><span style="color: #00b42a;">已认证</span></td>
-                            <td><button class="btn btn-secondary">详情</button></td>
+                            <td>上游原材料</td>
+                            <td>钢材采购</td>
+                            <td>3.2</td>
+                            <td>20.3%</td>
+                            <td>-15.2%</td>
+                            <td>高</td>
                         </tr>
                         <tr>
-                            <td>XYZ制造集团</td>
-                            <td>PRO-3000</td>
-                            <td style="color: #ff7d00; font-weight: 600;">2.45</td>
-                            <td style="color: #ff7d00;">→0.0%</td>
-                            <td>8/25</td>
-                            <td><span style="color: #ff7d00;">审核中</span></td>
-                            <td><button class="btn btn-secondary">详情</button></td>
+                            <td>上游原材料</td>
+                            <td>塑料采购</td>
+                            <td>2.6</td>
+                            <td>16.5%</td>
+                            <td>-10.8%</td>
+                            <td>高</td>
                         </tr>
                         <tr>
-                            <td>DEF工业有限公司</td>
-                            <td>ECO-150</td>
-                            <td style="color: #f53f3f; font-weight: 600;">3.12</td>
-                            <td style="color: #f53f3f;">↑5.6%</td>
-                            <td>15/25</td>
-                            <td><span style="color: #f53f3f;">未认证</span></td>
-                            <td><button class="btn btn-secondary">详情</button></td>
+                            <td>生产制造</td>
+                            <td>电力消耗</td>
+                            <td>3.5</td>
+                            <td>22.2%</td>
+                            <td>-12.5%</td>
+                            <td>高</td>
                         </tr>
                         <tr>
-                            <td>GHK新材料</td>
-                            <td>GREEN-500</td>
-                            <td style="color: #00b42a; font-weight: 600;">1.92</td>
-                            <td style="color: #00b42a;">↓3.8%</td>
-                            <td>3/25</td>
-                            <td><span style="color: #00b42a;">已认证</span></td>
-                            <td><button class="btn btn-secondary">详情</button></td>
+                            <td>生产制造</td>
+                            <td>天然气消耗</td>
+                            <td>3.0</td>
+                            <td>19.0%</td>
+                            <td>-8.2%</td>
+                            <td>高</td>
+                        </tr>
+                        <tr>
+                            <td>运输配送</td>
+                            <td>成品运输</td>
+                            <td>2.2</td>
+                            <td>13.9%</td>
+                            <td>-5.8%</td>
+                            <td>中</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
-        
-        <!-- 版本管理 -->
-        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-            <h3>碳足迹数据版本管理</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
-                <div style="padding: 15px; border: 1px solid #d9d9d9; border-radius: 6px;">
-                    <div style="font-weight: 600; margin-bottom: 5px;">V2.1 (当前)</div>
-                    <div style="color: #666; font-size: 0.9rem;">更新时间: 2025-06-12</div>
-                    <div style="color: #666; font-size: 0.9rem;">碳足迹: 2.45 kg CO₂e</div>
-                </div>
-                <div style="padding: 15px; border: 1px solid #d9d9d9; border-radius: 6px; opacity: 0.7;">
-                    <div style="font-weight: 600; margin-bottom: 5px;">V2.0</div>
-                    <div style="color: #666; font-size: 0.9rem;">更新时间: 2025-03-15</div>
-                    <div style="color: #666; font-size: 0.9rem;">碳足迹: 2.52 kg CO₂e</div>
-                </div>
-                <div style="padding: 15px; border: 1px solid #d9d9d9; border-radius: 6px; opacity: 0.7;">
-                    <div style="font-weight: 600; margin-bottom: 5px;">V1.2</div>
-                    <div style="color: #666; font-size: 0.9rem;">更新时间: 2024-12-20</div>
-                    <div style="color: #666; font-size: 0.9rem;">碳足迹: 2.68 kg CO₂e</div>
+            <div class="pagination">
+                <div class="pagination-info">显示 1-5 条，共 15 条数据</div>
+                <div class="pagination-controls">
+                    <button class="page-btn" disabled>上一页</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">下一页</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://unpkg.com/@arco-design/web-react@latest/dist/arco.development.js"></script>
+    <script src="https://unpkg.com/@arco-design/web-react@latest/dist/arco-icon.min.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 边界选择
-            const boundaryBtns = document.querySelectorAll('.boundary-btn');
-            boundaryBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    boundaryBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // 根据选择的边界更新显示
-                    if (this.textContent.includes('摇篮到大门')) {
-                        document.querySelector('.process-stage:last-child').style.opacity = '0.5';
-                    } else {
-                        document.querySelector('.process-stage:last-child').style.opacity = '1';
+            const stages = ['原材料开采', '原料运输', '生产制造', '成品运输', '使用阶段', '废弃处置'];
+            const emissions = [3.5, 1.2, 6.5, 1.8, 2.0, 0.8];
+            
+            const lcaChart = echarts.init(document.getElementById('lca-chart'));
+            lcaChart.setOption({
+                tooltip: { trigger: 'axis' },
+                xAxis: { type: 'category', data: stages },
+                yAxis: { type: 'value', name: '排放量(kgCO2e)' },
+                series: [
+                    { name: '碳足迹', type: 'bar', data: emissions, itemStyle: { color: '#00b42a' }, markPoint: {
+                        data: [
+                            { type: 'max', name: '最大值' },
+                            { type: 'min', name: '最小值' }
+                        ]
+                    }, markLine: {
+                        data: [
+                            { type: 'average', name: '平均值' }
+                        ]
+                    } }
+                ]
+            });
+            
+            const compositionChart = echarts.init(document.getElementById('composition-chart'));
+            compositionChart.setOption({
+                tooltip: { trigger: 'item' },
+                series: [{
+                    type: 'pie',
+                    radius: '60%',
+                    data: [
+                        { value: 5.8, name: '上游原材料' },
+                        { value: 6.5, name: '生产制造' },
+                        { value: 2.2, name: '运输配送' },
+                        { value: 1.3, name: '其他环节' }
+                    ],
+                    itemStyle: {
+                        colors: ['#00b42a', '#1e80ff', '#ff7d00', '#722ed1']
                     }
-                });
+                }]
+            });
+            
+            const historyChart = echarts.init(document.getElementById('history-chart'));
+            historyChart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['2024年', '2023年', '2022年'] },
+                xAxis: { type: 'category', data: ['第一季度', '第二季度', '第三季度', '第四季度'] },
+                yAxis: { type: 'value', name: '碳足迹(kgCO2e)' },
+                series: [
+                    { name: '2024年', type: 'line', data: [16.8, 16.2, 15.8, 15.5], itemStyle: { color: '#00b42a' }, smooth: true, areaStyle: { color: 'rgba(0, 180, 42, 0.1)' } },
+                    { name: '2023年', type: 'line', data: [18.5, 17.8, 17.5, 17.2], itemStyle: { color: '#1e80ff' }, smooth: true },
+                    { name: '2022年', type: 'line', data: [20.2, 19.8, 19.5, 19.2], itemStyle: { color: '#d9d9d9' }, smooth: true }
+                ]
+            });
+            
+            window.addEventListener('resize', function() {
+                lcaChart.resize();
+                compositionChart.resize();
+                historyChart.resize();
             });
         });
     </script>

@@ -8,46 +8,74 @@
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; color: #333; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #1e80ff 0%, #0e5fd8 100%); color: white; padding: 25px 30px; border-radius: 8px; margin-bottom: 20px; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .header h1 { font-size: 2rem; font-weight: 600; }
-        .back-btn { background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; text-decoration: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; }
+        .container { width: 1920px; margin: 0 auto; padding: 24px; }
         
-        .accounting-header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
-        .model-selector { display: flex; gap: 15px; margin-bottom: 15px; }
-        .model-btn { padding: 10px 20px; border: 1px solid #d9d9d9; border-radius: 6px; background: white; cursor: pointer; transition: all 0.3s; }
-        .model-btn.active { background: #1e80ff; color: white; border-color: #1e80ff; }
+        .header { background: linear-gradient(135deg, #722ed1 0%, #531dab 100%); color: white; padding: 32px 36px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(114, 46, 209, 0.25); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .header h1 { font-size: 2.5rem; font-weight: 600; }
+        .back-btn { background: rgba(255, 255, 255, 0.25); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+        .header p { font-size: 1.15rem; opacity: 0.92; line-height: 1.6; }
         
-        .scope-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-        .scope-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); text-align: center; }
-        .scope-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; }
-        .scope-value { font-size: 2rem; font-weight: 600; margin-bottom: 5px; }
-        .scope-desc { color: #666; font-size: 0.9rem; }
+        .config-section { background: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+        .section-title { font-size: 1.2rem; font-weight: 600; color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .config-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; margin-bottom: 20px; }
+        .config-item { display: flex; flex-direction: column; gap: 8px; }
+        .config-label { font-weight: 600; color: #555; font-size: 0.95rem; }
+        .config-select { padding: 10px 14px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 0.95rem; transition: all 0.3s; }
+        .config-select:focus { border-color: #722ed1; box-shadow: 0 0 0 3px rgba(114, 46, 209, 0.1); outline: none; }
+        .config-actions { display: flex; gap: 12px; justify-content: flex-end; padding-top: 8px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 500; transition: all 0.3s ease; }
+        .btn-primary { background: #722ed1; color: white; }
+        .btn-secondary { background: #f5f5f5; color: #333; border: 1px solid #d9d9d9; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         
-        .scope-1 { border-top: 4px solid #f53f3f; }
-        .scope-2 { border-top: 4px solid #ff7d00; }
-        .scope-3 { border-top: 4px solid #1e80ff; }
+        .kpi-section { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; margin-bottom: 24px; }
+        .kpi-card { background: white; padding: 28px 24px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); text-align: center; border-top: 4px solid #722ed1; }
+        .kpi-card:nth-child(2) { border-top-color: #1e80ff; }
+        .kpi-card:nth-child(3) { border-top-color: #00b42a; }
+        .kpi-card:nth-child(4) { border-top-color: #ff7d00; }
+        .kpi-card:nth-child(5) { border-top-color: #14c9c9; }
+        .kpi-card:nth-child(6) { border-top-color: #f53f3f; }
+        .kpi-value { font-size: 2.2rem; font-weight: 700; color: #722ed1; margin-bottom: 8px; }
+        .kpi-label { color: #666; font-size: 0.95rem; font-weight: 500; margin-bottom: 12px; }
+        .kpi-trend { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.9rem; padding: 6px 12px; border-radius: 4px; background: #f8f9fa; }
+        .trend-up { color: #f53f3f; }
+        .trend-down { color: #00b42a; }
         
-        .inventory-table { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); overflow: hidden; }
-        .table-header { padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .chart-section { background: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .chart-title { font-size: 1.15rem; font-weight: 600; color: #333; }
+        .chart-actions { display: flex; gap: 10px; }
+        .chart-large { height: 400px; }
+        
+        .charts-section { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        .chart-container { background: white; padding: 28px 24px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+        .chart-small { height: 380px; }
+        
+        .table-section { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); overflow: hidden; }
+        .table-header { padding: 24px 32px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .table-title { font-size: 1.15rem; font-weight: 600; color: #333; }
+        .table-actions { display: flex; gap: 12px; }
         .table-container { overflow-x: auto; }
         .data-table { width: 100%; border-collapse: collapse; }
-        .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .data-table th, .data-table td { padding: 16px 20px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 0.95rem; }
         .data-table th { background: #fafafa; font-weight: 600; color: #666; }
+        .data-table tr:hover { background: #f8f9fa; }
         
-        .analysis-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-        .chart-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); height: 300px; }
-        .chart-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; }
+        .pagination { padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; }
+        .pagination-info { color: #666; font-size: 0.95rem; }
+        .pagination-controls { display: flex; gap: 8px; }
+        .page-btn { padding: 8px 16px; border: 1px solid #d9d9d9; background: white; border-radius: 6px; cursor: pointer; font-size: 0.95rem; transition: all 0.3s; }
+        .page-btn:hover { border-color: #722ed1; color: #722ed1; }
+        .page-btn.active { background: #722ed1; color: white; border-color: #722ed1; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; transition: all 0.3s; }
-        .btn-primary { background: #1e80ff; color: white; }
-        .btn-secondary { background: #f0f0f0; color: #666; }
-        
-        @media (max-width: 768px) {
-            .scope-cards { grid-template-columns: 1fr; }
-            .analysis-charts { grid-template-columns: 1fr; }
+        @media (max-width: 1400px) {
+            .container { width: 100%; }
+            .kpi-section { grid-template-columns: repeat(3, 1fr); }
+            .charts-section { grid-template-columns: 1fr; }
+            .config-grid { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
 </head>
@@ -55,56 +83,146 @@
     <div class="container">
         <div class="header">
             <div class="header-top">
-                <h1>🌍 碳排放核算模块</h1>
+                <h1>🌱 碳排放核算模块</h1>
                 <a href="index.html" class="back-btn">← 返回首页</a>
             </div>
-            <p>范围1/2/3全口径碳排放核算，符合ISO 14064标准</p>
+            <p>基于ISO14064/GB/T32151标准，精准核算企业碳排放量，实现碳数据管理 | 全面碳核查</p>
         </div>
         
-        <!-- 核算模型选择 -->
-        <div class="accounting-header">
-            <div class="model-selector">
-                <button class="model-btn active">ISO 14064标准</button>
-                <button class="model-btn">GHG Protocol</button>
-                <button class="model-btn">国家核算指南</button>
-                <button class="model-btn">自定义模型</button>
+        <div class="config-section">
+            <div class="section-title">⚙️ 核算参数配置</div>
+            <div class="config-grid">
+                <div class="config-item">
+                    <label class="config-label">核算周期</label>
+                    <select class="config-select">
+                        <option value="month">月度核算</option>
+                        <option value="quarter">季度核算</option>
+                        <option value="year">年度核算</option>
+                    </select>
+                </div>
+                <div class="config-item">
+                    <label class="config-label">核算标准</label>
+                    <select class="config-select">
+                        <option value="iso14064">ISO14064</option>
+                        <option value="gb32151">GB/T32151</option>
+                        <option value="pas2050">PAS2050</option>
+                    </select>
+                </div>
+                <div class="config-item">
+                    <label class="config-label">核算范围</label>
+                    <select class="config-select">
+                        <option value="scope1">范围1</option>
+                        <option value="scope2">范围2</option>
+                        <option value="scope1-2">范围1+2</option>
+                        <option value="scope1-3">范围1+2+3</option>
+                    </select>
+                </div>
+                <div class="config-item">
+                    <label class="config-label">排放因子</label>
+                    <select class="config-select">
+                        <option value="ipcc">IPCC 默认值</option>
+                        <option value="cn">中国区域因子</option>
+                        <option value="local">地方因子</option>
+                    </select>
+                </div>
+                <div class="config-item">
+                    <label class="config-label">核算方法</label>
+                    <select class="config-select">
+                        <option value="calculation">计算法</option>
+                        <option value="measurement">测量法</option>
+                        <option value="hybrid">混合法</option>
+                    </select>
+                </div>
+                <div class="config-item">
+                    <label class="config-label">数据来源</label>
+                    <select class="config-select">
+                        <option value="actual">实测数据</option>
+                        <option value="default">默认数据</option>
+                        <option value="calculated">计算数据</option>
+                    </select>
+                </div>
             </div>
-            <div style="text-align: right;">
-                <button class="btn btn-secondary">因子库维护</button>
-                <button class="btn btn-secondary">核算结果锁定</button>
-                <button class="btn btn-primary">一键生成核算报表</button>
+            <div class="config-actions">
+                <button class="btn btn-secondary">重置配置</button>
+                <button class="btn btn-primary">开始核算</button>
             </div>
         </div>
         
-        <!-- 范围排放汇总 -->
-        <div class="scope-cards">
-            <div class="scope-card scope-1">
-                <div class="scope-title">范围1 - 直接排放</div>
-                <div class="scope-value">2,856.3</div>
-                <div class="scope-desc">吨 CO₂当量</div>
-                <div style="margin-top: 10px; color: #f53f3f; font-weight: 600;">占比: 36.2%</div>
+        <div class="kpi-section">
+            <div class="kpi-card">
+                <div class="kpi-value">12586.3</div>
+                <div class="kpi-label">总排放量</div>
+                <div class="kpi-trend trend-down">↓ tCO2e</div>
             </div>
-            <div class="scope-card scope-2">
-                <div class="scope-title">范围2 - 间接排放</div>
-                <div class="scope-value">3,245.8</div>
-                <div class="scope-desc">吨 CO₂当量</div>
-                <div style="margin-top: 10px; color: #ff7d00; font-weight: 600;">占比: 41.1%</div>
+            <div class="kpi-card">
+                <div class="kpi-value">-8.5%</div>
+                <div class="kpi-label">同比变化</div>
+                <div class="kpi-trend trend-down">↓ 优秀</div>
             </div>
-            <div class="scope-card scope-3">
-                <div class="scope-title">范围3 - 其他间接排放</div>
-                <div class="scope-value">1,785.6</div>
-                <div class="scope-desc">吨 CO₂当量</div>
-                <div style="margin-top: 10px; color: #1e80ff; font-weight: 600;">占比: 22.7%</div>
+            <div class="kpi-card">
+                <div class="kpi-value">0.028</div>
+                <div class="kpi-label">单位产值碳强度</div>
+                <div class="kpi-trend trend-down">↓ tCO2e/万元</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">0.012</div>
+                <div class="kpi-label">单位产品碳强度</div>
+                <div class="kpi-trend trend-down">↓ tCO2e/件</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">7856.2</div>
+                <div class="kpi-label">范围1</div>
+                <div class="kpi-trend trend-down">↓ tCO2e</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">4730.1</div>
+                <div class="kpi-label">范围2</div>
+                <div class="kpi-trend trend-down">↓ tCO2e</div>
             </div>
         </div>
         
-        <!-- 排放清单表格 -->
-        <div class="inventory-table">
+        <div class="chart-section">
+            <div class="chart-header">
+                <div class="chart-title">📊 碳排放趋势</div>
+                <div class="chart-actions">
+                    <button class="btn btn-secondary">刷新数据</button>
+                    <button class="btn btn-secondary">导出图表</button>
+                    <button class="btn btn-primary">生成报告</button>
+                </div>
+            </div>
+            <div id="trend-chart" class="chart-large"></div>
+        </div>
+        
+        <div class="charts-section">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">📊 碳排放构成</div>
+                    <div class="chart-actions">
+                        <button class="btn btn-secondary">刷新数据</button>
+                        <button class="btn btn-secondary">导出图表</button>
+                    </div>
+                </div>
+                <div id="composition-chart" class="chart-small"></div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">📈 各车间排放对比</div>
+                    <div class="chart-actions">
+                        <button class="btn btn-secondary">2D/3D切换</button>
+                    </div>
+                </div>
+                <div id="workshop-chart" class="chart-small"></div>
+            </div>
+        </div>
+        
+        <div class="table-section">
             <div class="table-header">
-                <h3>碳排放源活动水平数据</h3>
-                <div>
-                    <button class="btn btn-secondary">数据修正</button>
-                    <button class="btn btn-secondary">留痕管理</button>
+                <div class="table-title">📋 碳排放核算明细</div>
+                <div class="table-actions">
+                    <button class="btn btn-secondary">列设置</button>
+                    <button class="btn btn-secondary">导出CSV</button>
+                    <button class="btn btn-secondary">导出Excel</button>
+                    <button class="btn btn-primary">生成报告</button>
                 </div>
             </div>
             <div class="table-container">
@@ -113,171 +231,126 @@
                         <tr>
                             <th>排放源</th>
                             <th>能源类型</th>
-                            <th>活动水平</th>
-                            <th>排放因子</th>
-                            <th>排放量</th>
-                            <th>所属范围</th>
-                            <th>操作</th>
+                            <th>排放量(tCO2e)</th>
+                            <th>占比</th>
+                            <th>同比变化</th>
+                            <th>范围</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>锅炉房天然气燃烧</td>
-                            <td>天然气</td>
-                            <td>1856.3 m³</td>
-                            <td>2.15 kgCO₂/m³</td>
-                            <td>3,991.0 tCO₂</td>
-                            <td><span style="color: #f53f3f;">Scope1</span></td>
-                            <td><button class="btn btn-secondary">追溯</button></td>
-                        </tr>
-                        <tr>
-                            <td>外购电力消耗</td>
+                            <td>电力消耗</td>
                             <td>电力</td>
-                            <td>8,245.7 kWh</td>
-                            <td>0.581 kgCO₂/kWh</td>
-                            <td>4,789.5 tCO₂</td>
-                            <td><span style="color: #ff7d00;">Scope2</span></td>
-                            <td><button class="btn btn-secondary">追溯</button></td>
+                            <td>4730.1</td>
+                            <td>37.6%</td>
+                            <td>-9.2%</td>
+                            <td>范围2</td>
                         </tr>
                         <tr>
-                            <td>原材料运输</td>
+                            <td>天然气燃烧</td>
+                            <td>天然气</td>
+                            <td>3856.2</td>
+                            <td>30.6%</td>
+                            <td>-7.8%</td>
+                            <td>范围1</td>
+                        </tr>
+                        <tr>
+                            <td>锅炉燃烧</td>
+                            <td>煤炭</td>
+                            <td>2586.4</td>
+                            <td>20.6%</td>
+                            <td>-10.5%</td>
+                            <td>范围1</td>
+                        </tr>
+                        <tr>
+                            <td>车辆运输</td>
                             <td>柴油</td>
-                            <td>156.8 吨</td>
-                            <td>3.15 kgCO₂/kg</td>
-                            <td>493.9 tCO₂</td>
-                            <td><span style="color: #1e80ff;">Scope3</span></td>
-                            <td><button class="btn btn-secondary">追溯</button></td>
+                            <td>856.3</td>
+                            <td>6.8%</td>
+                            <td>-5.2%</td>
+                            <td>范围1</td>
                         </tr>
                         <tr>
-                            <td>员工通勤</td>
-                            <td>汽油</td>
-                            <td>45.2 吨</td>
-                            <td>2.32 kgCO₂/kg</td>
-                            <td>104.9 tCO₂</td>
-                            <td><span style="color: #1e80ff;">Scope3</span></td>
-                            <td><button class="btn btn-secondary">追溯</button></td>
+                            <td>其他排放</td>
+                            <td>其他</td>
+                            <td>557.3</td>
+                            <td>4.4%</td>
+                            <td>-3.8%</td>
+                            <td>范围1</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
-        
-        <!-- 分析图表 -->
-        <div class="analysis-charts">
-            <div class="chart-container">
-                <div class="chart-title">碳排放结构分析</div>
-                <div id="structure-chart" style="width: 100%; height: 250px;"></div>
-            </div>
-            <div class="chart-container">
-                <div class="chart-title">同比环比分析</div>
-                <div id="trend-chart" style="width: 100%; height: 250px;"></div>
-            </div>
-        </div>
-        
-        <!-- 总量与强度指标 -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
-            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-                <div style="font-size: 1.5rem; font-weight: 600; color: #1e80ff;">7,887.7</div>
-                <div style="color: #666;">碳排放总量 (tCO₂)</div>
-            </div>
-            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-                <div style="font-size: 1.5rem; font-weight: 600; color: #00b42a;">0.63</div>
-                <div style="color: #666;">碳强度 (tCO₂/万元)</div>
-            </div>
-            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-                <div style="font-size: 1.5rem; font-weight: 600; color: #ff7d00;">-5.2%</div>
-                <div style="color: #666;">同比变化</div>
-            </div>
-            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-                <div style="font-size: 1.5rem; font-weight: 600; color: #f53f3f;">+3.1%</div>
-                <div style="color: #666;">环比变化</div>
+            <div class="pagination">
+                <div class="pagination-info">显示 1-5 条，共 12 条数据</div>
+                <div class="pagination-controls">
+                    <button class="page-btn" disabled>上一页</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">下一页</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://unpkg.com/@arco-design/web-react@latest/dist/arco.development.js"></script>
+    <script src="https://unpkg.com/@arco-design/web-react@latest/dist/arco-icon.min.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 模型选择
-            const modelBtns = document.querySelectorAll('.model-btn');
-            modelBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    modelBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
+            const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            const scope1 = [650, 645, 680, 675, 660, 655, 690, 685, 670, 665, 700, 695];
+            const scope2 = [410, 405, 430, 425, 415, 410, 435, 430, 420, 415, 440, 435];
             
-            // 排放结构饼图
-            const structureChart = echarts.init(document.getElementById('structure-chart'));
-            structureChart.setOption({
-                tooltip: {
-                    trigger: 'item',
-                    formatter: '{a} <br/>{b}: {c} tCO₂ ({d}%)'
-                },
-                series: [{
-                    name: '排放结构',
-                    type: 'pie',
-                    radius: ['40%', '70%'],
-                    avoidLabelOverlap: false,
-                    itemStyle: {
-                        borderRadius: 10,
-                        borderColor: '#fff',
-                        borderWidth: 2
-                    },
-                    label: {
-                        show: false,
-                        position: 'center'
-                    },
-                    emphasis: {
-                        label: {
-                            show: true,
-                            fontSize: '16',
-                            fontWeight: 'bold'
-                        }
-                    },
-                    labelLine: {
-                        show: false
-                    },
-                    data: [
-                        { value: 2856.3, name: '范围1', itemStyle: { color: '#f53f3f' } },
-                        { value: 3245.8, name: '范围2', itemStyle: { color: '#ff7d00' } },
-                        { value: 1785.6, name: '范围3', itemStyle: { color: '#1e80ff' } }
-                    ]
-                }]
-            });
-            
-            // 趋势分析图
             const trendChart = echarts.init(document.getElementById('trend-chart'));
             trendChart.setOption({
-                tooltip: {
-                    trigger: 'axis'
-                },
-                xAxis: {
-                    type: 'category',
-                    data: ['1月', '2月', '3月', '4月', '5月', '6月']
-                },
-                yAxis: {
-                    type: 'value',
-                    name: 'tCO₂'
-                },
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['范围1', '范围2', '总计排放'] },
+                xAxis: { type: 'category', data: months },
+                yAxis: { type: 'value', name: '排放量(tCO2e)' },
+                series: [
+                    { name: '范围1', type: 'bar', data: scope1, itemStyle: { color: '#722ed1' } },
+                    { name: '范围2', type: 'bar', data: scope2, itemStyle: { color: '#1e80ff' } },
+                    { name: '总计排放', type: 'line', data: [1060, 1050, 1110, 1100, 1075, 1065, 1125, 1115, 1090, 1080, 1140, 1130], itemStyle: { color: '#ff7d00' }, smooth: true, areaStyle: { color: 'rgba(255, 125, 0, 0.1)' } }
+                ]
+            });
+            
+            const compositionChart = echarts.init(document.getElementById('composition-chart'));
+            compositionChart.setOption({
+                tooltip: { trigger: 'item' },
                 series: [{
-                    name: '碳排放量',
-                    type: 'line',
-                    data: [1256, 1189, 1324, 1456, 1567, 1489],
-                    smooth: true,
-                    lineStyle: {
-                        color: '#1e80ff',
-                        width: 3
-                    },
-                    areaStyle: {
-                        color: 'rgba(30, 128, 255, 0.1)'
+                    type: 'pie',
+                    radius: '60%',
+                    data: [
+                        { value: 4730.1, name: '电力' },
+                        { value: 3856.2, name: '天然气' },
+                        { value: 2586.4, name: '煤炭' },
+                        { value: 856.3, name: '柴油' },
+                        { value: 557.3, name: '其他' }
+                    ],
+                    itemStyle: {
+                        colors: ['#722ed1', '#1e80ff', '#ff7d00', '#00b42a', '#14c9c9']
                     }
                 }]
             });
             
+            const workshopChart = echarts.init(document.getElementById('workshop-chart'));
+            workshopChart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['今年', '去年'] },
+                xAxis: { type: 'category', data: ['涂装车间', '组装车间', '机加车间', '仓储物流', '办公后勤'] },
+                yAxis: { type: 'value', name: '排放量(tCO2e)' },
+                series: [
+                    { name: '今年', type: 'bar', data: [3856.2, 2586.4, 1856.3, 1256.8, 1030.6], itemStyle: { color: '#722ed1' } },
+                    { name: '去年', type: 'bar', data: [4186.5, 2786.5, 1986.5, 1342.5, 1098.5], itemStyle: { color: '#d9d9d9' } }
+                ]
+            });
+            
             window.addEventListener('resize', function() {
-                structureChart.resize();
                 trendChart.resize();
+                compositionChart.resize();
+                workshopChart.resize();
             });
         });
     </script>

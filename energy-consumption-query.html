@@ -7,303 +7,113 @@
     <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-react@latest/dist/css/arco.min.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa; color: #333; }
+        .container { width: 1920px; margin: 0 auto; padding: 24px; }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f5f7fa;
-            color: #333;
-        }
+        /* 页面头部 */
+        .header { background: linear-gradient(135deg, #1e80ff 0%, #0e5fd8 100%); color: white; padding: 32px 36px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(30, 128, 255, 0.25); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .header h1 { font-size: 2.5rem; font-weight: 600; }
+        .back-btn { background: rgba(255, 255, 255, 0.25); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+        .header p { font-size: 1.15rem; opacity: 0.92; line-height: 1.6; }
         
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        /* 多维度筛选区 */
+        .filter-section { background: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+        .filter-title { font-size: 1.15rem; font-weight: 600; color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .filter-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; margin-bottom: 20px; }
+        .filter-item { display: flex; flex-direction: column; gap: 8px; }
+        .filter-label { font-weight: 600; color: #555; font-size: 0.95rem; }
+        .filter-input, .filter-select { padding: 10px 14px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 0.95rem; transition: all 0.3s; }
+        .filter-input:focus, .filter-select:focus { border-color: #1e80ff; box-shadow: 0 0 0 3px rgba(30, 128, 255, 0.1); outline: none; }
+        .filter-actions { display: flex; gap: 12px; justify-content: flex-end; padding-top: 8px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 500; transition: all 0.3s ease; }
+        .btn-primary { background: #1e80ff; color: white; }
+        .btn-secondary { background: #f5f5f5; color: #333; border: 1px solid #d9d9d9; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         
-        .header {
-            background: linear-gradient(135deg, #1e80ff 0%, #0e5fd8 100%);
-            color: white;
-            padding: 25px 30px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(30, 128, 255, 0.3);
-        }
+        /* 能源层级树 */
+        .hierarchy-section { background: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+        .section-title { font-size: 1.2rem; font-weight: 600; color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .hierarchy-tree { display: flex; gap: 24px; flex-wrap: wrap; }
+        .tree-level { flex: 1; min-width: 300px; }
+        .tree-level-title { font-weight: 600; color: #666; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #1e80ff; }
+        .tree-item { padding: 12px 16px; background: #f8f9fa; border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: all 0.3s; border-left: 3px solid transparent; }
+        .tree-item:hover { background: #e8f4ff; border-left-color: #1e80ff; }
+        .tree-item.active { background: #e8f4ff; border-left-color: #1e80ff; font-weight: 600; color: #1e80ff; }
         
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
+        /* KPI指标卡片区 */
+        .kpi-section { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; margin-bottom: 24px; }
+        .kpi-card { background: white; padding: 28px 24px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); text-align: center; border-top: 4px solid #1e80ff; }
+        .kpi-card:nth-child(2) { border-top-color: #00b42a; }
+        .kpi-card:nth-child(3) { border-top-color: #ff7d00; }
+        .kpi-card:nth-child(4) { border-top-color: #722ed1; }
+        .kpi-card:nth-child(5) { border-top-color: #f53f3f; }
+        .kpi-card:nth-child(6) { border-top-color: #14c9c9; }
+        .kpi-value { font-size: 2.2rem; font-weight: 700; color: #1e80ff; margin-bottom: 8px; }
+        .kpi-label { color: #666; font-size: 0.95rem; font-weight: 500; margin-bottom: 12px; }
+        .kpi-unit { color: #999; font-size: 0.85rem; }
+        .kpi-trend { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.9rem; padding: 6px 12px; border-radius: 4px; background: #f8f9fa; }
+        .trend-up { color: #f53f3f; }
+        .trend-down { color: #00b42a; }
+        .trend-stable { color: #666; }
         
-        .header h1 {
-            font-size: 2rem;
-            font-weight: 600;
-        }
+        /* 图表区 */
+        .charts-section { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px; }
+        .chart-container { background: white; padding: 28px 24px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .chart-title { font-size: 1.15rem; font-weight: 600; color: #333; }
+        .chart-actions { display: flex; gap: 10px; }
+        .chart-small { height: 420px; }
+        .chart-large { height: 420px; }
         
-        .back-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
+        /* 数据对比分析 */
+        .comparison-section { background: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .comparison-item { padding: 20px; background: #f8f9fa; border-radius: 8px; }
+        .comparison-label { font-weight: 600; color: #333; margin-bottom: 12px; }
+        .comparison-values { display: flex; justify-content: space-between; align-items: center; }
+        .comparison-value { font-size: 1.8rem; font-weight: 700; color: #1e80ff; }
+        .comparison-diff { padding: 6px 12px; border-radius: 4px; font-weight: 600; }
         
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
+        /* 明细数据表格区 */
+        .table-section { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); overflow: hidden; }
+        .table-header { padding: 24px 32px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .table-title { font-size: 1.15rem; font-weight: 600; color: #333; }
+        .table-actions { display: flex; gap: 12px; }
+        .table-container { overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 16px 20px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 0.95rem; }
+        .data-table th { background: #fafafa; font-weight: 600; color: #666; }
+        .data-table tr:hover { background: #f8f9fa; }
+        .status-badge { padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+        .status-normal { background: #e8ffea; color: #00b42a; }
+        .status-warning { background: #fff7e6; color: #ff7d00; }
+        .status-error { background: #fff2f0; color: #f53f3f; }
         
-        /* 筛选区域 */
-        .filter-section {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
+        /* 高级筛选面板 */
+        .advanced-filter { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 16px; display: none; }
+        .advanced-filter.active { display: block; }
+        .filter-grid-advanced { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
         
-        .filter-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
+        /* 审计日志 */
+        .audit-section { background: white; padding: 28px 32px; border-radius: 12px; margin-top: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+        .audit-table { font-size: 0.9rem; }
         
-        .filter-item {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
+        /* 分页 */
+        .pagination { padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; }
+        .pagination-info { color: #666; font-size: 0.95rem; }
+        .pagination-controls { display: flex; gap: 8px; }
+        .page-btn { padding: 8px 16px; border: 1px solid #d9d9d9; background: white; border-radius: 6px; cursor: pointer; font-size: 0.95rem; transition: all 0.3s; }
+        .page-btn:hover { border-color: #1e80ff; color: #1e80ff; }
+        .page-btn.active { background: #1e80ff; color: white; border-color: #1e80ff; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .filter-label {
-            font-weight: 500;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .filter-input {
-            padding: 8px 12px;
-            border: 1px solid #d9d9d9;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-        
-        .filter-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            background: #1e80ff;
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #666;
-        }
-        
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-        
-        /* 指标卡片 */
-        .metrics-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .metric-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        
-        .metric-value {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #1e80ff;
-            margin-bottom: 5px;
-        }
-        
-        .metric-label {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .metric-trend {
-            font-size: 0.8rem;
-            margin-top: 5px;
-        }
-        
-        .trend-up {
-            color: #f53f3f;
-        }
-        
-        .trend-down {
-            color: #00b42a;
-        }
-        
-        /* 图表区域 */
-        .charts-section {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            height: 400px;
-        }
-        
-        .chart-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        /* 数据表格 */
-        .table-section {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        
-        .table-header {
-            padding: 20px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .table-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .table-container {
-            overflow-x: auto;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .data-table th,
-        .data-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .data-table th {
-            background: #fafafa;
-            font-weight: 600;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .data-table tr:hover {
-            background: #f5f7fa;
-        }
-        
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        .status-normal {
-            background: #f0fff0;
-            color: #00b42a;
-        }
-        
-        .status-warning {
-            background: #fff7e6;
-            color: #ff7d00;
-        }
-        
-        .status-error {
-            background: #fff2f0;
-            color: #f53f3f;
-        }
-        
-        .pagination {
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid #f0f0f0;
-        }
-        
-        .pagination-info {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .pagination-controls {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .page-btn {
-            padding: 6px 12px;
-            border: 1px solid #d9d9d9;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        
-        .page-btn.active {
-            background: #1e80ff;
-            color: white;
-            border-color: #1e80ff;
-        }
-        
-        @media (max-width: 768px) {
-            .charts-section {
-                grid-template-columns: 1fr;
-            }
-            
-            .filter-row {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 1400px) {
+            .container { width: 100%; }
+            .kpi-section { grid-template-columns: repeat(3, 1fr); }
+            .charts-section { grid-template-columns: 1fr; }
+            .filter-grid { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
 </head>
@@ -315,35 +125,37 @@
                 <h1>📊 能耗查询模块</h1>
                 <a href="index.html" class="back-btn">← 返回首页</a>
             </div>
-            <p>多维度能源数据查询与实时监控，支持历史数据追溯和高级筛选分析</p>
+            <p>多维度能源数据查询与实时监控，支持历史数据追溯和高级筛选分析 | 基于 <strong>energy_collect_raw</strong> 统一采集主表</p>
         </div>
         
-        <!-- 筛选区域 -->
+        <!-- 多维度筛选区 -->
         <div class="filter-section">
-            <div class="filter-row">
+            <div class="filter-title">🔍 查询条件配置</div>
+            <div class="filter-grid">
                 <div class="filter-item">
                     <label class="filter-label">时间范围</label>
-                    <select class="filter-input">
+                    <select class="filter-select">
                         <option value="realtime">实时数据</option>
                         <option value="today">今日</option>
+                        <option value="yesterday">昨日</option>
                         <option value="week">本周</option>
                         <option value="month">本月</option>
+                        <option value="quarter">本季度</option>
                         <option value="year">本年</option>
                         <option value="custom">自定义</option>
                     </select>
                 </div>
                 <div class="filter-item">
-                    <label class="filter-label">组织层级</label>
-                    <select class="filter-input">
-                        <option value="all">全部组织</option>
-                        <option value="factory1">一车间</option>
-                        <option value="factory2">二车间</option>
-                        <option value="factory3">三车间</option>
-                    </select>
+                    <label class="filter-label">开始时间</label>
+                    <input type="datetime-local" class="filter-input" value="2025-06-11T00:00">
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">结束时间</label>
+                    <input type="datetime-local" class="filter-input" value="2025-06-12T23:59">
                 </div>
                 <div class="filter-item">
                     <label class="filter-label">能源类型</label>
-                    <select class="filter-input">
+                    <select class="filter-select">
                         <option value="all">全部能源</option>
                         <option value="electric">电力</option>
                         <option value="water">水</option>
@@ -353,129 +165,385 @@
                 </div>
                 <div class="filter-item">
                     <label class="filter-label">数据质量</label>
-                    <select class="filter-input">
+                    <select class="filter-select">
                         <option value="all">全部数据</option>
                         <option value="normal">正常数据</option>
                         <option value="warning">警告数据</option>
                         <option value="error">异常数据</option>
                     </select>
                 </div>
+                <div class="filter-item">
+                    <label class="filter-label">查询粒度</label>
+                    <select class="filter-select">
+                        <option value="5min">5分钟</option>
+                        <option value="15min">15分钟</option>
+                        <option value="1hour">1小时</option>
+                        <option value="4hour">4小时</option>
+                        <option value="1day">1天</option>
+                        <option value="1month">1月</option>
+                    </select>
+                </div>
             </div>
             <div class="filter-actions">
-                <button class="btn btn-secondary">重置</button>
-                <button class="btn btn-primary">查询</button>
-                <button class="btn btn-secondary">高级筛选</button>
+                <button class="btn btn-secondary">重置条件</button>
+                <button class="btn btn-secondary" onclick="toggleAdvancedFilter()">高级筛选</button>
+                <button class="btn btn-primary">执行查询</button>
+            </div>
+            
+            <!-- 高级筛选面板 -->
+            <div class="advanced-filter" id="advancedFilter">
+                <div class="filter-grid-advanced">
+                    <div class="filter-item">
+                        <label class="filter-label">Top N分析</label>
+                        <select class="filter-select">
+                            <option value="10">Top 10</option>
+                            <option value="20">Top 20</option>
+                            <option value="50">Top 50</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label class="filter-label">异常筛选</label>
+                        <select class="filter-select">
+                            <option value="none">不筛选</option>
+                            <option value="high">超高值</option>
+                            <option value="low">超低值</option>
+                            <option value="missing">缺失值</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label class="filter-label">阈值范围</label>
+                        <input type="text" class="filter-input" placeholder="最小值-最大值">
+                    </div>
+                    <div class="filter-item">
+                        <label class="filter-label">数据归档</label>
+                        <select class="filter-select">
+                            <option value="all">全部归档</option>
+                            <option value="hot">热数据（近30天）</option>
+                            <option value="warm">温数据（30-180天）</option>
+                            <option value="cold">冷数据（180天以上）</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <!-- 核心指标 -->
-        <div class="metrics-section">
-            <div class="metric-card">
-                <div class="metric-value">12,568.3</div>
-                <div class="metric-label">总能耗 (kWh)</div>
-                <div class="metric-trend trend-down">↓ 5.2% 同比</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">8,245.7</div>
-                <div class="metric-label">电力消耗 (kWh)</div>
-                <div class="metric-trend trend-up">↑ 3.1% 环比</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">156.3</div>
-                <div class="metric-label">用水量 (m³)</div>
-                <div class="metric-trend trend-down">↓ 2.8% 同比</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">45</div>
-                <div class="metric-label">正常设备数</div>
-                <div class="metric-trend">/ 50 总数</div>
+        <!-- 能源层级树 -->
+        <div class="hierarchy-section">
+            <div class="section-title">🌳 能源层级导航</div>
+            <div class="hierarchy-tree">
+                <div class="tree-level">
+                    <div class="tree-level-title">能源类型 (Level 1)</div>
+                    <div class="tree-item active">电力</div>
+                    <div class="tree-item">水</div>
+                    <div class="tree-item">天然气</div>
+                    <div class="tree-item">蒸汽</div>
+                </div>
+                <div class="tree-level">
+                    <div class="tree-level-title">一级总表 (Level 2)</div>
+                    <div class="tree-item active">基地总表1</div>
+                    <div class="tree-item">15栋厂房-自来水</div>
+                    <div class="tree-item">16栋厂房-自来水</div>
+                    <div class="tree-item">30栋制水车间-自来水</div>
+                    <div class="tree-item">燃气总表</div>
+                </div>
+                <div class="tree-level">
+                    <div class="tree-level-title">二级分表 (Level 3)</div>
+                    <div class="tree-item active">生产系统-1线</div>
+                    <div class="tree-item">生产系统-2线</div>
+                    <div class="tree-item">生产系统-配料</div>
+                    <div class="tree-item">辅助生产系统-空压机</div>
+                    <div class="tree-item">辅助生产系统-锅炉</div>
+                </div>
+                <div class="tree-level">
+                    <div class="tree-level-title">三级子表 (Level 4)</div>
+                    <div class="tree-item active">灌装机</div>
+                    <div class="tree-item">输送线体</div>
+                    <div class="tree-item">APV设备</div>
+                    <div class="tree-item">热缩机</div>
+                    <div class="tree-item">冷却机</div>
+                    <div class="tree-item">烘炉</div>
+                    <div class="tree-item">冷却塔</div>
+                    <div class="tree-item">包装机</div>
+                    <div class="tree-item">码垛机</div>
+                    <div class="tree-item">卸垛机</div>
+                </div>
             </div>
         </div>
         
-        <!-- 图表区域 -->
+        <!-- KPI指标卡片区 -->
+        <div class="kpi-section">
+            <div class="kpi-card">
+                <div class="kpi-value">12,568.3</div>
+                <div class="kpi-label">总能耗</div>
+                <div class="kpi-unit">kWh</div>
+                <div class="kpi-trend trend-down">↓ 5.2% 同比</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">8,245.7</div>
+                <div class="kpi-label">电力消耗</div>
+                <div class="kpi-unit">kWh</div>
+                <div class="kpi-trend trend-up">↑ 3.1% 环比</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">156.3</div>
+                <div class="kpi-label">用水量</div>
+                <div class="kpi-unit">m³</div>
+                <div class="kpi-trend trend-down">↓ 2.8% 同比</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">2,456.2</div>
+                <div class="kpi-label">天然气消耗</div>
+                <div class="kpi-unit">m³</div>
+                <div class="kpi-trend trend-stable">→ 0.5% 持平</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">1,711.8</div>
+                <div class="kpi-label">蒸汽消耗</div>
+                <div class="kpi-unit">t</div>
+                <div class="kpi-trend trend-down">↓ 4.2% 同比</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">45/50</div>
+                <div class="kpi-label">正常设备数</div>
+                <div class="kpi-unit">在线率 90%</div>
+                <div class="kpi-trend trend-up">↑ 2台新增</div>
+            </div>
+        </div>
+        
+        <!-- 图表区 -->
         <div class="charts-section">
             <div class="chart-container">
-                <div class="chart-title">能耗趋势分析</div>
-                <div id="trend-chart" style="width: 100%; height: 350px;"></div>
+                <div class="chart-header">
+                    <div class="chart-title">📈 能耗趋势分析</div>
+                    <div class="chart-actions">
+                        <button class="btn btn-secondary">刷新数据</button>
+                        <button class="btn btn-secondary">导出图表</button>
+                    </div>
+                </div>
+                <div id="trend-chart" class="chart-large"></div>
             </div>
             <div class="chart-container">
-                <div class="chart-title">能源结构占比</div>
-                <div id="pie-chart" style="width: 100%; height: 350px;"></div>
+                <div class="chart-header">
+                    <div class="chart-title">🥧 能源结构占比</div>
+                    <div class="chart-actions">
+                        <button class="btn btn-secondary">2D/3D切换</button>
+                    </div>
+                </div>
+                <div id="pie-chart" class="chart-small"></div>
             </div>
         </div>
         
-        <!-- 数据表格 -->
+        <!-- 数据对比分析 -->
+        <div class="comparison-section">
+            <div class="section-title">📊 对比分析</div>
+            <div class="comparison-grid">
+                <div class="comparison-item">
+                    <div class="comparison-label">今日 vs 昨日</div>
+                    <div class="comparison-values">
+                        <div class="comparison-value">12,568 kWh</div>
+                        <div class="comparison-diff" style="background: #e8ffea; color: #00b42a;">↓ 5.2%</div>
+                    </div>
+                </div>
+                <div class="comparison-item">
+                    <div class="comparison-label">本周 vs 上周</div>
+                    <div class="comparison-values">
+                        <div class="comparison-value">87,978 kWh</div>
+                        <div class="comparison-diff" style="background: #fff2f0; color: #f53f3f;">↑ 3.8%</div>
+                    </div>
+                </div>
+                <div class="comparison-item">
+                    <div class="comparison-label">本月 vs 上月</div>
+                    <div class="comparison-values">
+                        <div class="comparison-value">386,234 kWh</div>
+                        <div class="comparison-diff" style="background: #e8ffea; color: #00b42a;">↓ 2.1%</div>
+                    </div>
+                </div>
+                <div class="comparison-item">
+                    <div class="comparison-label">本年 vs 去年同期</div>
+                    <div class="comparison-values">
+                        <div class="comparison-value">2,345,678 kWh</div>
+                        <div class="comparison-diff" style="background: #e8ffea; color: #00b42a;">↓ 4.5%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 明细数据表格区 -->
         <div class="table-section">
             <div class="table-header">
-                <h3>能耗明细数据</h3>
+                <div class="table-title">📋 能耗明细数据（按 energy_collect_raw 格式）</div>
                 <div class="table-actions">
-                    <button class="btn btn-secondary">导出Excel</button>
-                    <button class="btn btn-secondary">导出CSV</button>
                     <button class="btn btn-secondary">列设置</button>
+                    <button class="btn btn-secondary">导出CSV</button>
+                    <button class="btn btn-secondary">导出Excel</button>
+                    <button class="btn btn-primary">API导出</button>
                 </div>
             </div>
             <div class="table-container">
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th>仪表ID</th>
                             <th>仪表名称</th>
                             <th>表码读数</th>
+                            <th>瞬时值</th>
+                            <th>累计值</th>
                             <th>采集时间</th>
                             <th>能源类型</th>
                             <th>组织归属</th>
+                            <th>一级总表</th>
+                            <th>二级分表</th>
+                            <th>三级子表</th>
                             <th>数据质量</th>
                             <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>一车间空压机</td>
+                            <td>MTR001</td>
+                            <td>一车间灌装机</td>
                             <td>5811.7</td>
+                            <td>45.2 kW</td>
+                            <td>123456.7 kWh</td>
                             <td>2025-06-12 09:26:06</td>
                             <td>电力</td>
                             <td>一车间</td>
+                            <td>基地总表1</td>
+                            <td>生产系统-1线</td>
+                            <td>灌装机</td>
                             <td><span class="status-badge status-normal">正常</span></td>
-                            <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">查看详情</button></td>
+                            <td><button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">查看详情</button></td>
                         </tr>
                         <tr>
+                            <td>MTR002</td>
                             <td>二车间锅炉</td>
                             <td>2302735</td>
+                            <td>320.5 kg/h</td>
+                            <td>2302735 kg</td>
                             <td>2025-06-12 09:25:45</td>
                             <td>蒸汽</td>
                             <td>二车间</td>
+                            <td>蒸汽总表</td>
+                            <td>一线APV</td>
+                            <td>-</td>
                             <td><span class="status-badge status-warning">警告</span></td>
-                            <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">查看详情</button></td>
+                            <td><button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">查看详情</button></td>
                         </tr>
                         <tr>
+                            <td>MTR003</td>
                             <td>三车间冷却塔</td>
                             <td>82807</td>
+                            <td>12.3 m³/h</td>
+                            <td>82807 m³</td>
                             <td>2025-06-12 09:24:32</td>
                             <td>水</td>
                             <td>三车间</td>
+                            <td>30栋制水车间-自来水</td>
+                            <td>制水间-自来水</td>
+                            <td>浓水</td>
                             <td><span class="status-badge status-error">异常</span></td>
-                            <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">查看详情</button></td>
+                            <td><button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">查看详情</button></td>
                         </tr>
                         <tr>
-                            <td>全厂总表</td>
+                            <td>MTR004</td>
+                            <td>全厂燃气总表</td>
                             <td>1053715.52</td>
+                            <td>45.8 m³/h</td>
+                            <td>1053715.52 m³</td>
                             <td>2025-06-12 09:23:18</td>
                             <td>天然气</td>
                             <td>全厂</td>
+                            <td>燃气总表</td>
+                            <td>1号锅炉</td>
+                            <td>-</td>
                             <td><span class="status-badge status-normal">正常</span></td>
-                            <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">查看详情</button></td>
+                            <td><button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">查看详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>MTR005</td>
+                            <td>辅助系统空压机</td>
+                            <td>187654.3</td>
+                            <td>78.9 kW</td>
+                            <td>187654.3 kWh</td>
+                            <td>2025-06-12 09:22:55</td>
+                            <td>电力</td>
+                            <td>辅助车间</td>
+                            <td>基地总表1</td>
+                            <td>辅助生产系统-空压机</td>
+                            <td>-</td>
+                            <td><span class="status-badge status-normal">正常</span></td>
+                            <td><button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">查看详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>MTR006</td>
+                            <td>配料车间电表</td>
+                            <td>98765.4</td>
+                            <td>34.2 kW</td>
+                            <td>98765.4 kWh</td>
+                            <td>2025-06-12 09:21:38</td>
+                            <td>电力</td>
+                            <td>配料车间</td>
+                            <td>基地总表1</td>
+                            <td>生产系统-配料</td>
+                            <td>-</td>
+                            <td><span class="status-badge status-normal">正常</span></td>
+                            <td><button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">查看详情</button></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div class="pagination">
-                <div class="pagination-info">显示 1-4 条，共 124 条数据</div>
+                <div class="pagination-info">显示 1-6 条，共 124 条数据 | 查询耗时 0.023秒</div>
                 <div class="pagination-controls">
-                    <button class="page-btn">上一页</button>
+                    <button class="page-btn" disabled>上一页</button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
                     <button class="page-btn">3</button>
+                    <button class="page-btn">...</button>
+                    <button class="page-btn">21</button>
                     <button class="page-btn">下一页</button>
                 </div>
+            </div>
+        </div>
+        
+        <!-- 审计日志 -->
+        <div class="audit-section">
+            <div class="section-title">📝 操作审计日志</div>
+            <div class="table-container">
+                <table class="data-table audit-table">
+                    <thead>
+                        <tr>
+                            <th>操作时间</th>
+                            <th>操作用户</th>
+                            <th>操作类型</th>
+                            <th>操作内容</th>
+                            <th>IP地址</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2025-06-12 09:26:06</td>
+                            <td>能源管理员</td>
+                            <td>查询</td>
+                            <td>执行能耗数据查询（条件：今日 + 电力 + 全部组织）</td>
+                            <td>192.168.1.100</td>
+                        </tr>
+                        <tr>
+                            <td>2025-06-12 09:20:15</td>
+                            <td>碳管理专员</td>
+                            <td>导出</td>
+                            <td>导出昨日能耗数据为Excel格式</td>
+                            <td>192.168.1.101</td>
+                        </tr>
+                        <tr>
+                            <td>2025-06-12 08:55:42</td>
+                            <td>系统管理员</td>
+                            <td>配置</td>
+                            <td>修改数据采集配置（刷新间隔：5分钟）</td>
+                            <td>192.168.1.1</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -485,103 +553,47 @@
     <script src="https://unpkg.com/@arco-design/web-react@latest/dist/arco-icon.min.js"></script>
     
     <script>
+        // 高级筛选切换
+        function toggleAdvancedFilter() {
+            document.getElementById('advancedFilter').classList.toggle('active');
+        }
+        
         // 初始化图表
         document.addEventListener('DOMContentLoaded', function() {
             // 趋势图
             const trendChart = echarts.init(document.getElementById('trend-chart'));
             trendChart.setOption({
-                tooltip: {
-                    trigger: 'axis'
-                },
-                legend: {
-                    data: ['电力', '水', '天然气', '蒸汽']
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'category',
-                    boundaryGap: false,
-                    data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00']
-                },
-                yAxis: {
-                    type: 'value'
-                },
+                tooltip: { trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#d9d9d9', textStyle: { color: '#333' } },
+                legend: { data: ['电力', '水', '天然气', '蒸汽'], top: 0 },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: { type: 'category', boundaryGap: false, data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'] },
+                yAxis: { type: 'value', name: '能耗 (kWh)' },
                 series: [
-                    {
-                        name: '电力',
-                        type: 'line',
-                        data: [120, 132, 101, 134, 90, 230],
-                        smooth: true
-                    },
-                    {
-                        name: '水',
-                        type: 'line',
-                        data: [220, 182, 191, 234, 290, 330],
-                        smooth: true
-                    },
-                    {
-                        name: '天然气',
-                        type: 'line',
-                        data: [150, 232, 201, 154, 190, 330],
-                        smooth: true
-                    },
-                    {
-                        name: '蒸汽',
-                        type: 'line',
-                        data: [320, 332, 301, 334, 390, 330],
-                        smooth: true
-                    }
+                    { name: '电力', type: 'line', data: [120, 132, 101, 134, 90, 230, 180], smooth: true, itemStyle: { color: '#1e80ff' }, areaStyle: { color: 'rgba(30, 128, 255, 0.1)' } },
+                    { name: '水', type: 'line', data: [22, 18, 19, 23, 29, 33, 28], smooth: true, itemStyle: { color: '#14c9c9' }, areaStyle: { color: 'rgba(20, 201, 201, 0.1)' } },
+                    { name: '天然气', type: 'line', data: [15, 23, 20, 15, 19, 33, 25], smooth: true, itemStyle: { color: '#ff7d00' }, areaStyle: { color: 'rgba(255, 125, 0, 0.1)' } },
+                    { name: '蒸汽', type: 'line', data: [32, 33, 30, 33, 39, 33, 35], smooth: true, itemStyle: { color: '#722ed1' }, areaStyle: { color: 'rgba(114, 46, 209, 0.1)' } }
                 ]
             });
             
             // 饼图
             const pieChart = echarts.init(document.getElementById('pie-chart'));
             pieChart.setOption({
-                tooltip: {
-                    trigger: 'item',
-                    formatter: '{a} <br/>{b}: {c} ({d}%)'
-                },
-                legend: {
-                    orient: 'vertical',
-                    left: 'left'
-                },
-                series: [
-                    {
-                        name: '能源结构',
-                        type: 'pie',
-                        radius: ['40%', '70%'],
-                        avoidLabelOverlap: false,
-                        itemStyle: {
-                            borderRadius: 10,
-                            borderColor: '#fff',
-                            borderWidth: 2
-                        },
-                        label: {
-                            show: false,
-                            position: 'center'
-                        },
-                        emphasis: {
-                            label: {
-                                show: true,
-                                fontSize: '18',
-                                fontWeight: 'bold'
-                            }
-                        },
-                        labelLine: {
-                            show: false
-                        },
-                        data: [
-                            { value: 8245, name: '电力' },
-                            { value: 156, name: '水' },
-                            { value: 2456, name: '天然气' },
-                            { value: 1711, name: '蒸汽' }
-                        ]
-                    }
-                ]
+                tooltip: { trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' },
+                legend: { orient: 'vertical', right: '10%', top: 'center' },
+                series: [{
+                    name: '能源结构', type: 'pie', radius: ['45%', '70%'], center: ['35%', '50%'], avoidLabelOverlap: false,
+                    itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
+                    label: { show: false, position: 'center' },
+                    emphasis: { label: { show: true, fontSize: '16', fontWeight: 'bold' } },
+                    labelLine: { show: false },
+                    data: [
+                        { value: 8245, name: '电力', itemStyle: { color: '#1e80ff' } },
+                        { value: 156, name: '水', itemStyle: { color: '#14c9c9' } },
+                        { value: 2456, name: '天然气', itemStyle: { color: '#ff7d00' } },
+                        { value: 1711, name: '蒸汽', itemStyle: { color: '#722ed1' } }
+                    ]
+                }]
             });
             
             // 窗口大小变化时重绘图表
