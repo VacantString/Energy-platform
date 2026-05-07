@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能耗查询模块 - 国家级绿色工厂能源管理平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f0f2f5;color:#333}
+        .container{max-width:1920px;margin:0 auto;padding:20px}
+        .header{background:linear-gradient(135deg,#1e80ff 0%,#0e5fd8 100%);color:white;padding:28px 32px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 16px rgba(30,128,255,0.25)}
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .header h1{font-size:2rem;font-weight:600}
+        .back-btn{background:rgba(255,255,255,0.25);color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;font-size:0.95rem}
+        .back-btn:hover{background:rgba(255,255,255,0.35)}.header p{font-size:1rem;opacity:0.92}
+        .selector-bar{background:white;padding:16px 24px;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+        .selector-group{display:flex;align-items:center;gap:8px}
+        .selector-label{font-weight:600;color:#555;font-size:0.9rem;white-space:nowrap}
+        .selector-btn{padding:8px 18px;border:1px solid #d9d9d9;background:white;border-radius:6px;cursor:pointer;font-size:0.9rem;transition:all 0.2s;white-space:nowrap}
+        .selector-btn:hover{border-color:#1e80ff;color:#1e80ff}
+        .selector-btn.active{background:#1e80ff;color:white;border-color:#1e80ff}
+        .selector-divider{width:1px;height:24px;background:#e8e8e8}
+        .selector-select{padding:8px 14px;border:1px solid #d9d9d9;border-radius:6px;font-size:0.9rem;cursor:pointer;background:white;min-width:100px}
+        .selector-select:focus{border-color:#1e80ff;outline:none}
+        .kpi-section{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:20px}
+        .kpi-card{background:white;padding:28px 16px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:center;border-top:4px solid #1e80ff;transition:transform 0.2s;cursor:default;overflow:visible;min-height:140px;display:flex;flex-direction:column;justify-content:center}
+        .kpi-card:hover{transform:translateY(-2px)}.kpi-card:nth-child(2){border-top-color:#00b42a}.kpi-card:nth-child(3){border-top-color:#ff7d00}.kpi-card:nth-child(4){border-top-color:#722ed1}.kpi-card:nth-child(5){border-top-color:#f53f3f}.kpi-card:nth-child(6){border-top-color:#14c9c9}
+        .kpi-value{font-size:1.8rem;font-weight:700;color:#1e80ff;margin-bottom:4px;line-height:1.3}.kpi-card:nth-child(2) .kpi-value{color:#00b42a}.kpi-card:nth-child(3) .kpi-value{color:#ff7d00}.kpi-card:nth-child(4) .kpi-value{color:#722ed1}.kpi-card:nth-child(5) .kpi-value{color:#f53f3f}.kpi-card:nth-child(6) .kpi-value{color:#14c9c9}
+        .kpi-label{color:#666;font-size:0.85rem;font-weight:500;margin-bottom:6px;line-height:1.4}.kpi-unit{color:#999;font-size:0.78rem;line-height:1.4}.kpi-sub{font-size:0.8rem;color:#999;margin-top:4px;line-height:1.4}
+        .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+        .chart-panel{background:white;padding:20px 24px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+        .chart-panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .chart-panel-title{font-size:1.05rem;font-weight:600;color:#333;display:flex;align-items:center;gap:8px}
+        .chart-box{height:600px}.chart-box-sm{height:480px}
+        .section-panel{background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px;overflow:hidden}
+        .section-panel-header{padding:18px 24px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+        .section-panel-title{font-size:1.05rem;font-weight:600;color:#333;display:flex;align-items:center;gap:8px}
+        .section-panel-actions{display:flex;gap:8px}
+        .btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all 0.2s}
+        .btn-sm{padding:4px 10px;font-size:0.8rem}.btn-primary{background:#1e80ff;color:white}.btn-primary:hover{background:#0e5fd8}
+        .btn-outline{background:white;color:#1e80ff;border:1px solid #1e80ff}.btn-outline:hover{background:#e8f4ff}
+        .table-wrap{overflow-x:auto;max-height:520px;overflow-y:auto}
+        table{width:100%;border-collapse:collapse}table th,table td{padding:10px 14px;text-align:left;border-bottom:1px solid #f0f0f0;font-size:0.85rem}table th{background:#fafafa;font-weight:600;color:#666;white-space:nowrap;position:sticky;top:0;z-index:1}tbody tr:hover{background:#f8f9fa}
+        .text-right{text-align:right}.text-center{text-align:center}
+        .text-green{color:#00b42a;font-weight:600}.text-blue{color:#1e80ff;font-weight:600}.text-red{color:#f53f3f;font-weight:600}.text-orange{color:#ff7d00;font-weight:600}.text-purple{color:#722ed1;font-weight:600}
+        .fw-600{font-weight:600}.row-total{background:#e8f4ff;font-weight:700}
+        .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.72rem;font-weight:600}
+        .tag-green{background:#e8ffea;color:#00b42a}.tag-red{background:#fff2f0;color:#f53f3f}.tag-orange{background:#fff7e6;color:#ff7d00}.tag-blue{background:#e8f3ff;color:#1e80ff}
+        @media(max-width:1400px){.kpi-section{grid-template-columns:repeat(3,1fr)}.charts-row{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><div class="header-top"><h1>📊 能耗查询模块</h1><a href="0.index.html" class="back-btn">← 返回首页</a></div><p>多维度能源数据查询 | 逐日钻取 | 月度对比 | 跨年同比 | 支持电力/水/蒸汽三类能源 | 贵州基地一车间</p></div>
+        <div class="selector-bar">
+            <div class="selector-group"><span class="selector-label">📅 年度：</span><button class="selector-btn active" data-year="2025" onclick="switchYear('2025')">2025年</button><button class="selector-btn" data-year="2026" onclick="switchYear('2026')">2026年</button></div><div class="selector-divider"></div>
+            <div class="selector-group"><span class="selector-label">月份：</span><select class="selector-select" id="monthSelect" onchange="switchMonth()"><option value="all">全年汇总</option><option value="1">1月</option><option value="2">2月</option><option value="3">3月</option><option value="4">4月</option><option value="5">5月</option><option value="6">6月</option><option value="7">7月</option><option value="8">8月</option><option value="9">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option></select></div><div class="selector-divider"></div>
+            <div class="selector-group"><span class="selector-label">能源类型：</span><button class="selector-btn active" data-type="electricity" onclick="switchEnergyType('electricity',this)">⚡ 电力 (kWh)</button><button class="selector-btn" data-type="water" onclick="switchEnergyType('water',this)">💧 水 (m³)</button><button class="selector-btn" data-type="steam" onclick="switchEnergyType('steam',this)">♨️ 蒸汽 (t)</button><button class="selector-btn" data-type="all" onclick="switchEnergyType('all',this)">📐 综合 (tce)</button></div><div class="selector-divider"></div>
+            <div class="selector-group"><span class="selector-label">对比：</span><select class="selector-select" id="compareSelect" onchange="refreshAll()"><option value="none">无对比</option><option value="yoy">同比（去年同期）</option><option value="mom">环比（上月）</option></select></div>
+        </div>
+        <div class="kpi-section" id="kpiSection"></div>
+        <div class="charts-row"><div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">📈 逐日能耗趋势</div></div><div class="chart-box" id="dailyChart"></div></div><div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">📊 月度能耗对比</div></div><div class="chart-box" id="monthlyChart"></div></div></div>
+        <div class="charts-row"><div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">🔥 日用量热力日历</div></div><div class="chart-box" id="heatmapChart"></div></div><div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">📉 逐日偏差分析（vs 月度均值）</div></div><div class="chart-box" id="deviationChart"></div></div></div>
+        <div class="section-panel"><div class="section-panel-header"><div class="section-panel-title">📋 逐日能耗明细表</div><div class="section-panel-actions"><button class="btn btn-outline btn-sm" onclick="exportTable('detailTable')">导出CSV</button></div></div><div class="table-wrap"><table id="detailTable"><thead><tr><th>日期</th><th>用电量(kWh)</th><th>用水量(m³)</th><th>用汽量(t)</th><th>综合能耗(tce)</th><th>实际产量(t)</th><th>vs昨日</th><th>vs月均</th></tr></thead><tbody id="detailBody"></tbody></table></div></div>
+    </div>
+    <script>
+        const RAW_DATA = {'2025':{production:{months:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],actualOutput:[4274.6653,2902.1028,3486.0048,1707.0695,3063.5683,3584.5896,2034.9612,3025.3746,3401.2965,2177.4818,2708.5219,3603.3521]},water:[17386,12949,15143,6768,12579,14614,8813,12421,13803,9131,11312,15117],steam:[1712,1126,1292,574,1061,1186,669,1009,1125,750,954,1269],electricity:[345621,252416.4,290533.2,159854,281599.68,320937.2,211425.8,282957.8,302547.4,210993.6,236026.8,288701]},'2026':{production:{months:['1月','2月','3月','4月'],actualOutput:[4945.632,2834.961,4416.6993,2387.1303]},water:[20543,12165,18367,10380],steam:[1740,1020,1532,823],electricity:[374779.4,227895.6,345636.8,189917.2]}};
+        const ELEC_DAILY_2025={1:[12583,12449,12644.6,13060.2,12952,10571.4,12685,12716.8,12817.8,12827.6,12946.6,11057,12255.8,12458.2,12751.2,12851.2,12384.8,12949.6,12826,12736.8,13028.6,8431.2,null,null,null,null,5564],2:[12946,13128,13256.2,12814.2,13164.2,13064.2,13224.2,13111.4,13247.6,8280.8,11576.8,13276.6,13196.8,13313,13108,13338.2,12971.4,8555.6,null,null,null,null,9537.2,null,null,null,null,null],3:[12614,12744.8,13059.2,12606.8,12731,12824.6,12588.4,8751.6,12599.8,12686.8,12579.2,12860.2,12906,12640.2,8252.6,null,null,6718.2,5732.4,null,7549.2,null,12743.2,12613.2,12902.6,12581],4:[null,null,null,null,null,null,null,14277,7641.2,12683.8,13133.6,13117.6,13236.2,1232.2,13308.4,13530.8,4292.8,null,null,null,null,null,null,null,null,null,11853.8,null],5:[7732,13047.4,13319,13682.4,13030.6,12844.4,13214.6,11384.2,null,null,null,11006,5940.8,13678.2,13629.2,13358.8,14043.8,13063,12692.8,12770.2,13157.8,13494.28,13101,13304,8590,4526],6:[14568.8,14255.8,9147.2,14094.6,13940.8,null,null,null,null,null,27067.6,14198.4,14192.8,13908.6,13995.2,13580.6,13302,13841.2,14197.6,14025.4,13626.6,13884.6,14166.8,13959,12962.6,null],7:[20510.4,13925.8,14109.4,14047.8,13074.8,14152.2,14141.6,14193.4,14370.6,14716.2,14794,14871.8,12267,null,null,null,null,null,null,null,null,null,null,null,null,21338],8:[13996.4,13910.4,14287.6,13396.2,13412.4,13157.8,13671.2,13690.2,9022.6,null,null,null,null,null,14818.6,9748.8,13225.4,13480,13625.8,13877.6,13672,13859.2,13801.2,11255.8,null,null],9:[13830.2,13473.2,13514,null,null,13853.2,13499.8,13547,13503.6,8869.2,null,null,17571.4,13480.8,13574.2,13533.4,13376.4,13164.6,12839.6,13148.8,13096.2,8668.2,null,null,5880,null],10:[null,null,null,null,null,null,27401.8,13543,13479.2,13745.2,13289,13535.8,13705.4,13363.8,12692.4,9456.6,12577.2,12819.2,12639.8,8804.6,8206,5507.6,null,null,null,6227],11:[12831.8,13021.6,12982.2,11902.4,12787.4,12799.4,12574.2,12675.8,12551.8,4137.8,null,null,null,null,11513.2,8109,12188.2,12406.6,12359.4,12297.6,12225.2,1677.6,null,null,null,3990],12:[11884.4,11859.6,12053.2,12388.8,12292.6,12265.4,12151.8,12112,11895,9150.4,811.2,null,null,null,12438.4,12318.8,12490.6,12615.8,12589.2,12500.2,12583,12384.4,12227.8,12603.2,null,6689.6]};
+        const ELEC_DAILY_2026={1:[11789.6,12181.4,12174.2,12142.4,12058.4,12253.6,12193.8,12116.6,12400.4,9838,12184.2,12565,12232.2,12132.4,12185.4,12128.2,12211.2,12232.2,12265.8,12221,9410.8,12489,12393,11541.4,12558,12402.6,12478.6,12190.2,12181.8,12512.4,9986.2],2:[10993.4,12730.8,12833.6,12435.4,12740,12298.2,9752.2,12414,12994,12830.6,12679.6,12846.4,12739.4,3925.4,null,null,null,null,null,null,null,null,null,19287.8,12447.6,12667.6,12658.8,11337.2,null,null],3:[13591.2,12573,12376.6,12594,12245.4,null,7629,11890,12140.8,12292.2,12224.6,12306.6,12184.2,12443.4,12265.2,12283,12288.2,12368,7812.4,11234.6,12141.6,12409.8,12636.6,12482.6,12626.8,12426,12524.2,12425.2,12479,7542.4,1500],4:[112.2,null,null,null,null,null,16355.4,13053.6,13071.4,13048.8,13017.8,12828.6,13014.6,12788.4,12925.4,12907.2,8467.8,null,null,null,null,null,null,null,13495.4,8155.4,13245.8,13095.8,12777.8,10935.6,null]};
+        const COEF={electricity:0.1229/1000,water:0.0857/1000,steam:0.1000};
+        let currentYear='2025',currentMonth='all',energyType='electricity';
+
+        function getData(){return RAW_DATA[currentYear]}
+        function getMonthCount(){return getData().water.length}
+        function sum(arr){return arr.reduce((a,b)=>a+b,0)}
+        function avg(arr){const v=arr.filter(x=>x!=null);return v.length?sum(v)/v.length:0}
+        function fmt(n,d){d=d||2;return Number(n).toFixed(d)}
+        function fmtNum(n,d){d=d||2;const v=Number(n).toFixed(d);return parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+        function getMonthlyValues(key){const d=getData();return currentMonth==='all'?d[key]:[d[key][parseInt(currentMonth)-1]]}
+        function getDailyData(monthIdx){const yd=currentYear==='2025'?ELEC_DAILY_2025:ELEC_DAILY_2026;return yd[monthIdx+1]||[]}
+        function getSelectedDailyValues(){
+            if(energyType==='electricity'){if(currentMonth==='all'){let all=[];const mc=getMonthCount();for(let m=0;m<mc;m++)all=all.concat(getDailyData(m));return all}return getDailyData(parseInt(currentMonth)-1)}return null}
+        function getMonthProd(idx){const d=getData();if(currentMonth==='all')return sum(d.production.actualOutput);return d.production.actualOutput[idx]}
+
+        function switchYear(year){currentYear=year;document.querySelectorAll('[data-year]').forEach(b=>b.classList.remove('active'));document.querySelector('[data-year="'+year+'"]').classList.add('active');const sel=document.getElementById('monthSelect'),mc=getMonthCount();for(let i=5;i<=12;i++){const opt=sel.querySelector('option[value="'+i+'"]');if(opt)opt.disabled=i>mc}if(parseInt(currentMonth)>mc&&currentMonth!=='all'){currentMonth='all';sel.value='all'}refreshAll()}
+        function switchMonth(){currentMonth=document.getElementById('monthSelect').value;refreshAll()}
+        function switchEnergyType(type,btn){energyType=type;document.querySelectorAll('[data-type]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');refreshAll()}
+        function refreshAll(){renderKPIs();renderDailyChart();renderMonthlyChart();renderHeatmap();renderDeviationChart();renderTable()}
+
+        function renderKPIs(){
+            const d=getData();const totalElec=sum(getMonthlyValues('electricity')),totalWater=sum(getMonthlyValues('water')),totalSteam=sum(getMonthlyValues('steam'));
+            const totalTce=totalElec*COEF.electricity+totalWater*COEF.water+totalSteam*COEF.steam;
+            const prod=currentMonth==='all'?sum(d.production.actualOutput):d.production.actualOutput[parseInt(currentMonth)-1];
+            let mv,ml,mu,ms;
+            if(energyType==='electricity'){mv=totalElec;ml='电力消耗';mu='kWh';ms=fmtNum(totalElec/10000,2)+' 万kWh'}
+            else if(energyType==='water'){mv=totalWater;ml='用水量';mu='m³';ms=fmtNum(totalWater/10000,2)+' 万m³'}
+            else if(energyType==='steam'){mv=totalSteam;ml='蒸汽消耗';mu='t';ms=''}
+            else{mv=totalTce;ml='综合能耗';mu='tce';ms=''}
+            const dv=getSelectedDailyValues();const maxD=dv?dv.filter(v=>v!=null).reduce((a,b)=>Math.max(a,b),0):0;const avgD=dv?avg(dv):0;
+            const cards=[{v:energyType==='electricity'?fmtNum(totalElec/10000,2):energyType==='water'?fmtNum(totalWater,0):energyType==='steam'?fmtNum(totalSteam,0):fmtNum(totalTce,2),l:ml,u:mu,s:ms,c:'#1e80ff'},{v:fmtNum(totalTce,2),l:'综合能耗',u:'tce',s:'折标煤合计',c:'#00b42a'},{v:fmtNum(prod,1),l:'实际产量',u:'t',s:'统计期内',c:'#ff7d00'},{v:fmtNum(prod>0?totalTce/prod:0,4),l:'单位产品综合能耗',u:'tce/t',s:'',c:'#722ed1'},{v:dv?fmtNum(maxD,0):'-',l:'日最高用量',u:energyType==='electricity'?'kWh':'',s:'峰值日',c:'#f53f3f'},{v:dv?fmtNum(avgD,0):'-',l:'日平均用量',u:energyType==='electricity'?'kWh':'',s:'日均水平',c:'#14c9c9'}];
+            document.getElementById('kpiSection').innerHTML=cards.map(c=>'<div class="kpi-card" style="border-top-color:'+c.c+'"><div class="kpi-value" style="color:'+c.c+'">'+c.v+'</div><div class="kpi-label">'+c.l+'</div><div class="kpi-unit">'+c.u+'</div>'+(c.s?'<div class="kpi-sub">'+c.s+'</div>':'')+'</div>').join('');
+        }
+
+        function renderDailyChart(){
+            const dom=document.getElementById('dailyChart');if(!dom)return;const chart=echarts.init(dom);
+            if(energyType==='electricity'&&currentMonth!=='all'){const dVals=getSelectedDailyValues();const labels=[];for(let i=0;i<dVals.length;i++)labels.push((i+1)+'日');const vVals=dVals.map(v=>v!=null?+(v/10000).toFixed(1):null);const aV=avg(dVals)/10000;chart.setOption({tooltip:{trigger:'axis',formatter:function(p){return p[0].name+'<br/>'+(p[0].value!=null?p[0].value+' 万kWh':'无数据');}},grid:{left:'3%',right:'4%',bottom:'3%',containLabel:true},xAxis:{type:'category',data:labels},yAxis:{type:'value',name:'万kWh'},series:[{name:'日用电量',type:'bar',data:vVals,itemStyle:{color:function(p){return p.value!=null?(p.value>aV?'#f53f3f':'#1e80ff'):'#e0e0e0';}},barWidth:'60%',label:{show:true,position:'top',fontSize:8,formatter:function(p){return p.value!=null?p.value:'';}}},{name:'月均',type:'line',data:new Array(dVals.length).fill(+aV.toFixed(1)),lineStyle:{type:'dashed',color:'#ff7d00',width:2},symbol:'none'}]})}
+            else{const d=getData();const mc=getMonthCount();const labels=d.production.months.slice(0,mc);let vals;if(energyType==='electricity')vals=d.electricity.map(v=>+(v/10000).toFixed(1));else if(energyType==='water')vals=d.water.map(v=>v);else if(energyType==='steam')vals=d.steam.map(v=>v);else vals=d.electricity.map((v,i)=>+(v*COEF.electricity+d.water[i]*COEF.water+d.steam[i]*COEF.steam).toFixed(2));const yN=energyType==='electricity'?'万kWh':energyType==='water'?'m³':energyType==='steam'?'t':'tce';chart.setOption({tooltip:{trigger:'axis'},grid:{left:'3%',right:'4%',bottom:'3%',containLabel:true},xAxis:{type:'category',data:labels},yAxis:{type:'value',name:yN},series:[{name:'',type:'bar',data:vals,itemStyle:{color:'#1e80ff'},barWidth:'50%',label:{show:true,position:'top',fontSize:9}}]})}
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderMonthlyChart(){
+            const dom=document.getElementById('monthlyChart');if(!dom)return;const chart=echarts.init(dom);const d=getData();const mc=getMonthCount();const labels=d.production.months.slice(0,mc);
+            let e=[],w=[],s=[];if(energyType==='electricity')e=d.electricity.map(v=>+(v/10000).toFixed(1));else if(energyType==='water')w=d.water.map(v=>v);else if(energyType==='steam')s=d.steam.map(v=>v);else{e=d.electricity.map(v=>+(v*COEF.electricity).toFixed(2));w=d.water.map(v=>+(v*COEF.water).toFixed(2));s=d.steam.map(v=>+(v*COEF.steam).toFixed(2))}
+            const yN=energyType==='electricity'?'万kWh':energyType==='water'?'m³':energyType==='steam'?'t':'tce';const ser=[];if(e.length)ser.push({name:'电力',type:'bar',stack:'total',data:e,itemStyle:{color:'#1e80ff'},barWidth:'50%'});if(w.length)ser.push({name:'水',type:'bar',stack:'total',data:w,itemStyle:{color:'#14c9c9'}});if(s.length)ser.push({name:'蒸汽',type:'bar',stack:'total',data:s,itemStyle:{color:'#ff7d00'}});
+            chart.setOption({tooltip:{trigger:'axis'},legend:{data:['电力','水','蒸汽'].filter((v,i)=>[e.length,w.length,s.length][i]),top:0},grid:{left:'3%',right:'4%',bottom:'3%',containLabel:true},xAxis:{type:'category',data:labels},yAxis:{type:'value',name:yN},series:ser});
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderHeatmap(){
+            const dom=document.getElementById('heatmapChart');if(!dom)return;const chart=echarts.init(dom);const d=getData();const mc=getMonthCount();
+            if(energyType!=='electricity'){chart.setOption({title:{text:'热力日历仅支持电力日数据',left:'center',top:'center',textStyle:{color:'#999',fontSize:14}}});window.addEventListener('resize',()=>chart.resize());return}
+            const data=[];const maxDays=31;for(let m=0;m<mc;m++){const dv=getDailyData(m);for(let day=0;day<maxDays;day++){if(dv[day]!=null)data.push([day,m,dv[day]])}}const maxV=data.reduce((mx,d)=>Math.max(mx,d[2]),0);
+            chart.setOption({tooltip:{position:'top',formatter:function(p){return(p.data[1]+1)+'月'+(p.data[0]+1)+'日<br/>'+fmtNum(p.data[2],0)+' kWh'}},grid:{left:'8%',right:'5%',bottom:'3%',top:'5%'},xAxis:{type:'category',data:Array.from({length:maxDays},(_,i)=>(i+1)+'日'),splitArea:{show:true},axisLabel:{fontSize:9}},yAxis:{type:'category',data:d.production.months.slice(0,mc),splitArea:{show:true},axisLabel:{fontSize:10}},visualMap:{min:0,max:maxV,calculable:true,orient:'horizontal',left:'center',bottom:'0%',inRange:{color:['#e8f4ff','#1e80ff','#0e5fd8','#722ed1']}},series:[{type:'heatmap',data:data,label:{show:false},emphasis:{itemStyle:{shadowBlur:10,shadowColor:'rgba(0,0,0,0.5)'}}}]});
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderDeviationChart(){
+            const dom=document.getElementById('deviationChart');if(!dom)return;const chart=echarts.init(dom);
+            if(energyType!=='electricity'||currentMonth==='all'){chart.setOption({title:{text:'偏差分析请选择具体月份+电力',left:'center',top:'center',textStyle:{color:'#999',fontSize:14}}});window.addEventListener('resize',()=>chart.resize());return}
+            const dVals=getSelectedDailyValues();const aV=avg(dVals);const labels=[],devs=[];for(let i=0;i<dVals.length;i++){labels.push((i+1)+'日');devs.push(dVals[i]!=null?+((dVals[i]-aV)/aV*100).toFixed(1):null)}
+            chart.setOption({tooltip:{trigger:'axis',formatter:function(p){return p[0].name+'<br/>偏差: '+(p[0].value!=null?(p[0].value>0?'+':'')+p[0].value+'%':'无数据');}},grid:{left:'3%',right:'4%',bottom:'3%',containLabel:true},xAxis:{type:'category',data:labels},yAxis:{type:'value',name:'%',axisLabel:{formatter:'{value}%'}},series:[{name:'vs月均偏差',type:'bar',data:devs,itemStyle:{color:function(p){return p.value!=null?(p.value>0?'#f53f3f':'#00b42a'):'#e0e0e0';}},barWidth:'60%',label:{show:true,position:'top',fontSize:8,formatter:function(p){return p.value!=null?(p.value>0?'+':'')+p.value+'%':'';}}},{name:'零点线',type:'line',data:new Array(devs.length).fill(0),lineStyle:{color:'#999',width:1},symbol:'none'}]});
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderTable(){
+            const d=getData();const mc=getMonthCount();const prodPerDay=currentMonth==='all'?avg(d.production.actualOutput)/30:d.production.actualOutput[parseInt(currentMonth)-1]/30;
+            if(currentMonth==='all'||energyType!=='electricity'){
+                let html='';for(let i=0;i<mc;i++){const tce=d.electricity[i]*COEF.electricity+d.water[i]*COEF.water+d.steam[i]*COEF.steam;const prevTce=i>0?(d.electricity[i-1]*COEF.electricity+d.water[i-1]*COEF.water+d.steam[i-1]*COEF.steam):tce;const chg=i>0&&prevTce>0?((tce-prevTce)/prevTce*100):null;const allAvg=avg(d.electricity.map((v,j)=>v*COEF.electricity+d.water[j]*COEF.water+d.steam[j]*COEF.steam));const dChg=allAvg>0?((tce-allAvg)/allAvg*100):0;html+='<tr><td class="fw-600">'+d.production.months[i]+'</td><td class="text-right">'+fmtNum(d.electricity[i],0)+'</td><td class="text-right">'+fmtNum(d.water[i],0)+'</td><td class="text-right">'+fmtNum(d.steam[i],0)+'</td><td class="text-right fw-600">'+fmtNum(tce,2)+'</td><td class="text-right">'+fmtNum(d.production.actualOutput[i],1)+'</td><td class="text-center">'+(chg!=null?'<span class="'+('tag'+(chg>0?' tag-red':' tag-green'))+'">'+(chg>0?'+':'')+fmt(chg,1)+'%</span>':'-')+'</td><td class="text-center"><span class="tag '+(dChg>0?'tag-red':'tag-green')+'">'+(dChg>0?'+':'')+fmt(dChg,1)+'%</span></td></tr>'}
+                html+='<tr class="row-total"><td><strong>合计</strong></td><td class="text-right"><strong>'+fmtNum(sum(d.electricity),0)+'</strong></td><td class="text-right"><strong>'+fmtNum(sum(d.water),0)+'</strong></td><td class="text-right"><strong>'+fmtNum(sum(d.steam),0)+'</strong></td><td class="text-right"><strong>'+fmtNum(sum(d.electricity)*COEF.electricity+sum(d.water)*COEF.water+sum(d.steam)*COEF.steam,2)+'</strong></td><td class="text-right"><strong>'+fmtNum(sum(d.production.actualOutput),1)+'</strong></td><td class="text-center">-</td><td class="text-center">-</td></tr>';
+                document.getElementById('detailBody').innerHTML=html;return;
+            }
+            const dVals=getSelectedDailyValues();const aV=avg(dVals);let html='';
+            for(let i=0;i<dVals.length;i++){
+                const val=dVals[i];const date=(parseInt(currentMonth))+'月'+(i+1)+'日';
+                const prev=i>0?dVals[i-1]:null;
+                const dChg=val!=null&&prev!=null&&prev>0?((val-prev)/prev*100):null;
+                const mChg=val!=null&&aV>0?((val-aV)/aV*100):null;
+                const tce=val!=null?val*COEF.electricity:0;
+                html+='<tr><td class="fw-600">'+date+'</td><td class="text-right '+(val!=null?'':'text-muted')+'">'+(val!=null?fmtNum(val,0):'-')+'</td><td class="text-right text-muted">-</td><td class="text-right text-muted">-</td><td class="text-right">'+fmtNum(tce,2)+'</td><td class="text-right">'+fmtNum(prodPerDay,1)+'</td><td class="text-center">'+(dChg!=null?'<span class="tag '+(dChg>0?'tag-red':'tag-green')+'">'+(dChg>0?'+':'')+fmt(dChg,1)+'%</span>':'-')+'</td><td class="text-center">'+(mChg!=null?'<span class="tag '+(mChg>0?'tag-red':'tag-green')+'">'+(mChg>0?'+':'')+fmt(mChg,1)+'%</span>':'-')+'</td></tr>';
+            }
+            const validSum=dVals.filter(v=>v!=null).reduce((a,b)=>a+b,0);
+            html+='<tr class="row-total"><td><strong>月度合计</strong></td><td class="text-right"><strong>'+fmtNum(validSum,0)+'</strong></td><td class="text-right"><strong>'+fmtNum(currentMonth==='all'?sum(d.water):d.water[parseInt(currentMonth)-1],0)+'</strong></td><td class="text-right"><strong>'+fmtNum(currentMonth==='all'?sum(d.steam):d.steam[parseInt(currentMonth)-1],0)+'</strong></td><td class="text-right"><strong>'+fmtNum(validSum*COEF.electricity,2)+'</strong></td><td class="text-right"><strong>'+fmtNum(getMonthProd(parseInt(currentMonth)-1),1)+'</strong></td><td class="text-center">-</td><td class="text-center">-</td></tr>';
+            document.getElementById('detailBody').innerHTML=html;
+        }
+
+        function exportTable(tableId){const table=document.getElementById(tableId);let csv='\uFEFF';table.querySelectorAll('tr').forEach(row=>{const rd=[];row.querySelectorAll('th,td').forEach(c=>rd.push('"'+c.textContent.trim().replace(/"/g,'""')+'"'));csv+=rd.join(',')+'\n'});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download=tableId+'_'+currentYear+'_'+(currentMonth==='all'?'全年':currentMonth+'月')+'.csv';a.click();}
+        document.addEventListener('DOMContentLoaded',function(){refreshAll()});
+    </script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能效平衡计算模块 - 国家级绿色工厂能源管理平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; color: #333; }
+        .container { max-width: 1920px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #722ed1 0%, #531dab 100%); color: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(114, 46, 209, 0.25); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .header h1 { font-size: 2rem; font-weight: 600; }
+        .back-btn { background: rgba(255,255,255,0.25); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+        .back-btn:hover { background: rgba(255,255,255,0.35); }
+        .header p { font-size: 1rem; opacity: 0.92; }
+        .selector-bar { background: white; padding: 16px 24px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .selector-group { display: flex; align-items: center; gap: 8px; }
+        .selector-label { font-weight: 600; color: #555; font-size: 0.9rem; white-space: nowrap; }
+        .selector-btn { padding: 8px 18px; border: 1px solid #d9d9d9; background: white; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap; }
+        .selector-btn:hover { border-color: #722ed1; color: #722ed1; }
+        .selector-btn.active { background: #722ed1; color: white; border-color: #722ed1; }
+        .selector-divider { width: 1px; height: 24px; background: #e8e8e8; }
+        .selector-select { padding: 8px 14px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 0.9rem; cursor: pointer; background: white; min-width: 100px; }
+        .selector-select:focus { border-color: #722ed1; outline: none; }
+        .standard-badge { background: #f5f0ff; color: #722ed1; padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin-left: auto; }
+        .kpi-section { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 20px; }
+        .kpi-card { background: white; padding: 28px 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; border-top: 4px solid #722ed1; transition: transform 0.2s; cursor: default; overflow: visible; min-height: 140px; display: flex; flex-direction: column; justify-content: center; }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+        .kpi-card:nth-child(2) { border-top-color: #1e80ff; }
+        .kpi-card:nth-child(3) { border-top-color: #f53f3f; }
+        .kpi-card:nth-child(4) { border-top-color: #ff7d00; }
+        .kpi-card:nth-child(5) { border-top-color: #00b42a; }
+        .kpi-card:nth-child(6) { border-top-color: #14c9c9; }
+        .kpi-value { font-size: 1.8rem; font-weight: 700; color: #722ed1; margin-bottom: 4px; line-height: 1.3; }
+        .kpi-card:nth-child(2) .kpi-value { color: #1e80ff; }
+        .kpi-card:nth-child(3) .kpi-value { color: #f53f3f; }
+        .kpi-card:nth-child(4) .kpi-value { color: #ff7d00; }
+        .kpi-card:nth-child(5) .kpi-value { color: #00b42a; }
+        .kpi-card:nth-child(6) .kpi-value { color: #14c9c9; }
+        .kpi-label { color: #666; font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; line-height: 1.4; }
+        .kpi-unit { color: #999; font-size: 0.78rem; line-height: 1.4; }
+        .kpi-sub { font-size: 0.8rem; color: #999; margin-top: 4px; line-height: 1.4; }
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-panel { background: white; padding: 20px 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .chart-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .chart-panel-title { font-size: 1.05rem; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px; }
+        .chart-box { height: 600px; }
+        .chart-box-sm { height: 500px; }
+        .section-panel { background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }
+        .section-panel-header { padding: 18px 24px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .section-panel-title { font-size: 1.05rem; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px; }
+        .section-panel-actions { display: flex; gap: 8px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
+        .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+        .btn-primary { background: #722ed1; color: white; }
+        .btn-primary:hover { background: #531dab; }
+        .btn-outline { background: white; color: #722ed1; border: 1px solid #722ed1; }
+        .btn-outline:hover { background: #f5f0ff; }
+        .btn-ghost { background: transparent; color: #666; border: 1px solid #d9d9d9; }
+        .btn-ghost:hover { border-color: #722ed1; color: #722ed1; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        table th, table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+        table th { background: #fafafa; font-weight: 600; color: #666; white-space: nowrap; }
+        table tbody tr:hover { background: #f8f9fa; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .text-green { color: #00b42a; font-weight: 600; }
+        .text-blue { color: #1e80ff; font-weight: 600; }
+        .text-orange { color: #ff7d00; font-weight: 600; }
+        .text-red { color: #f53f3f; font-weight: 600; }
+        .text-purple { color: #722ed1; font-weight: 600; }
+        .text-muted { color: #999; }
+        .fw-600 { font-weight: 600; }
+        .row-total { background: #f5f0ff; font-weight: 700; }
+        .row-subtotal { background: #fafafa; font-weight: 600; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .tag-green { background: #e8ffea; color: #00b42a; }
+        .tag-red { background: #fff2f0; color: #f53f3f; }
+        .tag-orange { background: #fff7e6; color: #ff7d00; }
+        .tag-blue { background: #e8f3ff; color: #1e80ff; }
+        .tag-purple { background: #f5f0ff; color: #722ed1; }
+        .error-banner { background: linear-gradient(135deg, #fff2f0, #ffccc7); border: 1px solid #ffa39e; padding: 14px 24px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px; }
+        .error-banner.pass { background: linear-gradient(135deg, #e8ffea, #b7eb8f); border-color: #95de64; }
+        .error-banner-icon { font-size: 1.6rem; }
+        .error-banner-content { flex: 1; }
+        .error-banner-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+        .error-banner.pass .error-banner-title { color: #237804; }
+        .error-banner:not(.pass) .error-banner-title { color: #cf1322; }
+        .error-banner-desc { font-size: 0.85rem; color: #820014; }
+        .error-banner.pass .error-banner-desc { color: #389e0d; }
+        .optimization-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 20px 24px; }
+        .optimization-card { padding: 20px; background: #fafafa; border-radius: 8px; border-left: 4px solid #722ed1; }
+        .optimization-card:nth-child(2) { border-left-color: #1e80ff; }
+        .optimization-card:nth-child(3) { border-left-color: #00b42a; }
+        .optimization-card:nth-child(4) { border-left-color: #ff7d00; }
+        .opt-title { font-weight: 600; color: #333; margin-bottom: 8px; font-size: 0.95rem; }
+        .opt-desc { color: #666; font-size: 0.85rem; line-height: 1.6; margin-bottom: 10px; }
+        .opt-metrics { display: flex; gap: 20px; }
+        .opt-metric { text-align: center; }
+        .opt-metric-val { font-size: 1.3rem; font-weight: 700; color: #722ed1; }
+        .opt-metric-label { font-size: 0.78rem; color: #999; }
+        .coef-bar { background: white; padding: 12px 24px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 20px; flex-wrap: wrap; font-size: 0.82rem; color: #666; }
+        .coef-item { display: flex; align-items: center; gap: 6px; }
+        .coef-key { color: #555; font-weight: 600; }
+        .coef-val { color: #722ed1; font-weight: 700; }
+        @media (max-width: 1400px) { .kpi-section { grid-template-columns: repeat(3, 1fr); } .charts-row { grid-template-columns: 1fr; } .optimization-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>⚖️ 能效平衡计算模块</h1>
+                <a href="0.index.html" class="back-btn">← 返回首页</a>
+            </div>
+            <p>依据GB/T 3484-2009《企业能量平衡通则》| GB/T 2589-2020《综合能耗计算通则》| GB/T 28751-2012《企业能量平衡表编制方法》 | 当量值口径 | 贵州基地一车间</p>
+        </div>
+        <div class="selector-bar">
+            <div class="selector-group">
+                <span class="selector-label">📅 年度：</span>
+                <button class="selector-btn active" data-year="2025" onclick="switchYear('2025')">2025年</button>
+                <button class="selector-btn" data-year="2026" onclick="switchYear('2026')">2026年</button>
+            </div>
+            <div class="selector-divider"></div>
+            <div class="selector-group">
+                <span class="selector-label">核算周期：</span>
+                <select class="selector-select" id="periodSelect" onchange="switchPeriod()">
+                    <option value="all">年度累计</option>
+                    <option value="first">上半年（1-6月）</option>
+                    <option value="second">下半年（7-12月）</option>
+                </select>
+            </div>
+            <div class="selector-divider"></div>
+            <div class="selector-group">
+                <span class="selector-label">核算层级：</span>
+                <select class="selector-select" id="levelSelect" onchange="switchPeriod()">
+                    <option value="plant">全厂级</option>
+                    <option value="workshop">车间/工序级</option>
+                </select>
+            </div>
+            <span class="standard-badge">📐 当量值口径（物理能量平衡）</span>
+        </div>
+        <div class="coef-bar">
+            <span class="selector-label">🔢 折标系数（GB/T 2589-2020 当量值）：</span>
+            <div class="coef-item"><span class="coef-key">电力：</span><span class="coef-val">0.1229</span> kgce/kWh</div>
+            <div class="coef-item"><span class="coef-key">水：</span><span class="coef-val">0.0857</span> kgce/m³</div>
+            <div class="coef-item"><span class="coef-key">低压蒸汽：</span><span class="coef-val">0.1000</span> kgce/kg</div>
+        </div>
+        <div class="kpi-section" id="kpiSection"></div>
+        <div id="balanceErrorBanner"></div>
+        <div class="charts-row">
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">🔀 能量平衡流图（Sankey）— E₍输入₎ = E₍有效利用₎ + E₍损失₎</div>
+                </div>
+                <div class="chart-box" id="balanceSankeyChart"></div>
+            </div>
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">📊 能源损失结构分解</div>
+                </div>
+                <div class="chart-box" id="lossBreakdownChart"></div>
+            </div>
+        </div>
+        <div class="section-panel">
+            <div class="section-panel-header">
+                <div class="section-panel-title">📋 企业能量平衡表（GB/T 28751-2012 格式）</div>
+                <div class="section-panel-actions">
+                    <button class="btn btn-outline btn-sm" onclick="exportTable('balanceTable')">导出CSV</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table id="balanceTable">
+                    <thead>
+                        <tr>
+                            <th>能源品类</th>
+                            <th>实物量</th>
+                            <th>折标煤(tce)</th>
+                            <th>有效利用(tce)</th>
+                            <th>转换损失</th>
+                            <th>输送损失</th>
+                            <th>工艺设备损失</th>
+                            <th>其他损失</th>
+                            <th>损失合计(tce)</th>
+                            <th>损失率</th>
+                            <th>利用率</th>
+                        </tr>
+                    </thead>
+                    <tbody id="balanceBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="charts-row">
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">📈 月度能效平衡趋势</div>
+                </div>
+                <div class="chart-box-sm" id="monthlyBalanceChart"></div>
+            </div>
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">🔧 重点设备能效评估</div>
+                </div>
+                <div class="chart-box-sm" id="equipEffChart"></div>
+            </div>
+        </div>
+        <div class="section-panel">
+            <div class="section-panel-header">
+                <div class="section-panel-title">🎯 基于平衡分析的节能优化建议</div>
+            </div>
+            <div class="optimization-grid" id="optimizationGrid"></div>
+        </div>
+    </div>
+    <script>
+        const RAW_DATA = {
+            '2025': { production: { months: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'], actualOutput: [4274.6653,2902.1028,3486.0048,1707.0695,3063.5683,3584.5896,2034.9612,3025.3746,3401.2965,2177.4818,2708.5219,3603.3521] }, water: [17386,12949,15143,6768,12579,14614,8813,12421,13803,9131,11312,15117], steam: [1712,1126,1292,574,1061,1186,669,1009,1125,750,954,1269], electricity: [345621,252416.4,290533.2,159854,281599.68,320937.2,211425.8,282957.8,302547.4,210993.6,236026.8,288701] },
+            '2026': { production: { months: ['1月','2月','3月','4月'], actualOutput: [4945.632,2834.961,4416.6993,2387.1303] }, water: [20543,12165,18367,10380], steam: [1740,1020,1532,823], electricity: [374779.4,227895.6,345636.8,189917.2] }
+        };
+        const COEF = { electricity: 0.1229 / 1000, water: 0.0857 / 1000, steam: 0.1000 };
+        let currentYear = '2025', currentPeriod = 'all', currentLevel = 'plant';
+        let balanceSankeyInst = null, lossBreakdownInst = null, monthlyBalanceInst = null, equipEffInst = null;
+
+        function getData() { return RAW_DATA[currentYear]; }
+        function getMonthCount() { return getData().water.length; }
+        function sum(arr) { return arr.reduce((a, b) => a + b, 0); }
+        function fmt(n, d) { d = d || 2; return Number(n).toFixed(d); }
+        function fmtNum(n, d) { d = d || 2; const v = Number(n).toFixed(d); return parseFloat(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+
+        function getPeriodIndices() {
+            const mc = getMonthCount();
+            if (currentPeriod === 'all') return { start: 0, end: mc - 1 };
+            if (currentPeriod === 'first') return { start: 0, end: Math.min(5, mc - 1) };
+            return { start: Math.min(6, mc - 1), end: mc - 1 };
+        }
+        function getPeriodData(key) { const d = getData(); const { start, end } = getPeriodIndices(); return d[key].slice(start, end + 1); }
+        function getPeriodSum(key) { return sum(getPeriodData(key)); }
+        function getPeriodProduction() { const d = getData(); const { start, end } = getPeriodIndices(); return sum(d.production.actualOutput.slice(start, end + 1)); }
+
+        function switchYear(year) {
+            currentYear = year;
+            document.querySelectorAll('[data-year]').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-year="' + year + '"]').classList.add('active');
+            const sel = document.getElementById('periodSelect'), mc = getMonthCount();
+            if (mc < 12) { sel.querySelector('option[value="second"]').disabled = mc <= 6; }
+            else { sel.querySelectorAll('option').forEach(o => o.disabled = false); }
+            if (currentPeriod === 'second' && mc <= 6) { currentPeriod = 'all'; sel.value = 'all'; }
+            refreshAll();
+        }
+        function switchPeriod() {
+            currentPeriod = document.getElementById('periodSelect').value;
+            currentLevel = document.getElementById('levelSelect').value;
+            refreshAll();
+        }
+        function refreshAll() { renderKPIs(); renderBalanceError(); renderBalanceSankey(); renderLossBreakdown(); renderBalanceTable(); renderMonthlyBalance(); renderEquipEff(); renderOptimizations(); }
+
+        function calcBalance() {
+            const tE = getPeriodSum('electricity'), tW = getPeriodSum('water'), tS = getPeriodSum('steam');
+            const elecTce = tE * COEF.electricity, waterTce = tW * COEF.water, steamTce = tS * COEF.steam;
+            const totalTce = elecTce + waterTce + steamTce;
+            const elecEffRate = 0.88, steamEffRate = 0.76, waterEffRate = 0.95;
+            const elecEff = elecTce * elecEffRate, steamEff = steamTce * steamEffRate, waterEff = waterTce * waterEffRate;
+            const totalEff = elecEff + steamEff + waterEff;
+            const totalLoss = totalTce - totalEff;
+            const elecConvLoss = elecTce * 0.03, elecTransLoss = elecTce * 0.04, elecEquipLoss = elecTce * 0.04, elecOtherLoss = elecTce - elecEff - elecConvLoss - elecTransLoss - elecEquipLoss;
+            const steamConvLoss = steamTce * 0.08, steamTransLoss = steamTce * 0.0574, steamEquipLoss = steamTce * 0.10, steamOtherLoss = steamTce - steamEff - steamConvLoss - steamTransLoss - steamEquipLoss;
+            const waterTransLoss = waterTce * 0.02, waterEquipLoss = waterTce * 0.03, waterConvLoss = 0, waterOtherLoss = waterTce - waterEff - waterConvLoss - waterTransLoss - waterEquipLoss;
+            const lossSubtotal = (elecConvLoss+elecTransLoss+elecEquipLoss+elecOtherLoss) + (steamConvLoss+steamTransLoss+steamEquipLoss+steamOtherLoss) + (waterConvLoss+waterTransLoss+waterEquipLoss+waterOtherLoss);
+            const balanceErr = totalTce > 0 ? Math.abs(totalTce - (totalEff + lossSubtotal)) / totalTce * 100 : 0;
+            const energyEffRate = totalTce > 0 ? (totalEff / totalTce * 100) : 0;
+            const prodSum = getPeriodProduction();
+            const unitTce = prodSum > 0 ? totalTce / prodSum : 0;
+            return { tE, tW, tS, elecTce, waterTce, steamTce, totalTce, elecEff, steamEff, waterEff, totalEff, totalLoss, elecConvLoss, elecTransLoss, elecEquipLoss, elecOtherLoss, steamConvLoss, steamTransLoss, steamEquipLoss, steamOtherLoss, waterConvLoss, waterTransLoss, waterEquipLoss, waterOtherLoss, lossSubtotal, balanceErr, energyEffRate, prodSum, unitTce };
+        }
+
+        function renderKPIs() {
+            const b = calcBalance();
+            const cards = [
+                { v: fmtNum(b.totalTce, 2), l: '总输入能量 E₍输入₎', u: 'tce', s: '', c: '#722ed1' },
+                { v: fmtNum(b.totalEff, 2), l: '有效利用能量 E₍有效₎', u: 'tce', s: '', c: '#1e80ff' },
+                { v: fmtNum(b.totalLoss, 2), l: '总损失能量 E₍损失₎', u: 'tce', s: '转换+输送+设备+其他', c: '#f53f3f' },
+                { v: fmtNum(b.balanceErr, 2) + '%', l: '平衡误差校验', u: '国标≤±5%', s: b.balanceErr <= 5 ? '✅ 通过' : '❌ 超标', c: '#ff7d00' },
+                { v: fmtNum(b.energyEffRate, 1) + '%', l: '企业能源利用率', u: 'E₍有效₎/E₍输入₎', s: '', c: '#00b42a' },
+                { v: fmtNum(b.unitTce, 4), l: '单位产品综合能耗', u: 'tce/t', s: '产量 ' + fmtNum(b.prodSum, 1) + ' t', c: '#14c9c9' }
+            ];
+            document.getElementById('kpiSection').innerHTML = cards.map(c => '<div class="kpi-card" style="border-top-color:' + c.c + '"><div class="kpi-value" style="color:' + c.c + '">' + c.v + '</div><div class="kpi-label">' + c.l + '</div><div class="kpi-unit">' + c.u + '</div>' + (c.s ? '<div class="kpi-sub">' + c.s + '</div>' : '') + '</div>').join('');
+        }
+
+        function renderBalanceError() {
+            const b = calcBalance();
+            const pass = b.balanceErr <= 5;
+            document.getElementById('balanceErrorBanner').innerHTML = '<div class="error-banner' + (pass ? ' pass' : '') + '"><div class="error-banner-icon">' + (pass ? '✅' : '⚠️') + '</div><div class="error-banner-content"><div class="error-banner-title">' + (pass ? '平衡校验通过' : '平衡校验未通过') + '：|E₍输入₎ - (E₍有效₎ + Σ损失)| / E₍输入₎ = ' + fmtNum(b.balanceErr, 2) + '%</div><div class="error-banner-desc">' + (pass ? '误差在国标规定的±5%范围内，能量平衡数据可信。' : '误差超出±5%范围，请核查计量数据准确性、边界范围、折标系数及漏计/重计项。') + '</div></div></div>';
+        }
+
+        function renderBalanceSankey() {
+            const dom = document.getElementById('balanceSankeyChart'); if (!dom) return;
+            if (balanceSankeyInst) balanceSankeyInst.dispose();
+            const chart = echarts.init(dom); balanceSankeyInst = chart;
+            const b = calcBalance();
+            const data = [
+                { name: '总输入\n' + fmtNum(b.totalTce, 1) + ' tce', itemStyle: { color: '#722ed1' } },
+                { name: '电力\n' + fmtNum(b.elecTce, 1), itemStyle: { color: '#1e80ff' } },
+                { name: '蒸汽\n' + fmtNum(b.steamTce, 1), itemStyle: { color: '#ff7d00' } },
+                { name: '水\n' + fmtNum(b.waterTce, 1), itemStyle: { color: '#14c9c9' } },
+                { name: '有效利用\n' + fmtNum(b.totalEff, 1) + ' tce', itemStyle: { color: '#00b42a' } },
+                { name: '转换损失', itemStyle: { color: '#f53f3f' } },
+                { name: '输送损失', itemStyle: { color: '#ff7d00' } },
+                { name: '设备损失', itemStyle: { color: '#ffa940' } },
+                { name: '其他损失', itemStyle: { color: '#86909c' } },
+                { name: '产品/工艺\n有效做功', itemStyle: { color: '#00b42a' } }
+            ];
+            const sl = b.steamConvLoss + b.steamTransLoss + b.steamEquipLoss + b.steamOtherLoss;
+            const el = b.elecConvLoss + b.elecTransLoss + b.elecEquipLoss + b.elecOtherLoss;
+            const wl = b.waterConvLoss + b.waterTransLoss + b.waterEquipLoss + b.waterOtherLoss;
+            const links = [
+                { source: '总输入\n' + fmtNum(b.totalTce, 1) + ' tce', target: '电力\n' + fmtNum(b.elecTce, 1), value: b.elecTce },
+                { source: '总输入\n' + fmtNum(b.totalTce, 1) + ' tce', target: '蒸汽\n' + fmtNum(b.steamTce, 1), value: b.steamTce },
+                { source: '总输入\n' + fmtNum(b.totalTce, 1) + ' tce', target: '水\n' + fmtNum(b.waterTce, 1), value: b.waterTce },
+                { source: '电力\n' + fmtNum(b.elecTce, 1), target: '有效利用\n' + fmtNum(b.totalEff, 1) + ' tce', value: b.elecEff },
+                { source: '蒸汽\n' + fmtNum(b.steamTce, 1), target: '有效利用\n' + fmtNum(b.totalEff, 1) + ' tce', value: b.steamEff },
+                { source: '水\n' + fmtNum(b.waterTce, 1), target: '有效利用\n' + fmtNum(b.totalEff, 1) + ' tce', value: b.waterEff },
+                { source: '电力\n' + fmtNum(b.elecTce, 1), target: '转换损失', value: b.elecConvLoss },
+                { source: '电力\n' + fmtNum(b.elecTce, 1), target: '输送损失', value: b.elecTransLoss },
+                { source: '电力\n' + fmtNum(b.elecTce, 1), target: '设备损失', value: b.elecEquipLoss },
+                { source: '电力\n' + fmtNum(b.elecTce, 1), target: '其他损失', value: Math.max(0, b.elecOtherLoss) },
+                { source: '蒸汽\n' + fmtNum(b.steamTce, 1), target: '转换损失', value: b.steamConvLoss },
+                { source: '蒸汽\n' + fmtNum(b.steamTce, 1), target: '输送损失', value: b.steamTransLoss },
+                { source: '蒸汽\n' + fmtNum(b.steamTce, 1), target: '设备损失', value: b.steamEquipLoss },
+                { source: '蒸汽\n' + fmtNum(b.steamTce, 1), target: '其他损失', value: Math.max(0, b.steamOtherLoss) },
+                { source: '水\n' + fmtNum(b.waterTce, 1), target: '输送损失', value: b.waterTransLoss },
+                { source: '水\n' + fmtNum(b.waterTce, 1), target: '设备损失', value: b.waterEquipLoss },
+                { source: '水\n' + fmtNum(b.waterTce, 1), target: '其他损失', value: Math.max(0, b.waterOtherLoss) },
+                { source: '有效利用\n' + fmtNum(b.totalEff, 1) + ' tce', target: '产品/工艺\n有效做功', value: b.totalEff }
+            ];
+            chart.setOption({
+                tooltip: { trigger: 'item', triggerOn: 'mousemove', formatter: function(p) { if (p.dataType === 'edge') return p.data.source + ' → ' + p.data.target + '<br/>' + fmtNum(p.data.value, 2) + ' tce'; return p.name.replace('\n', ' '); } },
+                series: [{ type: 'sankey', layout: 'none', emphasis: { focus: 'adjacency' }, nodeWidth: 18, nodeGap: 12, label: { show: true, fontSize: 10 }, lineStyle: { color: 'gradient', curveness: 0.5, opacity: 0.4 }, data: data, links: links }]
+            });
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        function renderLossBreakdown() {
+            const dom = document.getElementById('lossBreakdownChart'); if (!dom) return;
+            if (lossBreakdownInst) lossBreakdownInst.dispose();
+            const chart = echarts.init(dom); lossBreakdownInst = chart;
+            const b = calcBalance();
+            const convLoss = b.elecConvLoss + b.steamConvLoss + b.waterConvLoss;
+            const transLoss = b.elecTransLoss + b.steamTransLoss + b.waterTransLoss;
+            const equipLoss = b.elecEquipLoss + b.steamEquipLoss + b.waterEquipLoss;
+            const otherLoss = b.elecOtherLoss + b.steamOtherLoss + b.waterOtherLoss;
+            chart.setOption({
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                grid: { left: '3%', right: '12%', bottom: '3%', containLabel: true },
+                xAxis: { type: 'value', name: 'tce' },
+                yAxis: { type: 'category', data: ['转换损失', '输送损失', '工艺设备损失', '其他损失'], inverse: true },
+                series: [
+                    { name: '电力', type: 'bar', stack: 'total', data: [b.elecConvLoss, b.elecTransLoss, b.elecEquipLoss, Math.max(0, b.elecOtherLoss)], itemStyle: { color: '#1e80ff' }, label: { show: true, position: 'right', formatter: function(p) { return p.value > 0.1 ? fmt(p.value, 1) : ''; } } },
+                    { name: '蒸汽', type: 'bar', stack: 'total', data: [b.steamConvLoss, b.steamTransLoss, b.steamEquipLoss, Math.max(0, b.steamOtherLoss)], itemStyle: { color: '#ff7d00' } },
+                    { name: '水', type: 'bar', stack: 'total', data: [b.waterConvLoss, b.waterTransLoss, b.waterEquipLoss, Math.max(0, b.waterOtherLoss)], itemStyle: { color: '#14c9c9' } }
+                ]
+            });
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        function renderBalanceTable() {
+            const b = calcBalance();
+            const rows = [
+                { label: '电力', qty: fmtNum(b.tE, 0) + ' kWh', tce: b.elecTce, eff: b.elecEff, cLoss: b.elecConvLoss, tLoss: b.elecTransLoss, eLoss: b.elecEquipLoss, oLoss: Math.max(0, b.elecOtherLoss) },
+                { label: '蒸汽', qty: fmtNum(b.tS, 0) + ' t', tce: b.steamTce, eff: b.steamEff, cLoss: b.steamConvLoss, tLoss: b.steamTransLoss, eLoss: b.steamEquipLoss, oLoss: Math.max(0, b.steamOtherLoss) },
+                { label: '水（耗能工质）', qty: fmtNum(b.tW, 0) + ' m³', tce: b.waterTce, eff: b.waterEff, cLoss: b.waterConvLoss, tLoss: b.waterTransLoss, eLoss: b.waterEquipLoss, oLoss: Math.max(0, b.waterOtherLoss) }
+            ];
+            let html = '';
+            rows.forEach(r => {
+                const lSub = r.cLoss + r.tLoss + r.eLoss + r.oLoss;
+                const lRate = r.tce > 0 ? lSub / r.tce * 100 : 0;
+                const effRate = r.tce > 0 ? r.eff / r.tce * 100 : 0;
+                html += '<tr><td class="fw-600">' + r.label + '</td><td class="text-right">' + r.qty + '</td><td class="text-right text-purple fw-600">' + fmtNum(r.tce, 2) + '</td><td class="text-right text-blue">' + fmtNum(r.eff, 2) + '</td><td class="text-right">' + fmtNum(r.cLoss, 2) + '</td><td class="text-right">' + fmtNum(r.tLoss, 2) + '</td><td class="text-right">' + fmtNum(r.eLoss, 2) + '</td><td class="text-right">' + fmtNum(r.oLoss, 2) + '</td><td class="text-right text-red">' + fmtNum(lSub, 2) + '</td><td class="text-right text-red">' + fmtNum(lRate, 1) + '%</td><td class="text-right text-green fw-600">' + fmtNum(effRate, 1) + '%</td></tr>';
+            });
+            const tC = rows.reduce((s, r) => s + r.cLoss, 0), tT = rows.reduce((s, r) => s + r.tLoss, 0), tE = rows.reduce((s, r) => s + r.eLoss, 0), tO = rows.reduce((s, r) => s + r.oLoss, 0);
+            const tL = tC + tT + tE + tO;
+            html += '<tr class="row-total"><td><strong>合计</strong></td><td class="text-right">-</td><td class="text-right text-purple"><strong>' + fmtNum(b.totalTce, 2) + '</strong></td><td class="text-right text-blue"><strong>' + fmtNum(b.totalEff, 2) + '</strong></td><td class="text-right"><strong>' + fmtNum(tC, 2) + '</strong></td><td class="text-right"><strong>' + fmtNum(tT, 2) + '</strong></td><td class="text-right"><strong>' + fmtNum(tE, 2) + '</strong></td><td class="text-right"><strong>' + fmtNum(tO, 2) + '</strong></td><td class="text-right text-red"><strong>' + fmtNum(tL, 2) + '</strong></td><td class="text-right text-red"><strong>' + fmtNum(b.totalTce > 0 ? tL / b.totalTce * 100 : 0, 1) + '%</strong></td><td class="text-right text-green"><strong>' + fmtNum(b.energyEffRate, 1) + '%</strong></td></tr>';
+            document.getElementById('balanceBody').innerHTML = html;
+        }
+
+        function renderMonthlyBalance() {
+            const dom = document.getElementById('monthlyBalanceChart'); if (!dom) return;
+            if (monthlyBalanceInst) monthlyBalanceInst.dispose();
+            const chart = echarts.init(dom); monthlyBalanceInst = chart;
+            const d = getData(); const mc = getMonthCount();
+            const labels = d.production.months.slice(0, mc);
+            const totalTce = d.electricity.map((v, i) => +(v * COEF.electricity + d.water[i] * COEF.water + d.steam[i] * COEF.steam).toFixed(2));
+            const effTce = totalTce.map(v => +(v * 0.82).toFixed(2));
+            const lossTce = totalTce.map((v, i) => +(v - effTce[i]).toFixed(2));
+            chart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['总输入能量', '有效利用', '总损失'], top: 0 },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: { type: 'category', data: labels },
+                yAxis: { type: 'value', name: 'tce' },
+                series: [
+                    { name: '总输入能量', type: 'bar', data: totalTce, itemStyle: { color: '#722ed1' }, barWidth: '50%' },
+                    { name: '有效利用', type: 'bar', data: effTce, itemStyle: { color: '#00b42a' }, barWidth: '50%' },
+                    { name: '总损失', type: 'line', data: lossTce, itemStyle: { color: '#f53f3f' }, lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 6 }
+                ]
+            });
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        function renderEquipEff() {
+            const dom = document.getElementById('equipEffChart'); if (!dom) return;
+            if (equipEffInst) equipEffInst.dispose();
+            const chart = echarts.init(dom); equipEffInst = chart;
+            const equipments = ['锅炉系统', '空压机', '中央空调K1', '中央空调K2', '中央空调K3', '中央空调K9', '污水处理', '灌装机一线', '灌装机二线', '包装线'];
+            const effRates = [82.5, 78.3, 75.8, 76.2, 76.5, 80.1, 72.4, 88.5, 87.2, 90.1];
+            const industryAvg = [85, 80, 78, 78, 78, 82, 75, 88, 88, 90];
+            chart.setOption({
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                legend: { data: ['实际能效', '行业平均'], top: 0 },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: { type: 'category', data: equipments, axisLabel: { rotate: 30, fontSize: 10 } },
+                yAxis: { type: 'value', name: '%', min: 60, max: 100 },
+                series: [
+                    { name: '实际能效', type: 'bar', data: effRates, itemStyle: { color: function(p) { return effRates[p.dataIndex] >= industryAvg[p.dataIndex] ? '#00b42a' : '#f53f3f'; } }, barWidth: '40%' },
+                    { name: '行业平均', type: 'line', data: industryAvg, lineStyle: { type: 'dashed', color: '#ff7d00', width: 2 }, symbol: 'diamond', symbolSize: 8 }
+                ]
+            });
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        function renderOptimizations() {
+            const items = [
+                { title: '蒸汽管网保温修复 — 降低输送损失', desc: '蒸汽输送损失占总损失比例最高（5.74%管网散热），主要因管道保温层老化和疏水阀泄漏。建议：全面排查管网保温，更换破损段；校准/更换泄漏疏水阀；优化蒸汽压力降低温差。', vals: [{ v: '5.74%', l: '目标降损' }, { v: '~35', l: '年节tce' }, { v: '0.8年', l: '回收期' }] },
+                { title: '锅炉排烟余热回收 — 降低转换损失', desc: '锅炉排烟温度偏高（转换损失约8%），大量热能随烟气排放。建议：加装烟气余热回收换热器，用于预热锅炉补水，可提高锅炉效率5-8个百分点。', vals: [{ v: '8%', l: '目标降损' }, { v: '~50', l: '年节tce' }, { v: '1.5年', l: '回收期' }] },
+                { title: '空压机群控+余热利用 — 降低设备损失', desc: '空压机系统设备损失占比较高，压缩过程产生大量热能未利用。建议：加装变频群控系统实现按需供气；回收压缩热用于车间供暖或热水。', vals: [{ v: '15-20%', l: '降电耗' }, { v: '~25', l: '年节tce' }, { v: '1.2年', l: '回收期' }] },
+                { title: '变压器负载优化 — 降低转换损失', desc: '变压器铁损/铜损占电力转换损失的较大部分，尤其在低负载时段效率下降明显。建议：优化变压器投切策略，合并轻载变压器，提升整体负载率至60-70%。', vals: [{ v: '3%', l: '目标降损' }, { v: '~10', l: '年节tce' }, { v: '2.0年', l: '回收期' }] }
+            ];
+            document.getElementById('optimizationGrid').innerHTML = items.map(it => '<div class="optimization-card"><div class="opt-title">' + it.title + '</div><div class="opt-desc">' + it.desc + '</div><div class="opt-metrics">' + it.vals.map(m => '<div class="opt-metric"><div class="opt-metric-val">' + m.v + '</div><div class="opt-metric-label">' + m.l + '</div></div>').join('') + '</div></div>').join('');
+        }
+
+        function exportTable(tableId) {
+            const table = document.getElementById(tableId);
+            let csv = '\uFEFF';
+            table.querySelectorAll('tr').forEach(row => {
+                const rowData = [];
+                row.querySelectorAll('th, td').forEach(col => { rowData.push('"' + col.textContent.trim().replace(/"/g, '""') + '"'); });
+                csv += rowData.join(',') + '\n';
+            });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            a.download = tableId + '_' + currentYear + '_' + currentPeriod + '.csv';
+            a.click();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() { refreshAll(); });
+    </script>
+</body>
+</html>

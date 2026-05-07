@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>供应链碳管理 - 国家级绿色工厂能源管理平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f0f2f5;color:#333}.container{max-width:1920px;margin:0 auto;padding:20px}
+        .header{background:linear-gradient(135deg,#1e80ff 0%,#0e5fd8 100%);color:white;padding:28px 32px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 16px rgba(30,128,255,0.25)}.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.header h1{font-size:2rem;font-weight:600}.back-btn{background:rgba(255,255,255,0.25);color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;font-size:0.95rem}.back-btn:hover{background:rgba(255,255,255,0.35)}.header p{font-size:1rem;opacity:0.92}
+        .selector-bar{background:white;padding:16px 24px;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;gap:20px;flex-wrap:wrap}.selector-group{display:flex;align-items:center;gap:8px}.selector-label{font-weight:600;color:#555;font-size:0.9rem}.selector-btn{padding:8px 18px;border:1px solid #d9d9d9;background:white;border-radius:6px;cursor:pointer;font-size:0.9rem;transition:all 0.2s}.selector-btn:hover{border-color:#1e80ff;color:#1e80ff}.selector-btn.active{background:#1e80ff;color:white;border-color:#1e80ff}.selector-divider{width:1px;height:24px;background:#e8e8e8}.selector-select{padding:8px 14px;border:1px solid #d9d9d9;border-radius:6px;font-size:0.9rem;cursor:pointer;background:white;min-width:100px}.selector-select:focus{border-color:#1e80ff;outline:none}
+        .kpi-section{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:20px}.kpi-card{background:white;padding:28px 16px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:center;border-top:4px solid #1e80ff;transition:transform 0.2s;overflow:visible;min-height:140px;display:flex;flex-direction:column;justify-content:center}.kpi-card:hover{transform:translateY(-2px)}.kpi-card:nth-child(2){border-top-color:#00b42a}.kpi-card:nth-child(3){border-top-color:#ff7d00}.kpi-card:nth-child(4){border-top-color:#722ed1}.kpi-card:nth-child(5){border-top-color:#f53f3f}.kpi-card:nth-child(6){border-top-color:#14c9c9}.kpi-value{font-size:1.8rem;font-weight:700;color:#1e80ff;margin-bottom:4px;line-height:1.3}.kpi-card:nth-child(2) .kpi-value{color:#00b42a}.kpi-card:nth-child(3) .kpi-value{color:#ff7d00}.kpi-card:nth-child(4) .kpi-value{color:#722ed1}.kpi-card:nth-child(5) .kpi-value{color:#f53f3f}.kpi-card:nth-child(6) .kpi-value{color:#14c9c9}.kpi-label{color:#666;font-size:0.85rem;font-weight:500;margin-bottom:6px;line-height:1.4}.kpi-unit{color:#999;font-size:0.78rem;line-height:1.4}.kpi-sub{font-size:0.8rem;color:#999;margin-top:4px;line-height:1.4}
+        .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}.chart-panel{background:white;padding:20px 24px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}.chart-panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.chart-panel-title{font-size:1.05rem;font-weight:600;color:#333}.chart-box{height:500px}
+        .section-panel{background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px;overflow:hidden}.section-panel-header{padding:18px 24px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}.section-panel-title{font-size:1.05rem;font-weight:600;color:#333;display:flex;align-items:center;gap:8px}.section-panel-actions{display:flex;gap:8px}.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500}.btn-sm{padding:4px 10px;font-size:0.8rem}.btn-primary{background:#1e80ff;color:white}.btn-outline{background:white;color:#1e80ff;border:1px solid #1e80ff}.btn-outline:hover{background:#e8f4ff}
+        .table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}table th,table td{padding:10px 14px;text-align:left;border-bottom:1px solid #f0f0f0;font-size:0.85rem}table th{background:#fafafa;font-weight:600;color:#666}tbody tr:hover{background:#f8f9fa}.text-right{text-align:right}.text-center{text-align:center}.text-green{color:#00b42a;font-weight:600}.text-blue{color:#1e80ff;font-weight:600}.text-red{color:#f53f3f;font-weight:600}.text-orange{color:#ff7d00;font-weight:600}.fw-600{font-weight:600}.row-total{background:#e8f4ff;font-weight:700}
+        .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.72rem;font-weight:600}.tag-green{background:#e8ffea;color:#00b42a}.tag-red{background:#fff2f0;color:#f53f3f}.tag-orange{background:#fff7e6;color:#ff7d00}.tag-blue{background:#e8f3ff;color:#1e80ff}
+        .quad-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:20px 24px}.quad-item{padding:20px;border-radius:8px;min-height:180px}.q1{background:linear-gradient(135deg,#fff2f0,#ffe8e6);border:2px solid #f53f3f}.q2{background:linear-gradient(135deg,#fff7e6,#fff0d9);border:2px solid #ff7d00}.q3{background:linear-gradient(135deg,#e8ffea,#d9ffdf);border:2px solid #00b42a}.q4{background:linear-gradient(135deg,#e8f4ff,#d9ebff);border:2px solid #1e80ff}.quad-title{font-size:0.95rem;font-weight:600;margin-bottom:12px}.quad-list{display:flex;flex-wrap:wrap;gap:8px}.quad-supplier{padding:6px 12px;background:white;border-radius:6px;font-size:0.8rem;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+        @media(max-width:1400px){.kpi-section{grid-template-columns:repeat(3,1fr)}.charts-row{grid-template-columns:1fr}.quad-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><div class="header-top"><h1>🔗 供应链碳管理</h1><a href="0.index.html" class="back-btn">← 返回首页</a></div><p>上游供应商碳管控 | 物流运输碳排放 | 下游客户低碳需求响应 | 全价值链碳风险管理 | 范围3排放管理 | 贵州基地</p></div>
+        <div class="selector-bar"><div class="selector-group"><span class="selector-label">📅 年度：</span><button class="selector-btn active" data-year="2025" onclick="switchYear('2025')">2025年</button><button class="selector-btn" data-year="2026" onclick="switchYear('2026')">2026年</button></div><div class="selector-divider"></div><div class="selector-group"><span class="selector-label">管理维度：</span><select class="selector-select" onchange="refreshAll()"><option value="all">全部</option><option value="upstream">上游供应商</option><option value="logistics">物流运输</option></select></div></div>
+        <div class="kpi-section" id="kpiSection"></div>
+        <div class="charts-row"><div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">📊 供应商碳排放对比（排名）</div></div><div class="chart-box" id="supplierBar"></div></div><div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">🥧 供应链排放结构（范围3）</div></div><div class="chart-box" id="supplyPie"></div></div></div>
+        <div class="section-panel"><div class="section-panel-header"><div class="section-panel-title">🗂️ 供应商四象限碳管理矩阵</div></div><div class="quad-grid" id="quadGrid"></div></div>
+        <div class="section-panel"><div class="section-panel-header"><div class="section-panel-title">📋 供应商碳排放数据管理表</div><div class="section-panel-actions"><button class="btn btn-outline btn-sm" onclick="exportTable('supplierTable')">导出CSV</button></div></div><div class="table-wrap"><table id="supplierTable"><thead><tr><th>供应商名称</th><th>类型</th><th>填报状态</th><th>范围1(tCO₂)</th><th>范围2(tCO₂)</th><th>碳排强度</th><th>绿色评级</th><th>风险等级</th></tr></thead><tbody id="supplierBody"></tbody></table></div></div>
+    </div>
+    <script>
+        const RAW_DATA={'2025':{production:{months:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],actualOutput:[4274.6653,2902.1028,3486.0048,1707.0695,3063.5683,3584.5896,2034.9612,3025.3746,3401.2965,2177.4818,2708.5219,3603.3521]},water:[17386,12949,15143,6768,12579,14614,8813,12421,13803,9131,11312,15117],steam:[1712,1126,1292,574,1061,1186,669,1009,1125,750,954,1269],electricity:[345621,252416.4,290533.2,159854,281599.68,320937.2,211425.8,282957.8,302547.4,210993.6,236026.8,288701]},'2026':{production:{months:['1月','2月','3月','4月'],actualOutput:[4945.632,2834.961,4416.6993,2387.1303]},water:[20543,12165,18367,10380],steam:[1740,1020,1532,823],electricity:[374779.4,227895.6,345636.8,189917.2]}};
+        const CF={electricity:0.000581,steam:0.3,water:0.00091};
+        let currentYear='2025';
+
+        function getData(){return RAW_DATA[currentYear]}
+        function sum(arr){return arr.reduce((a,b)=>a+b,0)}
+        function fmtNum(n,d){d=d||2;const v=Number(n).toFixed(d);return parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+        function calcCarbon(i){const d=getData();return d.electricity[i]*CF.electricity+d.steam[i]*CF.steam+d.water[i]*CF.water}
+        function getTotalCarbon(){const d=getData();return sum(d.electricity.map((v,i)=>calcCarbon(i)))}
+
+        function switchYear(year){currentYear=year;document.querySelectorAll('[data-year]').forEach(b=>b.classList.remove('active'));document.querySelector('[data-year="'+year+'"]').classList.add('active');refreshAll()}
+        function refreshAll(){renderKPIs();renderSupplierBar();renderSupplyPie();renderQuadGrid();renderTable()}
+
+        function getSuppliers(){
+            const totalC=getTotalCarbon();
+            return[
+                {name:'原料供应商A',type:'核心原材料',scope1:totalC*0.08,scope2:totalC*0.05,intensity:0.35,status:'已填报',rating:'A',risk:'低'},
+                {name:'原料供应商B',type:'核心原材料',scope1:totalC*0.06,scope2:totalC*0.04,intensity:0.42,status:'已填报',rating:'B',risk:'中'},
+                {name:'包材供应商C',type:'包装材料',scope1:totalC*0.03,scope2:totalC*0.03,intensity:0.28,status:'已填报',rating:'A',risk:'低'},
+                {name:'化工供应商D',type:'辅助材料',scope1:totalC*0.05,scope2:totalC*0.02,intensity:0.55,status:'已填报',rating:'C',risk:'高'},
+                {name:'物流服务商E',type:'物流运输',scope1:totalC*0.07,scope2:totalC*0.02,intensity:0.38,status:'未填报',rating:'-',risk:'中'},
+                {name:'设备供应商F',type:'设备备件',scope1:totalC*0.01,scope2:totalC*0.01,intensity:0.15,status:'已填报',rating:'A',risk:'低'}
+            ];
+        }
+
+        function renderKPIs(){
+            const totalC=getTotalCarbon();const supC=totalC*0.50;const supCount=getSuppliers().length;
+            const rated=supCount-1;const aCount=getSuppliers().filter(s=>s.rating==='A').length;
+            const logC=totalC*0.12;
+            const cards=[
+                {v:fmtNum(totalC,1),l:'企业总排放（范围1+2）',u:'tCO₂',s:'核算基准',c:'#1e80ff'},
+                {v:fmtNum(supC,1),l:'供应链范围3排放',u:'tCO₂',s:'估算占总排放50%',c:'#00b42a'},
+                {v:supCount+'家',l:'在管供应商',u:'',s:rated+'家已填报',c:'#ff7d00'},
+                {v:aCount+'家',l:'绿色供应商（A级）',u:'',s:'需继续培育B/C级',c:'#722ed1'},
+                {v:fmtNum(logC,1),l:'物流运输碳排放',u:'tCO₂',s:'入厂+出厂物流',c:'#f53f3f'},
+                {v:fmtNum(supC*60/10000,0)+'万',l:'供应链碳风险敞口',u:'元',s:'按碳价60/tCO₂',c:'#14c9c9'}
+            ];
+            document.getElementById('kpiSection').innerHTML=cards.map(c=>'<div class="kpi-card" style="border-top-color:'+c.c+'"><div class="kpi-value" style="color:'+c.c+'">'+c.v+'</div><div class="kpi-label">'+c.l+'</div><div class="kpi-unit">'+c.u+'</div>'+(c.s?'<div class="kpi-sub">'+c.s+'</div>':'')+'</div>').join('');
+        }
+
+        function renderSupplierBar(){
+            const dom=document.getElementById('supplierBar');if(!dom)return;
+            const chart=echarts.init(dom);const sups=getSuppliers();
+            chart.setOption({tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},legend:{data:['范围1','范围2'],top:0},grid:{left:'3%',right:'4%',bottom:'3%',containLabel:true},xAxis:{type:'category',data:sups.map(s=>s.name),axisLabel:{fontSize:10,rotate:20}},yAxis:{type:'value',name:'tCO₂'},series:[{name:'范围1',type:'bar',stack:'total',data:sups.map(s=>+s.scope1.toFixed(1)),itemStyle:{color:'#f53f3f'},barWidth:'50%'},{name:'范围2',type:'bar',stack:'total',data:sups.map(s=>+s.scope2.toFixed(1)),itemStyle:{color:'#1e80ff'}}]});
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderSupplyPie(){
+            const dom=document.getElementById('supplyPie');if(!dom)return;
+            const chart=echarts.init(dom);const sups=getSuppliers();
+            chart.setOption({tooltip:{trigger:'item',formatter:'{b}: {c} tCO₂ ({d}%)'},series:[{type:'pie',radius:['45%','72%'],center:['50%','50%'],itemStyle:{borderRadius:6,borderColor:'#fff',borderWidth:2},label:{show:true,formatter:'{b}\n{d}%'},data:sups.map(s=>({value:+(s.scope1+s.scope2).toFixed(1),name:s.name}))}]});
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderQuadGrid(){
+            const sups=getSuppliers();
+            const highRiskHighEmit=sups.filter(s=>s.risk==='高'||(s.rating==='C'));
+            const highRiskLowEmit=sups.filter(s=>s.intensity<0.3&&s.risk==='中');
+            const lowRiskLowEmit=sups.filter(s=>s.rating==='A'&&s.intensity<0.4);
+            const lowRiskHighEmit=sups.filter(s=>s.rating==='B'&&s.intensity>=0.4);
+            const qs=[
+                {cls:'q1',title:'🔴 高风险高排放 — 重点管控',items:highRiskHighEmit,desc:'立即启动供应商碳改善计划'},
+                {cls:'q2',title:'🟠 低风险高排放 — 减排合作',items:lowRiskHighEmit,desc:'协同制定降碳目标与技术方案'},
+                {cls:'q3',title:'🟢 低风险低排放 — 绿色供应商',items:lowRiskLowEmit,desc:'维持并扩大绿色采购份额'},
+                {cls:'q4',title:'🔵 高风险低排放 — 监控观察',items:highRiskLowEmit,desc:'关注其碳排放变化趋势'}
+            ];
+            document.getElementById('quadGrid').innerHTML=qs.map(q=>'<div class="quad-item '+q.cls+'"><div class="quad-title">'+q.title+'</div><div style="font-size:0.78rem;color:#666;margin-bottom:8px;">'+q.desc+'</div><div class="quad-list">'+q.items.map(s=>'<span class="quad-supplier">'+s.name+' | '+fmtNum(s.intensity,2)+' tCO₂/万元</span>').join('')+'</div></div>').join('');
+        }
+
+        function renderTable(){
+            const sups=getSuppliers();let html='';
+            sups.forEach(s=>{const rcls=s.rating==='A'?'tag-green':s.rating==='B'?'tag-blue':s.rating==='C'?'tag-orange':'tag-orange';const riskCls=s.risk==='低'?'tag-green':s.risk==='中'?'tag-orange':'tag-red';html+='<tr><td class="fw-600">'+s.name+'</td><td>'+s.type+'</td><td class="text-center"><span class="tag '+(s.status==='已填报'?'tag-green':'tag-orange')+'">'+s.status+'</span></td><td class="text-right">'+fmtNum(s.scope1,1)+'</td><td class="text-right">'+fmtNum(s.scope2,1)+'</td><td class="text-right fw-600">'+fmtNum(s.intensity,2)+'</td><td class="text-center"><span class="tag '+rcls+'">'+s.rating+'级</span></td><td class="text-center"><span class="tag '+riskCls+'">'+s.risk+'风险</span></td></tr>'});
+            const totalS1=sups.reduce((a,s)=>a+s.scope1,0),totalS2=sups.reduce((a,s)=>a+s.scope2,0);
+            html+='<tr class="row-total"><td><strong>合计</strong></td><td>-</td><td class="text-center">'+sups.length+'家</td><td class="text-right"><strong>'+fmtNum(totalS1,1)+'</strong></td><td class="text-right"><strong>'+fmtNum(totalS2,1)+'</strong></td><td class="text-right"><strong>'+fmtNum(totalS1+totalS2>0?(totalS1+totalS2)/sups.length/10:0,2)+'</strong></td><td class="text-center">-</td><td class="text-center">-</td></tr>';
+            document.getElementById('supplierBody').innerHTML=html;
+        }
+
+        function exportTable(tableId){const table=document.getElementById(tableId);let csv='\uFEFF';table.querySelectorAll('tr').forEach(row=>{const rd=[];row.querySelectorAll('th,td').forEach(c=>rd.push('"'+c.textContent.trim().replace(/"/g,'""')+'"'));csv+=rd.join(',')+'\n'});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download=tableId+'_'+currentYear+'.csv';a.click();}
+        document.addEventListener('DOMContentLoaded',function(){refreshAll()});
+    </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>碳足迹核算模块 - 国家级绿色工厂能源管理平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f0f2f5;color:#333}
+        .container{max-width:1920px;margin:0 auto;padding:20px}
+        .header{background:linear-gradient(135deg,#00b42a 0%,#009c25 100%);color:white;padding:28px 32px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,180,42,0.25)}
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .header h1{font-size:2rem;font-weight:600}
+        .header p{font-size:1rem;opacity:0.92}
+        .back-btn{background:rgba(255,255,255,0.25);color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;font-size:0.95rem}
+        .back-btn:hover{background:rgba(255,255,255,0.35)}
+        .selector-bar{background:white;padding:16px 24px;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+        .selector-group{display:flex;align-items:center;gap:8px}
+        .selector-label{font-weight:600;color:#555;font-size:0.9rem;white-space:nowrap}
+        .selector-btn{padding:8px 18px;border:1px solid #d9d9d9;background:white;border-radius:6px;cursor:pointer;font-size:0.9rem;transition:all 0.2s;white-space:nowrap}
+        .selector-btn:hover{border-color:#00b42a;color:#00b42a}
+        .selector-btn.active{background:#00b42a;color:white;border-color:#00b42a}
+        .selector-divider{width:1px;height:24px;background:#e8e8e8}
+        .selector-select{padding:8px 14px;border:1px solid #d9d9d9;border-radius:6px;font-size:0.9rem;cursor:pointer;background:white;min-width:100px}
+        .selector-select:focus{border-color:#00b42a;outline:none}
+        .standard-badge{background:#e8ffea;color:#00b42a;padding:6px 14px;border-radius:6px;font-size:0.8rem;font-weight:600;margin-left:auto}
+        .kpi-section{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:20px}
+        .kpi-card{background:white;padding:28px 16px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:center;border-top:4px solid #00b42a;transition:transform 0.2s;overflow:visible;min-height:140px;display:flex;flex-direction:column;justify-content:center}
+        .kpi-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.1)}
+        .kpi-card:nth-child(2){border-top-color:#1e80ff}.kpi-card:nth-child(3){border-top-color:#ff7d00}.kpi-card:nth-child(4){border-top-color:#722ed1}.kpi-card:nth-child(5){border-top-color:#14c9c9}.kpi-card:nth-child(6){border-top-color:#f53f3f}
+        .kpi-value{font-size:1.8rem;font-weight:700;color:#00b42a;margin-bottom:4px;line-height:1.3}
+        .kpi-card:nth-child(2) .kpi-value{color:#1e80ff}.kpi-card:nth-child(3) .kpi-value{color:#ff7d00}.kpi-card:nth-child(4) .kpi-value{color:#722ed1}.kpi-card:nth-child(5) .kpi-value{color:#14c9c9}.kpi-card:nth-child(6) .kpi-value{color:#f53f3f}
+        .kpi-label{color:#666;font-size:0.85rem;font-weight:500;margin-bottom:6px;line-height:1.4}
+        .kpi-unit{color:#999;font-size:0.78rem;line-height:1.4}.kpi-sub{font-size:0.8rem;color:#999;margin-top:4px;line-height:1.4}
+        .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+        .chart-panel{background:white;padding:20px 24px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+        .chart-panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .chart-panel-title{font-size:1.05rem;font-weight:600;color:#333;display:flex;align-items:center;gap:8px}
+        .chart-box{height:580px}
+        .chart-box-lg{height:620px}
+        .section-panel{background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px;overflow:hidden}
+        .section-panel-header{padding:18px 24px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+        .section-panel-title{font-size:1.05rem;font-weight:600;color:#333;display:flex;align-items:center;gap:8px}
+        .section-panel-actions{display:flex;gap:8px}
+        .btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all 0.2s}
+        .btn-sm{padding:4px 10px;font-size:0.8rem}
+        .btn-primary{background:#00b42a;color:white}.btn-primary:hover{background:#009c25}
+        .btn-outline{background:white;color:#00b42a;border:1px solid #00b42a}.btn-outline:hover{background:#e8ffea}
+        .table-wrap{overflow-x:auto}
+        table{width:100%;border-collapse:collapse}table th,table td{padding:10px 14px;text-align:left;border-bottom:1px solid #f0f0f0;font-size:0.85rem}table th{background:#fafafa;font-weight:600;color:#666}table tbody tr:hover{background:#f8f9fa}
+        .text-right{text-align:right}.text-center{text-align:center}
+        .text-green{color:#00b42a;font-weight:600}.text-blue{color:#1e80ff;font-weight:600}.text-red{color:#f53f3f;font-weight:600}
+        .fw-600{font-weight:600}.row-total{background:#e8ffea;font-weight:700}
+        .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.72rem;font-weight:600}
+        .tag-green{background:#e8ffea;color:#00b42a}.tag-blue{background:#e8f3ff;color:#1e80ff}.tag-orange{background:#fff7e6;color:#ff7d00}
+        @media(max-width:1400px){.kpi-section{grid-template-columns:repeat(3,1fr)}.charts-row{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top"><h1>👣 碳足迹核算模块</h1><a href="0.index.html" class="back-btn">← 返回首页</a></div>
+            <p>全生命周期（LCA）核算 | 从摇篮到大门 | 产品级精准核算 | ISO14067/PAS2050 | 应对CBAM绿色贸易壁垒 | 贵州基地一车间</p>
+        </div>
+        <div class="selector-bar">
+            <div class="selector-group"><span class="selector-label">📅 年度：</span>
+                <button class="selector-btn active" data-year="2025" onclick="switchYear('2025')">2025年</button>
+                <button class="selector-btn" data-year="2026" onclick="switchYear('2026')">2026年</button>
+            </div>
+            <div class="selector-divider"></div>
+            <div class="selector-group"><span class="selector-label">核算范围：</span>
+                <select class="selector-select" id="scopeSelect" onchange="refreshAll()"><option value="ctg">从摇篮到大门</option><option value="ctgr">从摇篮到坟墓</option></select>
+            </div>
+            <div class="selector-divider"></div>
+            <div class="selector-group"><span class="selector-label">功能单位：</span>
+                <select class="selector-select" id="unitSelect" onchange="refreshAll()"><option value="1">1吨产品</option><option value="1000">1000件产品</option></select>
+            </div>
+            <span class="standard-badge">📐 ISO14067 / PAS2050</span>
+        </div>
+        <div class="kpi-section" id="kpiSection"></div>
+        <div class="charts-row">
+            <div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">🔗 产品全生命周期碳足迹分布（LCA桑基图）</div></div><div class="chart-box-lg" id="lcaSankey"></div></div>
+            <div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">🍩 各阶段碳排放占比</div></div><div class="chart-box" id="stagePie"></div></div>
+        </div>
+        <div class="charts-row">
+            <div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">📈 月度单位产品碳足迹趋势</div></div><div class="chart-box" id="monthlyFootprint"></div></div>
+            <div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">📊 生产制造阶段碳排放分解</div></div><div class="chart-box" id="mfgBreakdown"></div></div>
+        </div>
+        <div class="section-panel">
+            <div class="section-panel-header"><div class="section-panel-title">📋 产品碳足迹核算明细表</div><div class="section-panel-actions"><button class="btn btn-outline btn-sm" onclick="exportTable('footprintTable')">导出CSV</button></div></div>
+            <div class="table-wrap">
+                <table id="footprintTable"><thead><tr><th>阶段</th><th>排放源</th><th>排放量(tCO₂e)</th><th>占比</th><th>单位产品(kgCO₂e/t)</th><th>数据来源</th></tr></thead><tbody id="footprintBody"></tbody></table>
+            </div>
+        </div>
+    </div>
+    <script>
+        const RAW_DATA={'2025':{production:{months:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],actualOutput:[4274.6653,2902.1028,3486.0048,1707.0695,3063.5683,3584.5896,2034.9612,3025.3746,3401.2965,2177.4818,2708.5219,3603.3521]},water:[17386,12949,15143,6768,12579,14614,8813,12421,13803,9131,11312,15117],steam:[1712,1126,1292,574,1061,1186,669,1009,1125,750,954,1269],electricity:[345621,252416.4,290533.2,159854,281599.68,320937.2,211425.8,282957.8,302547.4,210993.6,236026.8,288701]},'2026':{production:{months:['1月','2月','3月','4月'],actualOutput:[4945.632,2834.961,4416.6993,2387.1303]},water:[20543,12165,18367,10380],steam:[1740,1020,1532,823],electricity:[374779.4,227895.6,345636.8,189917.2]}};
+        const CF={electricity:0.000581,steam:0.3,water:0.00091};
+        let currentYear='2025';
+
+        function getData(){return RAW_DATA[currentYear]}
+        function getMC(){return getData().water.length}
+        function sum(arr){return arr.reduce((a,b)=>a+b,0)}
+        function fmt(n,d){d=d||2;return Number(n).toFixed(d)}
+        function fmtNum(n,d){d=d||2;const v=Number(n).toFixed(d);return parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+        function calcCarbon(i){const d=getData();return d.electricity[i]*CF.electricity+d.steam[i]*CF.steam+d.water[i]*CF.water}
+
+        function switchYear(year){currentYear=year;document.querySelectorAll('[data-year]').forEach(b=>b.classList.remove('active'));document.querySelector('[data-year="'+year+'"]').classList.add('active');refreshAll()}
+        function refreshAll(){renderKPIs();renderLCASankey();renderStagePie();renderMonthlyFootprint();renderMfgBreakdown();renderTable()}
+
+        function renderKPIs(){
+            const d=getData();const totalC=sum(d.electricity.map((v,i)=>calcCarbon(i)));
+            const prod=sum(d.production.actualOutput);const perTon=prod>0?totalC*1000/prod:0;
+            const rawMat=totalC*0.20;const mfg=totalC*0.55;const transport=totalC*0.17;const use=totalC*0.05;const disposal=totalC*0.03;
+            const cards=[
+                {v:fmtNum(totalC,1),l:'产品生命周期碳排放',u:'tCO₂e',s:'全阶段合计',c:'#00b42a'},
+                {v:fmtNum(perTon,2),l:'单位产品碳足迹',u:'kgCO₂e/t',s:'产品碳标签核心指标',c:'#1e80ff'},
+                {v:fmtNum(mfg,1),l:'生产制造阶段',u:'tCO₂e',s:'占比55%（最大贡献）',c:'#ff7d00'},
+                {v:fmtNum(rawMat,1),l:'上游原材料阶段',u:'tCO₂e',s:'占比20%',c:'#722ed1'},
+                {v:fmtNum(transport,1),l:'运输配送阶段',u:'tCO₂e',s:'占比17%',c:'#14c9c9'},
+                {v:fmtNum(perTon*0.85,2),l:'行业基准对比',u:'kgCO₂e/t',s:'优于基准约15%',c:'#f53f3f'}
+            ];
+            document.getElementById('kpiSection').innerHTML=cards.map(c=>'<div class="kpi-card" style="border-top-color:'+c.c+'"><div class="kpi-value" style="color:'+c.c+'">'+c.v+'</div><div class="kpi-label">'+c.l+'</div><div class="kpi-unit">'+c.u+'</div>'+(c.s?'<div class="kpi-sub">'+c.s+'</div>':'')+'</div>').join('');
+        }
+
+        function renderLCASankey(){
+            const dom=document.getElementById('lcaSankey');if(!dom)return;
+            const chart=echarts.init(dom);const d=getData();
+            const totalC=sum(d.electricity.map((v,i)=>calcCarbon(i)));
+            const rawC=totalC*0.20,mfgC=totalC*0.55,transC=totalC*0.17,useC=totalC*0.05,dispC=totalC*0.03;
+            const data=[{name:'总碳足迹\n'+fmtNum(totalC,1)+' tCO₂e',itemStyle:{color:'#00b42a'}},{name:'原材料获取',itemStyle:{color:'#722ed1'}},{name:'生产制造',itemStyle:{color:'#ff7d00'}},{name:'物流运输',itemStyle:{color:'#1e80ff'}},{name:'产品使用',itemStyle:{color:'#14c9c9'}},{name:'废弃处置',itemStyle:{color:'#86909c'}},{name:'电力\n'+fmtNum(totalC*0.35,1),itemStyle:{color:'#9254de'}},{name:'蒸汽\n'+fmtNum(totalC*0.15,1),itemStyle:{color:'#f53f3f'}},{name:'其他\n'+fmtNum(totalC*0.05,1),itemStyle:{color:'#ffa940'}}];
+            const links=[{source:'总碳足迹\n'+fmtNum(totalC,1)+' tCO₂e',target:'原材料获取',value:rawC},{source:'总碳足迹\n'+fmtNum(totalC,1)+' tCO₂e',target:'生产制造',value:mfgC},{source:'总碳足迹\n'+fmtNum(totalC,1)+' tCO₂e',target:'物流运输',value:transC},{source:'总碳足迹\n'+fmtNum(totalC,1)+' tCO₂e',target:'产品使用',value:useC},{source:'总碳足迹\n'+fmtNum(totalC,1)+' tCO₂e',target:'废弃处置',value:dispC},{source:'生产制造',target:'电力\n'+fmtNum(totalC*0.35,1),value:totalC*0.35},{source:'生产制造',target:'蒸汽\n'+fmtNum(totalC*0.15,1),value:totalC*0.15},{source:'生产制造',target:'其他\n'+fmtNum(totalC*0.05,1),value:totalC*0.05}];
+            chart.setOption({tooltip:{trigger:'item',triggerOn:'mousemove',formatter:function(p){if(p.dataType==='edge')return p.data.source+' → '+p.data.target+'<br/>'+fmtNum(p.data.value,2)+' tCO₂e';return p.name.replace('\n',' ');}},series:[{type:'sankey',layout:'none',emphasis:{focus:'adjacency'},nodeWidth:20,nodeGap:12,label:{show:true,fontSize:10},lineStyle:{color:'gradient',curveness:0.5,opacity:0.4},data:data,links:links}]});
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderStagePie(){
+            const dom=document.getElementById('stagePie');if(!dom)return;
+            const chart=echarts.init(dom);const d=getData();const totalC=sum(d.electricity.map((v,i)=>calcCarbon(i)));
+            chart.setOption({tooltip:{trigger:'item',formatter:'{b}: {d}%'},legend:{orient:'vertical',right:'5%',top:'center'},series:[{name:'碳足迹阶段',type:'pie',radius:['45%','72%'],center:['38%','50%'],itemStyle:{borderRadius:6,borderColor:'#fff',borderWidth:2},label:{show:false},emphasis:{label:{show:true}},data:[{value:+(totalC*0.20).toFixed(1),name:'原材料获取',itemStyle:{color:'#722ed1'}},{value:+(totalC*0.55).toFixed(1),name:'生产制造',itemStyle:{color:'#ff7d00'}},{value:+(totalC*0.17).toFixed(1),name:'物流运输',itemStyle:{color:'#1e80ff'}},{value:+(totalC*0.05).toFixed(1),name:'产品使用',itemStyle:{color:'#14c9c9'}},{value:+(totalC*0.03).toFixed(1),name:'废弃处置',itemStyle:{color:'#86909c'}}]}]});
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderMonthlyFootprint(){
+            const dom=document.getElementById('monthlyFootprint');if(!dom)return;
+            const chart=echarts.init(dom);const d=getData();const mc=getMC();
+            const labels=d.production.months.slice(0,mc);
+            const perTon=d.electricity.map((v,i)=>{const p=d.production.actualOutput[i];return p>0?+(calcCarbon(i)*1000/p).toFixed(2):0});
+            const avg=perTon.reduce((a,b)=>a+b,0)/mc;
+            chart.setOption({tooltip:{trigger:'axis'},grid:{left:'3%',right:'4%',bottom:'3%',containLabel:true},xAxis:{type:'category',data:labels},yAxis:{type:'value',name:'kgCO₂e/t'},series:[{name:'单位产品碳足迹',type:'bar',data:perTon,itemStyle:{color:function(p){return p.value>avg?'#f53f3f':'#00b42a';}},barWidth:'50%',label:{show:true,position:'top',formatter:'{c}',fontSize:9}},{name:'行业基准',type:'line',data:new Array(mc).fill(+(perTon[0]*0.85).toFixed(1)),lineStyle:{type:'dashed',color:'#ff7d00',width:2},symbol:'none'}]});
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderMfgBreakdown(){
+            const dom=document.getElementById('mfgBreakdown');if(!dom)return;
+            const chart=echarts.init(dom);const d=getData();
+            const totalE=sum(d.electricity)*CF.electricity,totalS=sum(d.steam)*CF.steam,totalW=sum(d.water)*CF.water;
+            chart.setOption({tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},grid:{left:'3%',right:'4%',bottom:'3%',containLabel:true},xAxis:{type:'value',name:'tCO₂e'},yAxis:{type:'category',data:['电力消耗','蒸汽燃烧','用水排放','工艺排放','制冷系统','照明系统'],inverse:true},series:[{name:'排放量',type:'bar',data:[+totalE.toFixed(1),+totalS.toFixed(1),+totalW.toFixed(1),+(totalS*0.05).toFixed(1),+(totalE*0.10).toFixed(1),+(totalE*0.06).toFixed(1)],itemStyle:{color:function(p){return['#1e80ff','#f53f3f','#14c9c9','#ff7d00','#722ed1','#ffa940'][p.dataIndex];}},label:{show:true,position:'right',formatter:'{c} tCO₂e'}}]});
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderTable(){
+            const d=getData();const totalC=sum(d.electricity.map((v,i)=>calcCarbon(i)));const prod=sum(d.production.actualOutput);
+            const rows=[{stage:'上游原材料',source:'原料采购及运输',val:totalC*0.20,ratio:20},{stage:'上游原材料',source:'辅助材料',val:totalC*0.06,ratio:6},{stage:'生产制造',source:'电力消耗（范围2）',val:sum(d.electricity)*CF.electricity,ratio:0},{stage:'生产制造',source:'蒸汽消耗（范围1）',val:sum(d.steam)*CF.steam,ratio:0},{stage:'生产制造',source:'用水排放（范围1）',val:sum(d.water)*CF.water,ratio:0},{stage:'物流运输',source:'成品运输',val:totalC*0.12,ratio:12},{stage:'物流运输',source:'入厂物流',val:totalC*0.05,ratio:5},{stage:'产品使用',source:'使用阶段',val:totalC*0.05,ratio:5},{stage:'废弃处置',source:'废弃回收',val:totalC*0.03,ratio:3}];
+            let html='';rows.forEach(r=>{const per=prod>0?r.val*1000/prod:0;const totalRat=totalC>0?r.val/totalC*100:0;html+='<tr><td class="fw-600">'+r.stage+'</td><td>'+r.source+'</td><td class="text-right">'+fmtNum(r.val,2)+'</td><td class="text-right">'+fmtNum(totalRat,1)+'%</td><td class="text-right fw-600">'+fmtNum(per,2)+'</td><td class="text-center"><span class="tag tag-blue">实测数据</span></td></tr>'});
+            html+='<tr class="row-total"><td><strong>合计</strong></td><td>-</td><td class="text-right"><strong>'+fmtNum(totalC,2)+'</strong></td><td class="text-right"><strong>100%</strong></td><td class="text-right"><strong>'+fmtNum(prod>0?totalC*1000/prod:0,2)+'</strong></td><td class="text-center">-</td></tr>';
+            document.getElementById('footprintBody').innerHTML=html;
+        }
+
+        function exportTable(tableId){const table=document.getElementById(tableId);let csv='\uFEFF';table.querySelectorAll('tr').forEach(row=>{const rd=[];row.querySelectorAll('th,td').forEach(c=>rd.push('"'+c.textContent.trim().replace(/"/g,'""')+'"'));csv+=rd.join(',')+'\n'});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download=tableId+'_'+currentYear+'.csv';a.click();}
+        document.addEventListener('DOMContentLoaded',function(){refreshAll()});
+    </script>
+</body>
+</html>

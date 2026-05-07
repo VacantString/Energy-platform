@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能流分析模块 - 国家级绿色工厂能源管理平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; color: #333; }
+        .container { max-width: 1920px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #14c9c9 0%, #0ea5a5 100%); color: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(20, 201, 201, 0.25); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .header h1 { font-size: 2rem; font-weight: 600; }
+        .back-btn { background: rgba(255,255,255,0.25); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+        .back-btn:hover { background: rgba(255,255,255,0.35); }
+        .header p { font-size: 1rem; opacity: 0.92; }
+        .selector-bar { background: white; padding: 16px 24px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .selector-group { display: flex; align-items: center; gap: 8px; }
+        .selector-label { font-weight: 600; color: #555; font-size: 0.9rem; white-space: nowrap; }
+        .selector-btn { padding: 8px 18px; border: 1px solid #d9d9d9; background: white; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap; }
+        .selector-btn:hover { border-color: #14c9c9; color: #14c9c9; }
+        .selector-btn.active { background: #14c9c9; color: white; border-color: #14c9c9; }
+        .selector-divider { width: 1px; height: 24px; background: #e8e8e8; }
+        .selector-select { padding: 8px 14px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 0.9rem; cursor: pointer; background: white; min-width: 100px; }
+        .selector-select:focus { border-color: #14c9c9; outline: none; }
+        .kpi-section { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 20px; }
+        .kpi-card { background: white; padding: 28px 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; border-top: 4px solid #14c9c9; transition: transform 0.2s; cursor: default; overflow: visible; min-height: 140px; display: flex; flex-direction: column; justify-content: center; }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+        .kpi-card:nth-child(2) { border-top-color: #1e80ff; }
+        .kpi-card:nth-child(3) { border-top-color: #ff7d00; }
+        .kpi-card:nth-child(4) { border-top-color: #f53f3f; }
+        .kpi-card:nth-child(5) { border-top-color: #00b42a; }
+        .kpi-card:nth-child(6) { border-top-color: #722ed1; }
+        .kpi-value { font-size: 1.8rem; font-weight: 700; color: #14c9c9; margin-bottom: 4px; line-height: 1.3; }
+        .kpi-card:nth-child(2) .kpi-value { color: #1e80ff; }
+        .kpi-card:nth-child(3) .kpi-value { color: #ff7d00; }
+        .kpi-card:nth-child(4) .kpi-value { color: #f53f3f; }
+        .kpi-card:nth-child(5) .kpi-value { color: #00b42a; }
+        .kpi-card:nth-child(6) .kpi-value { color: #722ed1; }
+        .kpi-label { color: #666; font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; line-height: 1.4; }
+        .kpi-unit { color: #999; font-size: 0.78rem; line-height: 1.4; }
+        .kpi-sub { font-size: 0.8rem; color: #999; margin-top: 4px; line-height: 1.4; }
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-panel { background: white; padding: 20px 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .chart-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .chart-panel-title { font-size: 1.05rem; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px; }
+        .chart-tabs { display: flex; gap: 4px; }
+        .chart-tab { padding: 4px 12px; border: 1px solid #d9d9d9; background: white; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
+        .chart-tab.active { background: #14c9c9; color: white; border-color: #14c9c9; }
+        .chart-box { height: 580px; }
+        .chart-box-lg { height: 620px; }
+        .section-panel { background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }
+        .section-panel-header { padding: 18px 24px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .section-panel-title { font-size: 1.05rem; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px; }
+        .section-panel-actions { display: flex; gap: 8px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
+        .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+        .btn-primary { background: #14c9c9; color: white; }
+        .btn-primary:hover { background: #0ea5a5; }
+        .btn-outline { background: white; color: #14c9c9; border: 1px solid #14c9c9; }
+        .btn-outline:hover { background: #e6fffe; }
+        .btn-ghost { background: transparent; color: #666; border: 1px solid #d9d9d9; }
+        .btn-ghost:hover { border-color: #14c9c9; color: #14c9c9; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        table th, table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+        table th { background: #fafafa; font-weight: 600; color: #666; white-space: nowrap; }
+        table tbody tr:hover { background: #f8f9fa; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .text-green { color: #00b42a; font-weight: 600; }
+        .text-blue { color: #1e80ff; font-weight: 600; }
+        .text-orange { color: #ff7d00; font-weight: 600; }
+        .text-red { color: #f53f3f; font-weight: 600; }
+        .text-muted { color: #999; }
+        .fw-600 { font-weight: 600; }
+        .row-total { background: #e6fffe; font-weight: 700; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .tag-green { background: #e8ffea; color: #00b42a; }
+        .tag-red { background: #fff2f0; color: #f53f3f; }
+        .tag-orange { background: #fff7e6; color: #ff7d00; }
+        .tag-blue { background: #e8f3ff; color: #1e80ff; }
+        .loss-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 20px 24px; }
+        .loss-card { padding: 20px; background: #fafafa; border-radius: 8px; border-left: 4px solid #f53f3f; }
+        .loss-card:nth-child(2) { border-left-color: #ff7d00; }
+        .loss-card:nth-child(3) { border-left-color: #1e80ff; }
+        .loss-card:nth-child(4) { border-left-color: #722ed1; }
+        .loss-label { font-weight: 600; color: #333; margin-bottom: 8px; font-size: 0.95rem; }
+        .loss-value { font-size: 1.6rem; font-weight: 700; color: #f53f3f; margin-bottom: 4px; }
+        .loss-card:nth-child(2) .loss-value { color: #ff7d00; }
+        .loss-card:nth-child(3) .loss-value { color: #1e80ff; }
+        .loss-card:nth-child(4) .loss-value { color: #722ed1; }
+        .loss-desc { color: #666; font-size: 0.85rem; line-height: 1.5; }
+        .meter-map { padding: 20px 24px; font-family: 'Courier New', Consolas, monospace; font-size: 0.8rem; line-height: 1.8; color: #333; background: #fafafa; border-radius: 6px; margin: 16px 24px; white-space: pre-wrap; overflow-x: auto; }
+        @media (max-width: 1400px) { .kpi-section { grid-template-columns: repeat(3, 1fr); } .charts-row { grid-template-columns: 1fr; } .loss-grid { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>🔄 能流分析模块</h1>
+                <a href="0.index.html" class="back-btn">← 返回首页</a>
+            </div>
+            <p>可视化能源流动过程 | 基地级电表/蒸汽表/水表/燃气表多级计量网络 | 精准识别能量损失环节 | 贵州基地</p>
+        </div>
+        <div class="selector-bar">
+            <div class="selector-group">
+                <span class="selector-label">📅 年度：</span>
+                <button class="selector-btn active" data-year="2025" onclick="switchYear('2025')">2025年</button>
+                <button class="selector-btn" data-year="2026" onclick="switchYear('2026')">2026年</button>
+            </div>
+            <div class="selector-divider"></div>
+            <div class="selector-group">
+                <span class="selector-label">月份：</span>
+                <select class="selector-select" id="monthSelect" onchange="switchMonth()">
+                    <option value="all">全年累计</option>
+                    <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
+                    <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
+                    <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+                    <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+                </select>
+            </div>
+            <div class="selector-divider"></div>
+            <div class="selector-group" id="sankeyModeGroup">
+                <span class="selector-label">能流类型：</span>
+                <button class="selector-btn active" data-mode="electricity" onclick="switchSankeyMode('electricity', this)">⚡ 电力</button>
+                <button class="selector-btn" data-mode="steam" onclick="switchSankeyMode('steam', this)">♨️ 蒸汽</button>
+                <button class="selector-btn" data-mode="water" onclick="switchSankeyMode('water', this)">💧 水</button>
+                <button class="selector-btn" data-mode="gas" onclick="switchSankeyMode('gas', this)">🔥 燃气</button>
+            </div>
+        </div>
+        <div class="kpi-section" id="kpiSection"></div>
+        <div class="section-panel">
+            <div class="section-panel-header">
+                <div class="section-panel-title">🔀 能流桑基图（Sankey）— 能源从输入到终端消耗的全路径可视化</div>
+                <div class="section-panel-actions">
+                    <button class="btn btn-ghost btn-sm" onclick="resetSankeyZoom()">重置视图</button>
+                    <button class="btn btn-outline btn-sm" onclick="exportSankeyAsImage()">导出图片</button>
+                </div>
+            </div>
+            <div class="chart-box-lg" id="sankeyChart"></div>
+        </div>
+        <div class="charts-row">
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">⚡ 电力三级能流（总表→分表→设备）</div>
+                </div>
+                <div class="chart-box-lg" id="elecSankeyChart"></div>
+            </div>
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">⚠️ 各环节能量损失分析（折标煤）</div>
+                </div>
+                <div class="chart-box" id="lossChart"></div>
+            </div>
+        </div>
+        <div class="section-panel">
+            <div class="section-panel-header">
+                <div class="section-panel-title">📊 基地计量表层级结构表</div>
+                <div class="section-panel-actions">
+                    <button class="btn btn-outline btn-sm" onclick="exportTable('meterTable')">导出CSV</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table id="meterTable">
+                    <thead>
+                        <tr>
+                            <th>能源类型</th><th>区域类型</th><th>一级总表</th><th>二级分表</th>
+                            <th>三级子表</th><th>本期用量</th><th>占比</th><th>折标煤(tce)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="meterBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="section-panel">
+            <div class="section-panel-header">
+                <div class="section-panel-title">🔎 能源损失环节定位</div>
+            </div>
+            <div class="loss-grid" id="lossGrid"></div>
+        </div>
+    </div>
+    <script>
+        const RAW_DATA = {
+            '2025': { production: { months: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'], actualOutput: [4274.6653,2902.1028,3486.0048,1707.0695,3063.5683,3584.5896,2034.9612,3025.3746,3401.2965,2177.4818,2708.5219,3603.3521] }, water: [17386,12949,15143,6768,12579,14614,8813,12421,13803,9131,11312,15117], steam: [1712,1126,1292,574,1061,1186,669,1009,1125,750,954,1269], electricity: [345621,252416.4,290533.2,159854,281599.68,320937.2,211425.8,282957.8,302547.4,210993.6,236026.8,288701] },
+            '2026': { production: { months: ['1月','2月','3月','4月'], actualOutput: [4945.632,2834.961,4416.6993,2387.1303] }, water: [20543,12165,18367,10380], steam: [1740,1020,1532,823], electricity: [374779.4,227895.6,345636.8,189917.2] }
+        };
+        const COEF = { electricity: 0.1229 / 1000, water: 0.0857 / 1000, steam: 0.1000 };
+        let currentYear = '2025', currentMonth = 'all', sankeyMode = 'electricity';
+        let sankeyChartInst = null, elecSankeyInst = null, lossChartInst = null;
+
+        function getData() { return RAW_DATA[currentYear]; }
+        function getMonthCount() { return getData().water.length; }
+        function sum(arr) { return arr.reduce((a, b) => a + b, 0); }
+        function fmt(n, d) { d = d || 2; return Number(n).toFixed(d); }
+        function fmtNum(n, d) { d = d || 2; const v = Number(n).toFixed(d); return parseFloat(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+        function getMonthlyValues(key) { const d = getData(); return currentMonth === 'all' ? d[key] : [d[key][parseInt(currentMonth) - 1]]; }
+        function getMonthlySum(key) { return sum(getMonthlyValues(key)); }
+
+        function switchYear(year) {
+            currentYear = year;
+            document.querySelectorAll('[data-year]').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-year="' + year + '"]').classList.add('active');
+            const sel = document.getElementById('monthSelect'), mc = getMonthCount();
+            for (let i = 5; i <= 12; i++) { const opt = sel.querySelector('option[value="' + i + '"]'); if (opt) opt.disabled = i > mc; }
+            if (parseInt(currentMonth) > mc && currentMonth !== 'all') { currentMonth = 'all'; sel.value = 'all'; }
+            refreshAll();
+        }
+        function switchMonth() { currentMonth = document.getElementById('monthSelect').value; refreshAll(); }
+        function switchSankeyMode(mode, btn) {
+            sankeyMode = mode;
+            document.querySelectorAll('#sankeyModeGroup .selector-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderSankeyChart();
+        }
+        function refreshAll() { renderKPIs(); renderSankeyChart(); renderElecSankeyChart(); renderLossChart(); renderMeterTable(); renderLossGrid(); }
+
+        function renderKPIs() {
+            const tE = getMonthlySum('electricity'), tW = getMonthlySum('water'), tS = getMonthlySum('steam');
+            const tTce = tE * COEF.electricity + tW * COEF.water + tS * COEF.steam;
+            const sLoss = tS * 0.0574, eLoss = tE * 0.04;
+            const eff = tTce > 0 ? ((tTce - (eLoss * COEF.electricity + sLoss * COEF.steam)) / tTce * 100) : 0;
+            const cards = [
+                { v: fmtNum(tTce, 2), l: '基地综合能耗输入', u: 'tce', s: '一车间全能源折标煤', c: '#14c9c9' },
+                { v: fmtNum(eff, 1) + '%', l: '能源综合利用率', u: '', s: '', c: '#1e80ff' },
+                { v: fmtNum(tS, 0), l: '蒸汽总流量', u: 't', s: '蒸汽总表', c: '#ff7d00' },
+                { v: fmtNum(sLoss, 0), l: '蒸汽管网损耗', u: 't', s: '损耗率 5.74%', c: '#f53f3f' },
+                { v: fmtNum(tE / 10000, 2), l: '基地电力总输入', u: '万kWh', s: '基地总表1', c: '#00b42a' },
+                { v: fmtNum(tW, 0), l: '基地用水总量', u: 'm³', s: '三栋厂房合计', c: '#722ed1' }
+            ];
+            document.getElementById('kpiSection').innerHTML = cards.map(c => '<div class="kpi-card" style="border-top-color:' + c.c + '"><div class="kpi-value" style="color:' + c.c + '">' + c.v + '</div><div class="kpi-label">' + c.l + '</div><div class="kpi-unit">' + c.u + '</div>' + (c.s ? '<div class="kpi-sub">' + c.s + '</div>' : '') + '</div>').join('');
+        }
+
+        function renderSankeyChart() {
+            const dom = document.getElementById('sankeyChart'); if (!dom) return;
+            if (sankeyChartInst) sankeyChartInst.dispose();
+            const chart = echarts.init(dom); sankeyChartInst = chart;
+            const tE = getMonthlySum('electricity'), tW = getMonthlySum('water'), tS = getMonthlySum('steam');
+            const lblE = '电力\n' + fmtNum(tE / 10000, 1) + '万kWh';
+            const lblS = '蒸汽\n' + fmtNum(tS, 0) + 't';
+            const lblW = '自来水\n' + fmtNum(tW, 0) + 'm³';
+            let data, links;
+            if (sankeyMode === 'electricity') {
+                const l1 = tE * 0.22, l2 = tE * 0.22, pl = tE * 0.08, zs = tE * 0.05;
+                const ky = tE * 0.06, gl = tE * 0.04, k3 = tE * 0.025, k2 = tE * 0.025, k1 = tE * 0.02, k9 = tE * 0.01;
+                const ws2 = tE * 0.025, ws = tE * 0.015, wx = tE * 0.01, cd = tE * 0.005, xf = tE * 0.02;
+                const ringSum = l1 + l2 + pl + zs + ky + gl + k3 + k2 + k1 + k9 + ws2 + ws + wx + cd + xf;
+                const other = Math.max(0, tE - ringSum);
+                data = [
+                    { name: lblE, itemStyle: { color: '#1e80ff' } },
+                    { name: '基地总表1' },
+                    { name: '生产系统', itemStyle: { color: '#00b42a' } },
+                    { name: '辅助系统', itemStyle: { color: '#ff7d00' } },
+                    { name: '消防/通风', itemStyle: { color: '#722ed1' } },
+                    { name: '其他/损耗', itemStyle: { color: '#f53f3f' } }
+                ];
+                links = [
+                    { source: lblE, target: '基地总表1', value: tE },
+                    { source: '基地总表1', target: '生产系统', value: l1 + l2 + pl + zs },
+                    { source: '基地总表1', target: '辅助系统', value: ky + gl + k3 + k2 + k1 + k9 + ws2 + ws + wx + cd },
+                    { source: '基地总表1', target: '消防/通风', value: xf + other }
+                ];
+            } else if (sankeyMode === 'steam') {
+                const pl = tS * 0.4048, l1 = tS * 0.2687, l2 = tS * 0.2690, loss = tS * 0.0574;
+                data = [
+                    { name: lblS, itemStyle: { color: '#ff7d00' } }, { name: '蒸汽总表' },
+                    { name: '配料', itemStyle: { color: '#1e80ff' } },
+                    { name: '一线APV', itemStyle: { color: '#00b42a' } },
+                    { name: '二线APV', itemStyle: { color: '#722ed1' } },
+                    { name: '管网损耗', itemStyle: { color: '#f53f3f' } }
+                ];
+                links = [
+                    { source: lblS, target: '蒸汽总表', value: tS },
+                    { source: '蒸汽总表', target: '配料', value: pl },
+                    { source: '蒸汽总表', target: '一线APV', value: l1 },
+                    { source: '蒸汽总表', target: '二线APV', value: l2 },
+                    { source: '蒸汽总表', target: '管网损耗', value: loss }
+                ];
+            } else if (sankeyMode === 'water') {
+                const b30 = tW * 0.55, b15 = tW * 0.22, b16 = tW * 0.23;
+                const roPl = b30 * 0.35, roGl = b30 * 0.35, ns = b30 * 0.20, px = b30 * 0.10;
+                const ck = b15 * 0.35, xj = b15 * 0.20, bg15 = b15 * 0.45;
+                const cj16 = b16 * 0.5, cs16 = b16 * 0.2, bg16 = b16 * 0.3;
+                data = [
+                    { name: lblW, itemStyle: { color: '#14c9c9' } },
+                    { name: '30栋制水车间', itemStyle: { color: '#1e80ff' } },
+                    { name: '15栋厂房', itemStyle: { color: '#00b42a' } },
+                    { name: '16栋厂房', itemStyle: { color: '#ff7d00' } },
+                    { name: '配料间-RO水', itemStyle: { color: '#722ed1' } },
+                    { name: '锅炉间-RO水', itemStyle: { color: '#f53f3f' } },
+                    { name: '浓水排放', itemStyle: { color: '#86909c' } },
+                    { name: '30栋培训室', itemStyle: { color: '#4a90d9' } },
+                    { name: '15栋仓库卫生间', itemStyle: { color: '#e8654a' } },
+                    { name: '15栋香精房消防', itemStyle: { color: '#f7ba1e' } },
+                    { name: '15栋行政办公室', itemStyle: { color: '#b37feb' } },
+                    { name: '16栋车间', itemStyle: { color: '#36cfc9' } },
+                    { name: '16栋卫生间', itemStyle: { color: '#d3adf7' } },
+                    { name: '16栋综合办公室', itemStyle: { color: '#ffadd2' } }
+                ];
+                links = [
+                    { source: lblW, target: '30栋制水车间', value: b30 },
+                    { source: lblW, target: '15栋厂房', value: b15 },
+                    { source: lblW, target: '16栋厂房', value: b16 },
+                    { source: '30栋制水车间', target: '配料间-RO水', value: roPl },
+                    { source: '30栋制水车间', target: '锅炉间-RO水', value: roGl },
+                    { source: '30栋制水车间', target: '浓水排放', value: ns },
+                    { source: '30栋制水车间', target: '30栋培训室', value: px },
+                    { source: '15栋厂房', target: '15栋仓库卫生间', value: ck },
+                    { source: '15栋厂房', target: '15栋香精房消防', value: xj },
+                    { source: '15栋厂房', target: '15栋行政办公室', value: bg15 },
+                    { source: '16栋厂房', target: '16栋车间', value: cj16 },
+                    { source: '16栋厂房', target: '16栋卫生间', value: cs16 },
+                    { source: '16栋厂房', target: '16栋综合办公室', value: bg16 }
+                ];
+            } else {
+                data = [
+                    { name: '天然气\n输入', itemStyle: { color: '#ff7d00' } }, { name: '燃气总表' },
+                    { name: '1号锅炉', itemStyle: { color: '#f53f3f' } },
+                    { name: '2号锅炉', itemStyle: { color: '#1e80ff' } },
+                    { name: '自产蒸汽', itemStyle: { color: '#00b42a' } },
+                    { name: '排烟损失', itemStyle: { color: '#86909c' } }
+                ];
+                const natGas = tS * 0.7 * 0.7;
+                links = [
+                    { source: '天然气\n输入', target: '燃气总表', value: natGas },
+                    { source: '燃气总表', target: '1号锅炉', value: natGas * 0.5 },
+                    { source: '燃气总表', target: '2号锅炉', value: natGas * 0.5 },
+                    { source: '1号锅炉', target: '自产蒸汽', value: natGas * 0.5 * 0.85 },
+                    { source: '1号锅炉', target: '排烟损失', value: natGas * 0.5 * 0.15 },
+                    { source: '2号锅炉', target: '自产蒸汽', value: natGas * 0.5 * 0.85 },
+                    { source: '2号锅炉', target: '排烟损失', value: natGas * 0.5 * 0.15 }
+                ];
+            }
+            chart.setOption({
+                tooltip: { trigger: 'item', triggerOn: 'mousemove', formatter: function(p) { if (p.dataType === 'edge') return p.data.source + ' → ' + p.data.target + '<br/>流量: ' + fmtNum(p.data.value, 1); return p.name.replace('\n', ' '); } },
+                series: [{ type: 'sankey', layout: 'none', emphasis: { focus: 'adjacency' }, nodeWidth: 22, nodeGap: 16, label: { show: true, fontSize: 11 }, lineStyle: { color: 'gradient', curveness: 0.5, opacity: 0.4 }, data: data, links: links }]
+            });
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        function resetSankeyZoom() { if (sankeyChartInst) sankeyChartInst.dispatchAction({ type: 'restore' }); }
+        function exportSankeyAsImage() { if (!sankeyChartInst) return; const a = document.createElement('a'); a.href = sankeyChartInst.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#fff' }); a.download = 'sankey_' + sankeyMode + '_' + currentYear + '.png'; a.click(); }
+
+        function renderElecSankeyChart() {
+            const dom = document.getElementById('elecSankeyChart'); if (!dom) return;
+            if (elecSankeyInst) elecSankeyInst.dispose();
+            const chart = echarts.init(dom); elecSankeyInst = chart;
+            const tE = getMonthlySum('electricity');
+            const dev1 = [{ n: '灌装机', r: 0.025 },{ n: '输送线体', r: 0.030 },{ n: 'APV', r: 0.022 },{ n: '热缩机', r: 0.018 },{ n: '冷却机', r: 0.028 },{ n: '烘炉', r: 0.035 },{ n: '包装机', r: 0.020 },{ n: '冷却塔', r: 0.015 },{ n: '码垛机', r: 0.012 },{ n: '卸垛机', r: 0.010 }];
+            const l1s = dev1.reduce((s, d) => s + tE * d.r, 0), l2s = l1s;
+            const data = [
+                { name: '电力\n输入', itemStyle: { color: '#1e80ff' } }, { name: '基地总表1' },
+                { name: '1线\n' + fmtNum(l1s / 10000, 1) + '万', itemStyle: { color: '#00b42a' } },
+                { name: '2线\n' + fmtNum(l2s / 10000, 1) + '万', itemStyle: { color: '#14c9c9' } },
+                { name: '配料', itemStyle: { color: '#ff7d00' } },
+                { name: '制水', itemStyle: { color: '#722ed1' } },
+                { name: '空压机', itemStyle: { color: '#f53f3f' } },
+                { name: '锅炉', itemStyle: { color: '#ffa940' } },
+                { name: '中央空调K3', itemStyle: { color: '#36cfc9' } },
+                { name: '中央空调K2', itemStyle: { color: '#597ef7' } },
+                { name: '中央空调K1', itemStyle: { color: '#9254de' } },
+                { name: '中央空调K9', itemStyle: { color: '#d3adf7' } },
+                { name: '污水处理\n二号线', itemStyle: { color: '#5cdbd3' } },
+                { name: '污水', itemStyle: { color: '#b37feb' } },
+                { name: '维修间', itemStyle: { color: '#f7ba1e' } },
+                { name: '充电桩', itemStyle: { color: '#ffadd2' } },
+                { name: '消防/通风', itemStyle: { color: '#86909c' } }
+            ];
+            dev1.forEach(d => data.push({ name: '1线-' + d.n }));
+            dev1.forEach(d => data.push({ name: '2线-' + d.n }));
+            const links = [
+                { source: '电力\n输入', target: '基地总表1', value: tE },
+                { source: '基地总表1', target: '1线\n' + fmtNum(l1s / 10000, 1) + '万', value: l1s },
+                { source: '基地总表1', target: '2线\n' + fmtNum(l2s / 10000, 1) + '万', value: l2s },
+                { source: '基地总表1', target: '配料', value: tE * 0.08 },
+                { source: '基地总表1', target: '制水', value: tE * 0.05 },
+                { source: '基地总表1', target: '空压机', value: tE * 0.06 },
+                { source: '基地总表1', target: '锅炉', value: tE * 0.04 },
+                { source: '基地总表1', target: '中央空调K3', value: tE * 0.025 },
+                { source: '基地总表1', target: '中央空调K2', value: tE * 0.025 },
+                { source: '基地总表1', target: '中央空调K1', value: tE * 0.02 },
+                { source: '基地总表1', target: '中央空调K9', value: tE * 0.01 },
+                { source: '基地总表1', target: '污水处理\n二号线', value: tE * 0.025 },
+                { source: '基地总表1', target: '污水', value: tE * 0.015 },
+                { source: '基地总表1', target: '维修间', value: tE * 0.01 },
+                { source: '基地总表1', target: '充电桩', value: tE * 0.005 },
+                { source: '基地总表1', target: '消防/通风', value: tE * 0.02 }
+            ];
+            dev1.forEach(d => { links.push({ source: '1线\n' + fmtNum(l1s / 10000, 1) + '万', target: '1线-' + d.n, value: tE * d.r }); links.push({ source: '2线\n' + fmtNum(l2s / 10000, 1) + '万', target: '2线-' + d.n, value: tE * d.r }); });
+            chart.setOption({
+                tooltip: { trigger: 'item', triggerOn: 'mousemove', formatter: function(p) { if (p.dataType === 'edge') return p.data.source + ' → ' + p.data.target + '<br/>' + fmtNum(p.data.value, 0) + ' kWh'; return p.name.replace('\n', ' '); } },
+                series: [{ type: 'sankey', layout: 'none', emphasis: { focus: 'adjacency' }, nodeWidth: 16, nodeGap: 10, label: { show: true, fontSize: 8 }, lineStyle: { color: 'gradient', curveness: 0.5, opacity: 0.25 }, data: data, links: links }]
+            });
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        function renderLossChart() {
+            const dom = document.getElementById('lossChart'); if (!dom) return;
+            if (lossChartInst) lossChartInst.dispose();
+            const chart = echarts.init(dom); lossChartInst = chart;
+            const tS = getMonthlySum('steam'), tE = getMonthlySum('electricity');
+            const cats = ['蒸汽管网损耗', '电力线损', '锅炉排烟损失', '空压机散热', '管道散热', '制冷散热'];
+            const vals = [ +(tS * 0.0574 * COEF.steam).toFixed(2), +(tE * 0.04 * COEF.electricity).toFixed(2), +(tS * 0.08 * COEF.steam).toFixed(2), +(tE * 0.06 * 0.15 * COEF.electricity).toFixed(2), +(tS * 0.02 * COEF.steam).toFixed(2), +(tE * 0.08 * 0.10 * COEF.electricity).toFixed(2) ];
+            chart.setOption({
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                grid: { left: '3%', right: '8%', bottom: '3%', containLabel: true },
+                xAxis: { type: 'value', name: 'tce' },
+                yAxis: { type: 'category', data: cats, inverse: true },
+                series: [{ name: '能量损失', type: 'bar', data: vals, itemStyle: { color: function(p) { return ['#f53f3f','#ff7d00','#ffa940','#f7ba1e','#14c9c9','#1e80ff'][p.dataIndex]; } }, label: { show: true, position: 'right', formatter: '{c} tce' } }]
+            });
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        function renderMeterTable() {
+            const tE = getMonthlySum('electricity'), tW = getMonthlySum('water'), tS = getMonthlySum('steam');
+            const rows = [
+                { type: '蒸汽表', area: '生产区', l1: '蒸汽总表', l2: '配料', l3: '-', val: tS * 0.4048, ratio: 40.48, tce: tS * 0.4048 * COEF.steam, cls: 'fw-600' },
+                { type: '蒸汽表', area: '生产区', l1: '蒸汽总表', l2: '一线APV', l3: '-', val: tS * 0.2687, ratio: 26.87, tce: tS * 0.2687 * COEF.steam },
+                { type: '蒸汽表', area: '生产区', l1: '蒸汽总表', l2: '二线APV', l3: '-', val: tS * 0.2690, ratio: 26.90, tce: tS * 0.2690 * COEF.steam },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '生产系统-1线', l3: '灌装机等10项', val: tE * 0.22, ratio: 22, tce: tE * 0.22 * COEF.electricity, cls: 'fw-600' },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '生产系统-2线', l3: '灌装机等10项', val: tE * 0.22, ratio: 22, tce: tE * 0.22 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '生产系统-配料', l3: '-', val: tE * 0.08, ratio: 8, tce: tE * 0.08 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '生产系统-制水', l3: '-', val: tE * 0.05, ratio: 5, tce: tE * 0.05 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '辅助系统-空压机', l3: '-', val: tE * 0.06, ratio: 6, tce: tE * 0.06 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '辅助系统-锅炉', l3: '-', val: tE * 0.04, ratio: 4, tce: tE * 0.04 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '辅助系统-中央空调K3', l3: '灌装间2', val: tE * 0.025, ratio: 2.5, tce: tE * 0.025 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '辅助系统-中央空调K2', l3: '灌装间1', val: tE * 0.025, ratio: 2.5, tce: tE * 0.025 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '辅助系统-中央空调K1', l3: '冷水机', val: tE * 0.02, ratio: 2, tce: tE * 0.02 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '辅助系统-中央空调K9', l3: '配料送风', val: tE * 0.01, ratio: 1, tce: tE * 0.01 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '辅助系统-污水处理二号线', l3: '-', val: tE * 0.025, ratio: 2.5, tce: tE * 0.025 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '辅助系统-污水', l3: '-', val: tE * 0.015, ratio: 1.5, tce: tE * 0.015 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '辅助系统-维修间', l3: '-', val: tE * 0.01, ratio: 1, tce: tE * 0.01 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '辅助系统-充电桩', l3: '-', val: tE * 0.005, ratio: 0.5, tce: tE * 0.005 * COEF.electricity },
+                { type: '电表', area: '生产区', l1: '基地总表1', l2: '消防/通风', l3: '-', val: tE * 0.02, ratio: 2, tce: tE * 0.02 * COEF.electricity },
+                { type: '水表', area: '生产区', l1: '15栋厂房-自来水', l2: '15栋仓库卫生间', l3: '-', val: tW * 0.22 * 0.35, ratio: 7.7, tce: tW * 0.22 * 0.35 * COEF.water },
+                { type: '水表', area: '生产区', l1: '15栋厂房-自来水', l2: '15栋香精房消防用水', l3: '-', val: tW * 0.22 * 0.20, ratio: 4.4, tce: tW * 0.22 * 0.20 * COEF.water },
+                { type: '水表', area: '办公区', l1: '15栋厂房-自来水', l2: '15栋行政办公室', l3: '-', val: tW * 0.22 * 0.45, ratio: 9.9, tce: tW * 0.22 * 0.45 * COEF.water },
+                { type: '水表', area: '生产区', l1: '16栋厂房-自来水', l2: '16栋车间-自来水', l3: '-', val: tW * 0.23 * 0.5, ratio: 11.5, tce: tW * 0.23 * 0.5 * COEF.water },
+                { type: '水表', area: '生产区', l1: '16栋厂房-自来水', l2: '16栋卫生间-自来水', l3: '-', val: tW * 0.23 * 0.2, ratio: 4.6, tce: tW * 0.23 * 0.2 * COEF.water },
+                { type: '水表', area: '办公区', l1: '16栋厂房-自来水', l2: '16栋综合办公室-自来水', l3: '-', val: tW * 0.23 * 0.3, ratio: 6.9, tce: tW * 0.23 * 0.3 * COEF.water },
+                { type: '水表', area: '生产区', l1: '30栋制水车间-自来水', l2: '制水间-自来水', l3: '配料间-RO水', val: tW * 0.55 * 0.35, ratio: 19.25, tce: tW * 0.55 * 0.35 * COEF.water },
+                { type: '水表', area: '生产区', l1: '30栋制水车间-自来水', l2: '制水间-自来水', l3: '锅炉间-RO水', val: tW * 0.55 * 0.35, ratio: 19.25, tce: tW * 0.55 * 0.35 * COEF.water },
+                { type: '水表', area: '生产区', l1: '30栋制水车间-自来水', l2: '制水间-自来水', l3: '浓水', val: tW * 0.55 * 0.20, ratio: 11, tce: tW * 0.55 * 0.20 * COEF.water },
+                { type: '水表', area: '生产区', l1: '30栋制水车间-自来水', l2: '30栋培训室-自来水', l3: '-', val: tW * 0.55 * 0.10, ratio: 5.5, tce: tW * 0.55 * 0.10 * COEF.water },
+                { type: '燃气表', area: '生产区', l1: '燃气总表', l2: '1号锅炉', l3: '-', val: null, ratio: null, tce: null },
+                { type: '燃气表', area: '生产区', l1: '燃气总表', l2: '2号锅炉', l3: '-', val: null, ratio: null, tce: null }
+            ];
+            let html = '';
+            rows.forEach(r => {
+                html += '<tr>';
+                html += '<td><span class="tag tag-blue">' + r.type + '</span></td>';
+                html += '<td>' + r.area + '</td>';
+                html += '<td class="fw-600">' + r.l1 + '</td>';
+                html += '<td>' + r.l2 + '</td>';
+                html += '<td' + (r.l3 === '-' ? ' class="text-muted"' : '') + '>' + r.l3 + '</td>';
+                html += '<td class="text-right">' + (r.val != null ? fmtNum(r.val, 0) : '-') + '</td>';
+                html += '<td class="text-right">' + (r.ratio != null ? fmtNum(r.ratio, 1) + '%' : '-') + '</td>';
+                html += '<td class="text-right text-green">' + (r.tce != null ? fmtNum(r.tce, 2) : '-') + '</td>';
+                html += '</tr>';
+            });
+            document.getElementById('meterBody').innerHTML = html;
+        }
+
+        function renderLossGrid() {
+            const tS = getMonthlySum('steam'), tE = getMonthlySum('electricity');
+            const items = [
+                { label: '蒸汽管网散热损失', value: fmtNum(tS * 0.0574, 0) + ' t', desc: '损耗率5.74%，主要因管道保温老化、疏水阀泄漏。建议：排查全厂疏水阀、更换破损保温层' },
+                { label: '电力变压器及线损', value: fmtNum(tE * 0.04 / 10000, 2) + ' 万kWh', desc: '线损率约4%，主要因变压器空载损耗及低压线路长距离输送。建议：优化变压器负载率' },
+                { label: '锅炉排烟热损失', value: fmtNum(tS * 0.08, 0) + ' t（蒸汽当量）', desc: '排烟温度偏高，余热未回收。建议：加装烟气余热回收装置，用于锅炉补水预热' },
+                { label: '空压机系统散热损失', value: fmtNum(tE * 0.06 * 0.15 / 10000, 2) + ' 万kWh', desc: '压缩过程产生大量热能未利用。建议：回收空压机余热用于车间供暖或热水' }
+            ];
+            document.getElementById('lossGrid').innerHTML = items.map(item =>
+                '<div class="loss-card">' +
+                '<div class="loss-label">' + item.label + '</div>' +
+                '<div class="loss-value">' + item.value + '</div>' +
+                '<div class="loss-desc">' + item.desc + '</div>' +
+                '</div>'
+            ).join('');
+        }
+
+        function exportTable(tableId) {
+            const table = document.getElementById(tableId);
+            let csv = '\uFEFF';
+            table.querySelectorAll('tr').forEach(row => {
+                const rowData = [];
+                row.querySelectorAll('th, td').forEach(col => {
+                    rowData.push('"' + col.textContent.trim().replace(/"/g, '""') + '"');
+                });
+                csv += rowData.join(',') + '\n';
+            });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            a.download = tableId + '_' + currentYear + '_' + (currentMonth === 'all' ? '全年' : currentMonth + '月') + '.csv';
+            a.click();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() { refreshAll(); });
+    </script>
+</body>
+</html>

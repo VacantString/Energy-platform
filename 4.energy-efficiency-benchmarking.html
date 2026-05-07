@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能效对标模块 - 国家级绿色工厂能源管理平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; color: #333; }
+        .container { max-width: 1920px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #722ed1 0%, #531dab 100%); color: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(114, 46, 209, 0.25); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .header h1 { font-size: 2rem; font-weight: 600; }
+        .back-btn { background: rgba(255,255,255,0.25); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+        .back-btn:hover { background: rgba(255,255,255,0.35); }
+        .header p { font-size: 1rem; opacity: 0.92; }
+        .selector-bar { background: white; padding: 16px 24px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .selector-group { display: flex; align-items: center; gap: 8px; }
+        .selector-label { font-weight: 600; color: #555; font-size: 0.9rem; white-space: nowrap; }
+        .selector-btn { padding: 8px 18px; border: 1px solid #d9d9d9; background: white; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap; }
+        .selector-btn:hover { border-color: #722ed1; color: #722ed1; }
+        .selector-btn.active { background: #722ed1; color: white; border-color: #722ed1; }
+        .selector-divider { width: 1px; height: 24px; background: #e8e8e8; }
+        .selector-select { padding: 8px 14px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 0.9rem; cursor: pointer; background: white; min-width: 100px; }
+        .selector-select:focus { border-color: #722ed1; outline: none; }
+        .type-banner { background: #f5f0ff; border: 1px solid #d3adf7; padding: 12px 24px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; font-size: 0.82rem; flex-wrap: wrap; }
+        .type-badge { padding: 4px 12px; border-radius: 4px; font-weight: 700; font-size: 0.76rem; white-space: nowrap; }
+        .type-badge-reverse { background: #fff7e6; color: #ff7d00; }
+        .type-badge-forward { background: #e8ffea; color: #00b42a; }
+        .kpi-section { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 20px; }
+        .kpi-card { background: white; padding: 28px 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; border-top: 4px solid #722ed1; transition: transform 0.2s; cursor: default; overflow: visible; min-height: 140px; display: flex; flex-direction: column; justify-content: center; }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+        .kpi-card:nth-child(2) { border-top-color: #1e80ff; }
+        .kpi-card:nth-child(3) { border-top-color: #00b42a; }
+        .kpi-card:nth-child(4) { border-top-color: #ff7d00; }
+        .kpi-card:nth-child(5) { border-top-color: #f53f3f; }
+        .kpi-card:nth-child(6) { border-top-color: #14c9c9; }
+        .kpi-value { font-size: 1.8rem; font-weight: 700; color: #722ed1; margin-bottom: 4px; line-height: 1.3; }
+        .kpi-card:nth-child(2) .kpi-value { color: #1e80ff; }
+        .kpi-card:nth-child(3) .kpi-value { color: #00b42a; }
+        .kpi-card:nth-child(4) .kpi-value { color: #ff7d00; }
+        .kpi-card:nth-child(5) .kpi-value { color: #f53f3f; }
+        .kpi-card:nth-child(6) .kpi-value { color: #14c9c9; }
+        .kpi-label { color: #666; font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; line-height: 1.4; }
+        .kpi-unit { color: #999; font-size: 0.78rem; line-height: 1.4; }
+        .kpi-sub { font-size: 0.8rem; color: #999; margin-top: 4px; line-height: 1.4; }
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-panel { background: white; padding: 20px 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .chart-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .chart-panel-title { font-size: 1.05rem; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px; }
+        .chart-box { height: 580px; }
+        .chart-box-lg { height: 600px; }
+        .section-panel { background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }
+        .section-panel-header { padding: 18px 24px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .section-panel-title { font-size: 1.05rem; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px; }
+        .section-panel-actions { display: flex; gap: 8px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
+        .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+        .btn-primary { background: #722ed1; color: white; }
+        .btn-primary:hover { background: #531dab; }
+        .btn-outline { background: white; color: #722ed1; border: 1px solid #722ed1; }
+        .btn-outline:hover { background: #f5f0ff; }
+        .btn-ghost { background: transparent; color: #666; border: 1px solid #d9d9d9; }
+        .btn-ghost:hover { border-color: #722ed1; color: #722ed1; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        table th, table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; }
+        table th { background: #fafafa; font-weight: 600; color: #666; white-space: nowrap; }
+        table tbody tr:hover { background: #f8f9fa; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .text-green { color: #00b42a; font-weight: 600; }
+        .text-blue { color: #1e80ff; font-weight: 600; }
+        .text-orange { color: #ff7d00; font-weight: 600; }
+        .text-red { color: #f53f3f; font-weight: 600; }
+        .text-purple { color: #722ed1; font-weight: 600; }
+        .text-muted { color: #999; }
+        .fw-600 { font-weight: 600; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+        .tag-green { background: #e8ffea; color: #00b42a; }
+        .tag-red { background: #fff2f0; color: #f53f3f; }
+        .tag-orange { background: #fff7e6; color: #ff7d00; }
+        .tag-blue { background: #e8f3ff; color: #1e80ff; }
+        .tag-purple { background: #f5f0ff; color: #722ed1; }
+        .tag-gray { background: #f5f5f5; color: #999; }
+        .gauge-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+        .gauge-card { background: white; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .gauge-header { text-align: center; font-weight: 600; color: #333; font-size: 0.9rem; margin-bottom: 6px; }
+        .gauge-box { height: 230px; }
+        .savings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px 24px; }
+        .savings-card { padding: 20px; background: #fafafa; border-radius: 8px; border-left: 4px solid #00b42a; }
+        .savings-card:nth-child(2) { border-left-color: #1e80ff; }
+        .savings-card:nth-child(3) { border-left-color: #ff7d00; }
+        .savings-title { font-weight: 600; color: #333; margin-bottom: 8px; font-size: 0.9rem; }
+        .savings-value { font-size: 1.5rem; font-weight: 700; color: #00b42a; margin-bottom: 4px; }
+        .savings-card:nth-child(2) .savings-value { color: #1e80ff; }
+        .savings-card:nth-child(3) .savings-value { color: #ff7d00; }
+        .savings-desc { color: #666; font-size: 0.8rem; line-height: 1.5; }
+        @media (max-width: 1400px) { .kpi-section { grid-template-columns: repeat(3, 1fr); } .charts-row, .gauge-row, .savings-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>📊 能效对标模块</h1>
+                <a href="0.index.html" class="back-btn">← 返回首页</a>
+            </div>
+            <p>三维对标体系（国家标准·行业标杆·历史最优）| 逆向/正向指标分类 | 差距率与节能量精准测算 | 标准达标状态判定 | 贵州基地一车间</p>
+        </div>
+        <div class="selector-bar">
+            <div class="selector-group">
+                <span class="selector-label">📅 年度：</span>
+                <button class="selector-btn active" data-year="2025" onclick="switchYear('2025')">2025年</button>
+                <button class="selector-btn" data-year="2026" onclick="switchYear('2026')">2026年</button>
+            </div>
+            <div class="selector-divider"></div>
+            <div class="selector-group">
+                <span class="selector-label">核算周期：</span>
+                <select class="selector-select" id="periodSelect" onchange="switchPeriod()">
+                    <option value="all">年度累计</option>
+                    <option value="first">上半年（1-6月）</option>
+                    <option value="second">下半年（7-12月）</option>
+                </select>
+            </div>
+            <div class="selector-divider"></div>
+            <div class="selector-group">
+                <span class="selector-label">电价：</span>
+                <input type="number" id="elecPrice" value="0.75" step="0.01" min="0.3" max="3" style="width:80px;padding:6px 10px;border:1px solid #d9d9d9;border-radius:6px;font-size:0.9rem;" onchange="refreshAll()">
+                <span style="font-size:0.8rem;color:#999;">元/kWh</span>
+            </div>
+            <span class="tag tag-purple" style="font-size:0.78rem;padding:4px 12px;margin-left:auto;">📐 逆向指标为主（越低越好）</span>
+        </div>
+        <div class="type-banner">
+            <span class="selector-label">📋 指标方向性区分（底层逻辑）：</span>
+            <span class="type-badge type-badge-reverse">逆向指标（核心常用）</span><span>单位产品综合能耗/电耗/汽耗 — 数值越低越好 — 实际值≤对标值为达标</span>
+            <span class="type-badge type-badge-forward">正向指标</span><span>能源利用率/余热回收率 — 数值越高越好 — 实际值≥对标值为达标</span>
+        </div>
+        <div class="kpi-section" id="kpiSection"></div>
+        <div class="gauge-row" id="gaugeRow"></div>
+        <div class="charts-row">
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">📊 三维对标对比（逆向指标 — 越低越好）</div>
+                </div>
+                <div class="chart-box-lg" id="compareChart"></div>
+            </div>
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">📈 相对差距率分析（正值=落后，负值=领先）</div>
+                </div>
+                <div class="chart-box-lg" id="gapChart"></div>
+            </div>
+        </div>
+        <div class="section-panel">
+            <div class="section-panel-header">
+                <div class="section-panel-title">📋 标准化能效对标分析表</div>
+                <div class="section-panel-actions">
+                    <button class="btn btn-outline btn-sm" onclick="exportTable('benchmarkTable')">导出CSV</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table id="benchmarkTable">
+                    <thead>
+                        <tr>
+                            <th>能效指标</th><th>对标维度</th><th>对标值(A)</th><th>单位</th><th>当前实际值(X)</th>
+                            <th>对标达成度</th><th>绝对差距</th><th>相对差距率</th>
+                            <th>理论年节能量</th><th>可实节能收益</th><th>达标状态</th><th>优化方向</th>
+                        </tr>
+                    </thead>
+                    <tbody id="benchmarkBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="section-panel">
+            <div class="section-panel-header">
+                <div class="section-panel-title">💰 综合节能潜力汇总</div>
+            </div>
+            <div class="savings-grid" id="savingsGrid"></div>
+        </div>
+    </div>
+    <script>
+        const RAW_DATA = {
+            '2025': { production: { months: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'], actualOutput: [4274.6653,2902.1028,3486.0048,1707.0695,3063.5683,3584.5896,2034.9612,3025.3746,3401.2965,2177.4818,2708.5219,3603.3521] }, water: [17386,12949,15143,6768,12579,14614,8813,12421,13803,9131,11312,15117], steam: [1712,1126,1292,574,1061,1186,669,1009,1125,750,954,1269], electricity: [345621,252416.4,290533.2,159854,281599.68,320937.2,211425.8,282957.8,302547.4,210993.6,236026.8,288701] },
+            '2026': { production: { months: ['1月','2月','3月','4月'], actualOutput: [4945.632,2834.961,4416.6993,2387.1303] }, water: [20543,12165,18367,10380], steam: [1740,1020,1532,823], electricity: [374779.4,227895.6,345636.8,189917.2] }
+        };
+        const COEF = { electricity: 0.1229 / 1000, water: 0.0857 / 1000, steam: 0.1000 };
+        let currentYear = '2025', currentPeriod = 'all';
+
+        function getData() { return RAW_DATA[currentYear]; }
+        function getMonthCount() { return getData().water.length; }
+        function sum(arr) { return arr.reduce((a, b) => a + b, 0); }
+        function fmt(n, d) { d = d || 2; return Number(n).toFixed(d); }
+        function fmtNum(n, d) { d = d || 2; const v = Number(n).toFixed(d); return parseFloat(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+        function getPeriodIndices() { const mc = getMonthCount(); if (currentPeriod === 'all') return { start: 0, end: mc - 1 }; if (currentPeriod === 'first') return { start: 0, end: Math.min(5, mc - 1) }; return { start: Math.min(6, mc - 1), end: mc - 1 }; }
+        function getPeriodData(k) { const d = getData(); const s = getPeriodIndices(); return d[k].slice(s.start, s.end + 1); }
+        function getPeriodSum(k) { return sum(getPeriodData(k)); }
+        function getPeriodProd() { const d = getData(); const s = getPeriodIndices(); return sum(d.production.actualOutput.slice(s.start, s.end + 1)); }
+        function getAnnualProd() { return sum(getData().production.actualOutput); }
+        function getElecPrice() { const v = parseFloat(document.getElementById('elecPrice').value); return isNaN(v) || v <= 0 ? 0.75 : v; }
+
+        function switchYear(year) {
+            currentYear = year;
+            document.querySelectorAll('[data-year]').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-year="' + year + '"]').classList.add('active');
+            const sel = document.getElementById('periodSelect'), mc = getMonthCount();
+            if (mc < 12) { sel.querySelector('option[value="second"]').disabled = mc <= 6; }
+            else { sel.querySelectorAll('option').forEach(o => o.disabled = false); }
+            if (currentPeriod === 'second' && mc <= 6) { currentPeriod = 'all'; sel.value = 'all'; }
+            refreshAll();
+        }
+        function switchPeriod() { currentPeriod = document.getElementById('periodSelect').value; refreshAll(); }
+        function refreshAll() { renderKPIs(); renderGauges(); renderCompareChart(); renderGapChart(); renderBenchmarkTable(); renderSavingsGrid(); }
+
+        function calcMetrics() {
+            const tE = getPeriodSum('electricity'), tW = getPeriodSum('water'), tS = getPeriodSum('steam');
+            const prod = getPeriodProd(), annualProd = getAnnualProd();
+            const totalTce = tE * COEF.electricity + tW * COEF.water + tS * COEF.steam;
+            const unitComp = prod > 0 ? totalTce / prod : 0;
+            const unitElec = prod > 0 ? tE / prod : 0;
+            const unitSteam = prod > 0 ? tS / prod : 0;
+            const unitWater = prod > 0 ? tW / prod : 0;
+            const effRate = 82;
+            const months = getMonthCount();
+            let bestUnitComp = Infinity, bestUnitElec = Infinity, bestUnitSteam = Infinity;
+            const d = getData();
+            for (let i = 0; i < months; i++) {
+                const p = d.production.actualOutput[i]; if (p <= 0) continue;
+                const t = d.electricity[i] * COEF.electricity + d.water[i] * COEF.water + d.steam[i] * COEF.steam;
+                bestUnitComp = Math.min(bestUnitComp, t / p);
+                bestUnitElec = Math.min(bestUnitElec, d.electricity[i] / p);
+                bestUnitSteam = Math.min(bestUnitSteam, d.steam[i] / p);
+            }
+            if (bestUnitComp === Infinity) bestUnitComp = 0;
+            if (bestUnitElec === Infinity) bestUnitElec = 0;
+            if (bestUnitSteam === Infinity) bestUnitSteam = 0;
+            return { totalTce, prod, annualProd, unitComp, unitElec, unitSteam, unitWater, effRate, bestUnitComp, bestUnitElec, bestUnitSteam, elecPrice: getElecPrice() };
+        }
+
+        function getBenchmarks() {
+            return {
+                comp: { key: '单位产品综合能耗', unit: 'tce/t', type: 'reverse', fmt: 4, ns: 0.055, nb: 0.048, actualKey: 'unitComp', hbKey: 'bestUnitComp', unitPrice: 1200 },
+                elec: { key: '单位产品电耗', unit: 'kWh/t', type: 'reverse', fmt: 1, ns: 95, nb: 85, actualKey: 'unitElec', hbKey: 'bestUnitElec', unitPrice: null },
+                steam: { key: '单位产品蒸汽消耗', unit: 't/t', type: 'reverse', fmt: 3, ns: 0.42, nb: 0.35, actualKey: 'unitSteam', hbKey: 'bestUnitSteam', unitPrice: 350 },
+                water: { key: '单位产品水耗', unit: 'm³/t', type: 'reverse', fmt: 2, ns: 4.5, nb: 3.8, actualKey: 'unitWater', hbKey: 'unitWater', unitPrice: 6 },
+                eff: { key: '能源利用率', unit: '%', type: 'forward', fmt: 1, ns: 78, nb: 83, actualKey: 'effRate', hbKey: 'effRate', unitPrice: null }
+            };
+        }
+
+        function computeAchievement(actual, benchmark, type) {
+            if (!benchmark || benchmark === 0) return { achieved: null, absoluteGap: null, relativeGap: null };
+            if (type === 'reverse') {
+                return { achieved: benchmark / actual * 100, absoluteGap: actual - benchmark, relativeGap: (actual - benchmark) / benchmark * 100 };
+            } else {
+                return { achieved: actual / benchmark * 100, absoluteGap: benchmark - actual, relativeGap: (benchmark - actual) / benchmark * 100 };
+            }
+        }
+
+        function getStatus(achieved, dim) {
+            if (achieved == null || isNaN(achieved)) return { label: '无数据', cls: 'tag-gray' };
+            if (achieved >= 100) {
+                if (dim === '国家标准') return { label: '国标先进', cls: 'tag-purple' };
+                if (dim === '行业标杆') return { label: '行业领先', cls: 'tag-green' };
+                return { label: '突破最优', cls: 'tag-green' };
+            }
+            if (achieved >= 95) {
+                if (dim === '国家标准') return { label: '已达标', cls: 'tag-green' };
+                if (dim === '行业标杆') return { label: '接近标杆', cls: 'tag-blue' };
+                return { label: '基本持平', cls: 'tag-blue' };
+            }
+            if (dim === '国家标准') return { label: '未达标⚠', cls: 'tag-red' };
+            if (dim === '行业标杆') return { label: '差距较大', cls: 'tag-orange' };
+            return { label: '退步明显', cls: 'tag-orange' };
+        }
+
+        function getSuggestion(label) {
+            if (label.includes('未达标')) return '立即整改，制定专项达标方案';
+            if (label.includes('领先') || label.includes('突破') || label.includes('先进')) return '固化经验，持续保持领先水平';
+            if (label.includes('接近') || label.includes('持平')) return '小幅优化，持续缩小差距';
+            if (label.includes('差距') || label.includes('退步')) return '排查根因，制定年度追赶计划';
+            return '-';
+        }
+
+        function renderKPIs() {
+            const m = calcMetrics(); const b = getBenchmarks();
+            const rComp = computeAchievement(m.unitComp, b.comp.ns, 'reverse');
+            const rElec = computeAchievement(m.unitElec, b.elec.ns, 'reverse');
+            const rSteam = computeAchievement(m.unitSteam, b.steam.ns, 'reverse');
+            const passCount = [rComp, rElec, rSteam].filter(r => r.achieved != null && r.achieved >= 100).length;
+            const cards = [
+                { v: fmtNum(m.unitComp, 4), l: '单位产品综合能耗', u: 'tce/t', s: '逆向 — 越低越好', c: '#722ed1' },
+                { v: fmtNum(m.unitElec, 1), l: '单位产品电耗', u: 'kWh/t', s: '国标限定值≤95 kWh/t', c: '#1e80ff' },
+                { v: fmtNum(m.unitSteam, 3), l: '单位产品蒸汽消耗', u: 't/t', s: '国标限定值≤0.42 t/t', c: '#00b42a' },
+                { v: passCount + '/3', l: '国标达标指标数', u: '', s: rComp.achieved >= 100 ? '✅ 综合能耗达标' : '⚠ 综合能耗未达标', c: rComp.achieved >= 100 ? '#00b42a' : '#ff7d00' },
+                { v: fmtNum(m.bestUnitComp, 4), l: '历史最优（月度）', u: 'tce/t', s: '内部挖潜基准', c: '#f53f3f' },
+                { v: fmtNum(m.annualProd, 1), l: '年度总产量', u: 't', s: '节能量计算基准', c: '#14c9c9' }
+            ];
+            document.getElementById('kpiSection').innerHTML = cards.map(c => '<div class="kpi-card" style="border-top-color:' + c.c + '"><div class="kpi-value" style="color:' + c.c + '">' + c.v + '</div><div class="kpi-label">' + c.l + '</div><div class="kpi-unit">' + c.u + '</div>' + (c.s ? '<div class="kpi-sub">' + c.s + '</div>' : '') + '</div>').join('');
+        }
+
+        function renderGauges() {
+            const m = calcMetrics(); const b = getBenchmarks();
+            const items = [
+                { title: '国家标准 — 单位产品综合能耗', actual: m.unitComp, benchmark: b.comp.ns, type: 'reverse', dim: '国家标准' },
+                { title: '行业标杆 — 单位产品电耗', actual: m.unitElec, benchmark: b.elec.nb, type: 'reverse', dim: '行业标杆' },
+                { title: '历史最优 — 单位产品综合能耗', actual: m.unitComp, benchmark: m.bestUnitComp, type: 'reverse', dim: '历史最优' }
+            ];
+            let html = '';
+            items.forEach((it, idx) => {
+                const r = computeAchievement(it.actual, it.benchmark, it.type);
+                const status = r.achieved != null ? getStatus(r.achieved, it.dim) : { label: '无数据', cls: 'tag-gray' };
+                html += '<div class="gauge-card"><div class="gauge-header">' + it.title + '</div><div class="gauge-box" id="gauge_' + idx + '"></div><div style="text-align:center;margin-top:4px;"><span class="tag ' + status.cls + '">' + status.label + ' | 达成度:' + (r.achieved != null ? fmt(r.achieved, 1) + '%' : '-') + '</span></div></div>';
+            });
+            document.getElementById('gaugeRow').innerHTML = html;
+            items.forEach((it, idx) => {
+                const dom = document.getElementById('gauge_' + idx); if (!dom) return;
+                const c = echarts.init(dom);
+                const r = computeAchievement(it.actual, it.benchmark, it.type);
+                const val = r.achieved != null ? Math.min(Math.max(r.achieved, 0), 150) : 0;
+                const color = val >= 100 ? '#00b42a' : (val >= 95 ? '#1e80ff' : '#f53f3f');
+                c.setOption({
+                    series: [{ type: 'gauge', radius: '80%', center: ['50%', '55%'], startAngle: 220, endAngle: -40, min: 0, max: 150, splitNumber: 10, axisLine: { lineStyle: { width: 14, color: [[0.633, '#f53f3f'], [0.667, '#1e80ff'], [1, '#00b42a']] } }, axisTick: { distance: -18, length: 6 }, splitLine: { distance: -22, length: 10, lineStyle: { width: 1.5 } }, axisLabel: { distance: -38, fontSize: 9, formatter: function(v) { return v + '%'; } }, anchor: { show: false }, detail: { valueAnimation: true, fontSize: 20, offsetCenter: [0, '60%'], formatter: '{value}%', color: color }, data: [{ value: +val.toFixed(1), name: '达成度' }] }]
+                });
+                window.addEventListener('resize', () => c.resize());
+            });
+        }
+
+        function renderCompareChart() {
+            const dom = document.getElementById('compareChart'); if (!dom) return;
+            const chart = echarts.init(dom);
+            const m = calcMetrics(); const b = getBenchmarks();
+            const labels = ['单位产品\n综合能耗(tce/t)', '单位产品\n电耗(kWh/t)', '单位产品\n蒸汽消耗(t/t)'];
+            const actuals = [m.unitComp, m.unitElec, m.unitSteam];
+            const nsVals = [b.comp.ns, b.elec.ns, b.steam.ns];
+            const nbVals = [b.comp.nb, b.elec.nb, b.steam.nb];
+            const hbVals = [m.bestUnitComp, m.bestUnitElec, m.bestUnitSteam];
+            chart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['实际值', '国标限定值', '行业标杆值', '历史最优值'], top: 0 },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: { type: 'category', data: labels, axisLabel: { fontSize: 10 } },
+                yAxis: { type: 'value', name: '' },
+                series: [
+                    { name: '实际值', type: 'bar', data: actuals, itemStyle: { color: '#722ed1' }, barWidth: '22%', label: { show: true, position: 'top', fontSize: 9, formatter: function(p) { return p.value.toFixed(2); } } },
+                    { name: '国标限定值', type: 'bar', data: nsVals, itemStyle: { color: '#f53f3f', opacity: 0.6 }, barWidth: '22%' },
+                    { name: '行业标杆值', type: 'bar', data: nbVals, itemStyle: { color: '#ff7d00', opacity: 0.6 }, barWidth: '22%' },
+                    { name: '历史最优值', type: 'bar', data: hbVals, itemStyle: { color: '#00b42a', opacity: 0.6 }, barWidth: '22%' }
+                ]
+            });
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        function renderGapChart() {
+            const dom = document.getElementById('gapChart'); if (!dom) return;
+            const chart = echarts.init(dom);
+            const m = calcMetrics(); const b = getBenchmarks();
+            const labels = ['vs 国标', 'vs 行业标杆', 'vs 历史最优'];
+            const dims = [
+                { ns: b.comp.ns, nb: b.comp.nb, hb: m.bestUnitComp, actual: m.unitComp },
+                { ns: b.elec.ns, nb: b.elec.nb, hb: m.bestUnitElec, actual: m.unitElec },
+                { ns: b.steam.ns, nb: b.steam.nb, hb: m.bestUnitSteam, actual: m.unitSteam }
+            ];
+            const names = ['综合能耗', '电耗', '蒸汽消耗'];
+            const series = dims.map((d, i) => {
+                const vals = [
+                    +(d.ns ? ((d.actual - d.ns) / d.ns * 100) : 0).toFixed(1),
+                    +(d.nb ? ((d.actual - d.nb) / d.nb * 100) : 0).toFixed(1),
+                    +(d.hb > 0 ? ((d.actual - d.hb) / d.hb * 100) : 0).toFixed(1)
+                ];
+                return { name: names[i], type: 'bar', data: vals, barWidth: '30%', itemStyle: { color: function(p) { return p.value > 0 ? '#f53f3f' : '#00b42a'; } }, label: { show: true, position: 'top', formatter: '{c}%', fontSize: 10 } };
+            });
+            chart.setOption({
+                tooltip: { trigger: 'axis', formatter: function(ps) { let s = ps[0].name + '<br/>'; ps.forEach(p => s += p.marker + p.seriesName + ': ' + p.value + '%<br/>'); return s; } },
+                legend: { data: names, top: 0 },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: { type: 'category', data: labels },
+                yAxis: { type: 'value', name: '相对差距率(%)', axisLabel: { formatter: '{value}%' } },
+                series: series
+            });
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        function renderBenchmarkTable() {
+            const m = calcMetrics(); const b = getBenchmarks(); const ep = getElecPrice();
+            const indicators = [b.comp, b.elec, b.steam, b.water, b.eff];
+            const dims = [{ label: '国家标准', bKey: 'ns' }, { label: '行业标杆', bKey: 'nb' }, { label: '历史最优', bKey: 'hb' }];
+            let html = '';
+            indicators.forEach(ind => {
+                const hbVal = ind.hbKey ? m[ind.hbKey] : null;
+                dims.forEach((dim, di) => {
+                    let bVal = dim.bKey === 'hb' ? hbVal : ind[dim.bKey];
+                    if (bVal == null || bVal === 0) return;
+                    const r = computeAchievement(m[ind.actualKey], bVal, ind.type);
+                    const status = r.achieved != null ? getStatus(r.achieved, dim.label) : { label: '无数据', cls: 'tag-gray' };
+                    let theoretical = 0, revenue = 0;
+                    if (r.absoluteGap != null && r.absoluteGap > 0) {
+                        theoretical = r.absoluteGap * m.annualProd;
+                        if (ind.unitPrice !== null) { revenue = theoretical * 0.7 * (ind.unitPrice || ep); }
+                        else if (ind.key.includes('电耗')) { revenue = theoretical * 0.7 * ep; }
+                        else { revenue = theoretical * 0.7 * 500; }
+                    }
+                    html += '<tr' + (di === 0 ? ' style="border-top:2px solid #e0d5f7;"' : '') + '>';
+                    html += '<td class="fw-600">' + (di === 0 ? ind.key : '') + '</td>';
+                    html += '<td><span class="tag tag-purple">' + dim.label + '</span></td>';
+                    html += '<td class="text-right fw-600">' + fmtNum(bVal, ind.fmt) + '</td>';
+                    html += '<td>' + ind.unit + '</td>';
+                    html += '<td class="text-right">' + fmtNum(m[ind.actualKey], ind.fmt) + '</td>';
+                    html += '<td class="text-right fw-600 ' + (r.achieved >= 100 ? 'text-green' : (r.achieved >= 95 ? 'text-blue' : 'text-red')) + '">' + (r.achieved != null ? fmtNum(r.achieved, 1) + '%' : '-') + '</td>';
+                    html += '<td class="text-right ' + (r.absoluteGap > 0 ? 'text-red' : 'text-green') + '">' + (r.absoluteGap != null ? (r.absoluteGap > 0 ? '+' : '') + fmtNum(r.absoluteGap, ind.fmt) : '-') + '</td>';
+                    html += '<td class="text-right ' + (r.relativeGap > 0 ? 'text-red' : 'text-green') + '">' + (r.relativeGap != null ? (r.relativeGap > 0 ? '+' : '') + fmtNum(r.relativeGap, 1) + '%' : '-') + '</td>';
+                    html += '<td class="text-right">' + (theoretical > 0 ? fmtNum(theoretical, 0) + ' ' + ind.unit.replace('/t', '') : '-') + '</td>';
+                    html += '<td class="text-right text-purple fw-600">' + (revenue > 0 ? '¥' + fmtNum(revenue, 0) : '-') + '</td>';
+                    html += '<td class="text-center"><span class="tag ' + status.cls + '">' + status.label + '</span></td>';
+                    html += '<td style="font-size:0.78rem;">' + getSuggestion(status.label) + '</td>';
+                    html += '</tr>';
+                });
+            });
+            document.getElementById('benchmarkBody').innerHTML = html;
+        }
+
+        function renderSavingsGrid() {
+            const m = calcMetrics(); const b = getBenchmarks(); const ep = getElecPrice();
+            const compR = computeAchievement(m.unitComp, b.comp.nb, 'reverse');
+            const elecR = computeAchievement(m.unitElec, b.elec.nb, 'reverse');
+            const steamR = computeAchievement(m.unitSteam, b.steam.nb, 'reverse');
+            let totalRevenue = 0;
+            const calcRev = (r, up) => r.absoluteGap > 0 ? r.absoluteGap * m.annualProd * 0.7 * up : 0;
+            const revComp = calcRev(compR, 1200);
+            const revElec = calcRev(elecR, ep);
+            const revSteam = calcRev(steamR, 350);
+            totalRevenue = revComp + revElec + revSteam;
+            document.getElementById('savingsGrid').innerHTML = [
+                { title: '综合能耗节能量（vs 行业标杆）', value: (compR.absoluteGap > 0 ? fmtNum(compR.absoluteGap * m.annualProd, 1) : '0') + ' tce', desc: '理论年节能量：' + (compR.absoluteGap > 0 ? fmtNum(compR.absoluteGap * m.annualProd, 1) + ' tce' : '已领先，无节能空间') + ' | 可实现70%：' + (compR.absoluteGap > 0 ? fmtNum(compR.absoluteGap * m.annualProd * 0.7, 1) + ' tce，收益 ¥' + fmtNum(revComp, 0) : '无需优化') },
+                { title: '电耗节能量（vs 行业标杆）', value: (elecR.absoluteGap > 0 ? fmtNum(elecR.absoluteGap * m.annualProd, 0) : '0') + ' kWh', desc: '理论年节电量：' + (elecR.absoluteGap > 0 ? fmtNum(elecR.absoluteGap * m.annualProd, 0) + ' kWh' : '已领先，无节能空间') + ' | 可实现70%：收益 ¥' + fmtNum(revElec, 0) },
+                { title: '三指标合计年节能收益', value: '¥' + fmtNum(totalRevenue, 0), desc: '单位产品综合能耗 + 电耗 + 蒸汽消耗对标行业标杆的可实现节能收益合计 | 可实现系数取70%' }
+            ].map(s => '<div class="savings-card"><div class="savings-title">' + s.title + '</div><div class="savings-value">' + s.value + '</div><div class="savings-desc">' + s.desc + '</div></div>').join('');
+        }
+
+        function exportTable(tableId) {
+            const table = document.getElementById(tableId);
+            let csv = '\uFEFF';
+            table.querySelectorAll('tr').forEach(row => {
+                const rd = []; row.querySelectorAll('th, td').forEach(c => rd.push('"' + c.textContent.trim().replace(/"/g, '""') + '"'));
+                csv += rd.join(',') + '\n';
+            });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            a.download = tableId + '_' + currentYear + '_' + currentPeriod + '.csv';
+            a.click();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() { refreshAll(); });
+    </script>
+</body>
+</html>
