@@ -8,13 +8,11 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; color: #333; }
-        .container { max-width: 1920px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1920px; margin: 0 auto; padding: 20px; width: 100%; }
 
         .header { background: linear-gradient(135deg, #ff7d00 0%, #d96800 100%); color: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(255, 125, 0, 0.25); }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .header h1 { font-size: 2rem; font-weight: 600; }
-        .back-btn { background: rgba(255,255,255,0.25); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
-        .back-btn:hover { background: rgba(255,255,255,0.35); }
         .header p { font-size: 1rem; opacity: 0.92; }
 
         .selector-bar { background: white; padding: 16px 24px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
@@ -120,6 +118,24 @@
             .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
             .strategy-grid { grid-template-columns: 1fr; }
         }
+        @media (min-width: 2560px) {
+            .container { max-width: 3440px; padding: 30px; }
+            .header { padding: 32px 40px; }
+            .header h1 { font-size: 2.2rem; }
+            .header p { font-size: 1.1rem; }
+            .kpi-section { grid-template-columns: repeat(8, 1fr); gap: 20px; }
+            .kpi-card { min-height: 150px; padding: 32px 20px; }
+            .kpi-value { font-size: 2rem; }
+            .charts-row { grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+            .charts-row-3 { grid-template-columns: repeat(4, 1fr); gap: 24px; }
+            .chart-panel { padding: 24px 30px; }
+            .chart-box { height: 520px; }
+            .chart-box-sm { height: 450px; }
+            .section-panel { border-radius: 12px; }
+            .section-panel-header { padding: 20px 30px; }
+            .strategy-grid { grid-template-columns: repeat(4, 1fr); }
+            table th, table td { padding: 12px 16px; font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -127,7 +143,7 @@
         <div class="header">
             <div class="header-top">
                 <h1>📊 能源消费分析模块</h1>
-                <a href="0.index.html" class="back-btn">← 返回首页</a>
+
             </div>
             <p>能耗结构树状分析 | 全周期/半周期对比 | 异常检测与预警 | 蒸汽消耗与锅炉能耗分析 | 用能策略推荐 | 贵州基地一车间</p>
         </div>
@@ -166,6 +182,10 @@
             <div class="chart-panel">
                 <div class="chart-panel-header">
                     <div class="chart-panel-title">🌳 能耗结构树状图（全周期综合能耗）</div>
+                    <div class="chart-panel-actions">
+                        <button class="btn btn-sm" id="treemapBtn" onclick="switchChartType('treemap')" style="background:#ff7d00;color:white;border:1px solid #ff7d00">矩形树图</button>
+                        <button class="btn btn-sm" id="sunburstBtn" onclick="switchChartType('sunburst')" style="background:white;color:#666;border:1px solid #d9d9d9">旭日图</button>
+                    </div>
                 </div>
                 <div class="chart-box" id="treemapChart"></div>
             </div>
@@ -462,11 +482,43 @@
             `).join('');
         }
 
+        // ==================== 图表类型切换 ====================
+        let currentChartType = 'treemap';
+        let treemapChartInstance = null;
+
+        function switchChartType(type) {
+            currentChartType = type;
+            const treemapBtn = document.getElementById('treemapBtn');
+            const sunburstBtn = document.getElementById('sunburstBtn');
+            
+            if (type === 'treemap') {
+                treemapBtn.style.background = '#ff7d00';
+                treemapBtn.style.color = 'white';
+                treemapBtn.style.border = '1px solid #ff7d00';
+                sunburstBtn.style.background = 'white';
+                sunburstBtn.style.color = '#666';
+                sunburstBtn.style.border = '1px solid #d9d9d9';
+            } else {
+                sunburstBtn.style.background = '#ff7d00';
+                sunburstBtn.style.color = 'white';
+                sunburstBtn.style.border = '1px solid #ff7d00';
+                treemapBtn.style.background = 'white';
+                treemapBtn.style.color = '#666';
+                treemapBtn.style.border = '1px solid #d9d9d9';
+            }
+            
+            renderTreemapChart();
+        }
+
         // ==================== 能耗结构树状图 ====================
         function renderTreemapChart() {
             const dom = document.getElementById('treemapChart');
             if (!dom) return;
-            const chart = echarts.init(dom);
+            
+            if (treemapChartInstance) {
+                treemapChartInstance.dispose();
+            }
+            treemapChartInstance = echarts.init(dom);
 
             const totalTce = getPeriodSum('electricity') * COEF.electricity + getPeriodSum('water') * COEF.water + getPeriodSum('steam') * COEF.steam;
             const refData = currentPeriod === 'second' ? STRUCTURE_DATA.secondHalf : STRUCTURE_DATA.fullCycle;
@@ -480,25 +532,103 @@
 
             const colors = ['#1e80ff','#00b42a','#ff7d00','#722ed1','#f53f3f','#14c9c9','#f7ba1e','#86909c','#e8654a','#4a90d9'];
 
-            chart.setOption({
-                tooltip: { formatter: function(p) { return p.name + '<br/>综合能耗: ' + fmtNum(p.value, 2) + ' tce'; } },
-                series: [{
-                    type: 'treemap', roam: false, width: '100%', height: '92%',
-                    breadcrumb: { show: true, height: 28, bottom: 0 },
-                    label: { show: true, formatter: function(p) { return p.name + '\n' + fmtNum(p.value, 1) + ' tce'; } },
-                    upperLabel: { show: true, height: 28 },
-                    itemStyle: { borderColor: '#fff', borderWidth: 2 },
-                    levels: [
-                        { colorMapping: 'value', visualMin: 0, visualMax: totalTce, color: colors },
-                        { itemStyle: { borderWidth: 2, gapWidth: 2 }, upperLabel: { show: true } }
-                    ],
-                    data: [
-                        { name: '生产系统', children: prodItems },
-                        { name: '辅助系统', children: auxItems }
-                    ]
-                }]
-            });
-            window.addEventListener('resize', () => chart.resize());
+            let option;
+            
+            if (currentChartType === 'treemap') {
+                // 矩形树图配置
+                option = {
+                    tooltip: { 
+                        formatter: function(p) { 
+                            return p.name + '<br/>综合能耗: ' + fmtNum(p.value, 2) + ' tce'; 
+                        } 
+                    },
+                    animationDuration: 800,
+                    animationEasing: 'cubicOut',
+                    series: [{
+                        type: 'treemap', 
+                        roam: false, 
+                        width: '100%', 
+                        height: '92%',
+                        breadcrumb: { show: true, height: 28, bottom: 0 },
+                        label: { 
+                            show: true, 
+                            formatter: function(p) { 
+                                return p.name + '\n' + fmtNum(p.value, 1) + ' tce'; 
+                            } 
+                        },
+                        upperLabel: { show: true, height: 28 },
+                        itemStyle: { borderColor: '#fff', borderWidth: 2 },
+                        levels: [
+                            { colorMapping: 'value', visualMin: 0, visualMax: totalTce, color: colors },
+                            { itemStyle: { borderWidth: 2, gapWidth: 2 }, upperLabel: { show: true } }
+                        ],
+                        data: [
+                            { name: '生产系统', children: prodItems },
+                            { name: '辅助系统', children: auxItems }
+                        ]
+                    }]
+                };
+            } else {
+                // 旭日图配置
+                const sunburstData = [
+                    {
+                        name: '生产系统',
+                        itemStyle: { color: '#1e80ff' },
+                        children: prodItems.map((item, idx) => ({
+                            name: item.name,
+                            value: item.value,
+                            itemStyle: { color: colors[idx % colors.length] }
+                        }))
+                    },
+                    {
+                        name: '辅助系统',
+                        itemStyle: { color: '#ff7d00' },
+                        children: auxItems.map((item, idx) => ({
+                            name: item.name,
+                            value: item.value,
+                            itemStyle: { color: colors[(idx + 5) % colors.length] }
+                        }))
+                    }
+                ];
+                
+                option = {
+                    tooltip: { 
+                        formatter: function(p) { 
+                            return p.name + '<br/>综合能耗: ' + fmtNum(p.value, 2) + ' tce<br/>占比: ' + fmtNum(p.percent, 1) + '%'; 
+                        } 
+                    },
+                    animationDuration: 1000,
+                    animationEasing: 'cubicOut',
+                    series: [{
+                        type: 'sunburst',
+                        data: sunburstData,
+                        radius: [0, '90%'],
+                        label: {
+                            rotate: 'radial',
+                            formatter: function(p) {
+                                return p.name.length > 6 ? p.name.substring(0, 5) + '...' : p.name;
+                            }
+                        },
+                        itemStyle: {
+                            borderRadius: 4,
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        },
+                        emphasis: {
+                            focus: 'ancestor'
+                        },
+                        levels: [
+                            {},
+                            { r0: '15%', r: '45%', label: { rotate: 'tangential' } },
+                            { r0: '45%', r: '75%', label: { align: 'right' } },
+                            { r0: '75%', r: '85%', label: { position: 'outside', padding: 3, silent: false } }
+                        ]
+                    }]
+                };
+            }
+
+            treemapChartInstance.setOption(option);
+            window.addEventListener('resize', () => treemapChartInstance && treemapChartInstance.resize());
         }
 
         // ==================== 全周期 vs 半周期对比图 ====================
@@ -741,10 +871,23 @@
             });
 
             const avgLine = unitTce.reduce((a, b) => a + b, 0) / unitTce.length;
+            const warningThreshold = 0.03; // ±3% 预警阈值
+            const upperLimit = +(avgLine * (1 + warningThreshold)).toFixed(4);
+            const lowerLimit = +(avgLine * (1 - warningThreshold)).toFixed(4);
 
             chart.setOption({
-                tooltip: { trigger: 'axis', formatter: function(p) { return p[0].name + '<br/>单位产品综合能耗: ' + fmtNum(p[0].value, 4) + ' tce/t'; } },
-                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                tooltip: { 
+                    trigger: 'axis', 
+                    formatter: function(p) { 
+                        return p[0].name + '<br/>单位产品综合能耗: ' + fmtNum(p[0].value, 4) + ' tce/t'; 
+                    } 
+                },
+                legend: { 
+                    data: ['单位产品综合能耗', '平均值', '预警上限', '预警下限'],
+                    top: 10,
+                    textStyle: { fontSize: 11 }
+                },
+                grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
                 xAxis: { type: 'category', data: labels },
                 yAxis: { type: 'value', name: 'tce/t' },
                 series: [
@@ -752,14 +895,47 @@
                         name: '单位产品综合能耗', type: 'bar', data: unitTce,
                         itemStyle: {
                             color: function(p) {
-                                return p.value > avgLine ? '#f53f3f' : '#00b42a';
+                                if (p.value > upperLimit) return '#f53f3f';
+                                if (p.value < lowerLimit) return '#f7ba1e';
+                                return '#00b42a';
                             }
                         }, barWidth: '50%'
                     },
                     {
                         name: '平均值', type: 'line', data: new Array(unitTce.length).fill(+avgLine.toFixed(4)),
                         lineStyle: { type: 'dashed', color: '#ff7d00', width: 2 },
-                        symbol: 'none'
+                        symbol: 'none',
+                        label: {
+                            show: true,
+                            position: 'end',
+                            formatter: 'avg: ' + avgLine.toFixed(4),
+                            fontSize: 10,
+                            color: '#ff7d00'
+                        }
+                    },
+                    {
+                        name: '预警上限', type: 'line', data: new Array(unitTce.length).fill(upperLimit),
+                        lineStyle: { type: 'dashed', color: '#f53f3f', width: 2 },
+                        symbol: 'none',
+                        label: {
+                            show: true,
+                            position: 'end',
+                            formatter: '上限: ' + upperLimit.toFixed(4),
+                            fontSize: 10,
+                            color: '#f53f3f'
+                        }
+                    },
+                    {
+                        name: '预警下限', type: 'line', data: new Array(unitTce.length).fill(lowerLimit),
+                        lineStyle: { type: 'dashed', color: '#f7ba1e', width: 2 },
+                        symbol: 'none',
+                        label: {
+                            show: true,
+                            position: 'end',
+                            formatter: '下限: ' + lowerLimit.toFixed(4),
+                            fontSize: 10,
+                            color: '#f7ba1e'
+                        }
                     }
                 ]
             });

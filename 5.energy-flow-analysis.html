@@ -8,12 +8,10 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; color: #333; }
-        .container { max-width: 1920px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1920px; margin: 0 auto; padding: 20px; width: 100%; }
         .header { background: linear-gradient(135deg, #14c9c9 0%, #0ea5a5 100%); color: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(20, 201, 201, 0.25); }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .header h1 { font-size: 2rem; font-weight: 600; }
-        .back-btn { background: rgba(255,255,255,0.25); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
-        .back-btn:hover { background: rgba(255,255,255,0.35); }
         .header p { font-size: 1rem; opacity: 0.92; }
         .selector-bar { background: white; padding: 16px 24px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
         .selector-group { display: flex; align-items: center; gap: 8px; }
@@ -94,6 +92,23 @@
         .loss-desc { color: #666; font-size: 0.85rem; line-height: 1.5; }
         .meter-map { padding: 20px 24px; font-family: 'Courier New', Consolas, monospace; font-size: 0.8rem; line-height: 1.8; color: #333; background: #fafafa; border-radius: 6px; margin: 16px 24px; white-space: pre-wrap; overflow-x: auto; }
         @media (max-width: 1400px) { .kpi-section { grid-template-columns: repeat(3, 1fr); } .charts-row { grid-template-columns: 1fr; } .loss-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 2560px) {
+            .container { max-width: 3440px; padding: 30px; }
+            .header { padding: 32px 40px; }
+            .header h1 { font-size: 2.2rem; }
+            .header p { font-size: 1.1rem; }
+            .kpi-section { grid-template-columns: repeat(8, 1fr); gap: 20px; }
+            .kpi-card { min-height: 150px; padding: 32px 20px; }
+            .kpi-value { font-size: 2rem; }
+            .charts-row { grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+            .chart-panel { padding: 24px 30px; }
+            .chart-box { height: 550px; }
+            .chart-box-lg { height: 650px; }
+            .loss-grid { grid-template-columns: repeat(4, 1fr); }
+            .section-panel { border-radius: 12px; }
+            .section-panel-header { padding: 20px 30px; }
+            table th, table td { padding: 12px 16px; font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -101,7 +116,7 @@
         <div class="header">
             <div class="header-top">
                 <h1>🔄 能流分析模块</h1>
-                <a href="0.index.html" class="back-btn">← 返回首页</a>
+
             </div>
             <p>可视化能源流动过程 | 基地级电表/蒸汽表/水表/燃气表多级计量网络 | 精准识别能量损失环节 | 贵州基地</p>
         </div>
@@ -238,104 +253,191 @@
             if (sankeyChartInst) sankeyChartInst.dispose();
             const chart = echarts.init(dom); sankeyChartInst = chart;
             const tE = getMonthlySum('electricity'), tW = getMonthlySum('water'), tS = getMonthlySum('steam');
-            const lblE = '电力\n' + fmtNum(tE / 10000, 1) + '万kWh';
-            const lblS = '蒸汽\n' + fmtNum(tS, 0) + 't';
-            const lblW = '自来水\n' + fmtNum(tW, 0) + 'm³';
+            const lblE = '⚡ 电力输入\n' + fmtNum(tE / 10000, 1) + '万kWh';
+            const lblS = '♨️ 蒸汽输入\n' + fmtNum(tS, 0) + 't';
+            const lblW = '💧 自来水输入\n' + fmtNum(tW, 0) + 'm³';
+            const lblG = '🔥 天然气输入';
             let data, links;
+            
             if (sankeyMode === 'electricity') {
-                const l1 = tE * 0.22, l2 = tE * 0.22, pl = tE * 0.08, zs = tE * 0.05;
+                // 一级总表 -> 二级分表 -> 三级子表
+                const prod1 = tE * 0.22, prod2 = tE * 0.22, pl = tE * 0.08, zs = tE * 0.05;
                 const ky = tE * 0.06, gl = tE * 0.04, k3 = tE * 0.025, k2 = tE * 0.025, k1 = tE * 0.02, k9 = tE * 0.01;
                 const ws2 = tE * 0.025, ws = tE * 0.015, wx = tE * 0.01, cd = tE * 0.005, xf = tE * 0.02;
-                const ringSum = l1 + l2 + pl + zs + ky + gl + k3 + k2 + k1 + k9 + ws2 + ws + wx + cd + xf;
-                const other = Math.max(0, tE - ringSum);
+                
+                // 三级子表设备
+                const devRatio = [0.025, 0.030, 0.022, 0.018, 0.028, 0.035, 0.020, 0.015, 0.012, 0.010];
+                const devNames = ['灌装机', '输送线体', 'APV', '热缩机', '冷却机', '烘炉', '包装机', '冷却塔', '码垛机', '卸垛机'];
+                
                 data = [
+                    // 能源输入
                     { name: lblE, itemStyle: { color: '#1e80ff' } },
-                    { name: '基地总表1' },
-                    { name: '生产系统', itemStyle: { color: '#00b42a' } },
-                    { name: '辅助系统', itemStyle: { color: '#ff7d00' } },
-                    { name: '消防/通风', itemStyle: { color: '#722ed1' } },
-                    { name: '其他/损耗', itemStyle: { color: '#f53f3f' } }
+                    // 一级总表
+                    { name: '【一级】基地总表1', itemStyle: { color: '#722ed1' } },
+                    // 二级分表 - 生产系统
+                    { name: '【二级】生产系统-1线', itemStyle: { color: '#00b42a' } },
+                    { name: '【二级】生产系统-2线', itemStyle: { color: '#14c9c9' } },
+                    { name: '【二级】生产系统-配料', itemStyle: { color: '#ff7d00' } },
+                    { name: '【二级】生产系统-制水', itemStyle: { color: '#ffa940' } },
+                    // 二级分表 - 辅助系统
+                    { name: '【二级】辅助-空压机', itemStyle: { color: '#f53f3f' } },
+                    { name: '【二级】辅助-锅炉', itemStyle: { color: '#f7ba1e' } },
+                    { name: '【二级】辅助-中央空调', itemStyle: { color: '#36cfc9' } },
+                    { name: '【二级】辅助-污水处理', itemStyle: { color: '#b37feb' } },
+                    { name: '【二级】辅助-维修间', itemStyle: { color: '#ffadd2' } },
+                    { name: '【二级】辅助-充电桩', itemStyle: { color: '#86909c' } },
+                    { name: '【二级】消防/通风', itemStyle: { color: '#d3adf7' } },
+                    // 三级子表 - 1线设备
+                    { name: '【三级】1线-灌装机' }, { name: '【三级】1线-输送线体' }, { name: '【三级】1线-APV' },
+                    { name: '【三级】1线-热缩机' }, { name: '【三级】1线-冷却机' }, { name: '【三级】1线-烘炉' },
+                    { name: '【三级】1线-包装机' }, { name: '【三级】1线-冷却塔' }, { name: '【三级】1线-码垛机' },
+                    { name: '【三级】1线-卸垛机' },
+                    // 三级子表 - 2线设备
+                    { name: '【三级】2线-灌装机' }, { name: '【三级】2线-输送线体' }, { name: '【三级】2线-APV' },
+                    { name: '【三级】2线-热缩机' }, { name: '【三级】2线-冷却机' }, { name: '【三级】2线-烘炉' },
+                    { name: '【三级】2线-包装机' }, { name: '【三级】2线-冷却塔' }, { name: '【三级】2线-码垛机' },
+                    { name: '【三级】2线-卸垛机' }
                 ];
+                
                 links = [
-                    { source: lblE, target: '基地总表1', value: tE },
-                    { source: '基地总表1', target: '生产系统', value: l1 + l2 + pl + zs },
-                    { source: '基地总表1', target: '辅助系统', value: ky + gl + k3 + k2 + k1 + k9 + ws2 + ws + wx + cd },
-                    { source: '基地总表1', target: '消防/通风', value: xf + other }
+                    // 输入 -> 一级总表
+                    { source: lblE, target: '【一级】基地总表1', value: tE },
+                    // 一级总表 -> 二级分表
+                    { source: '【一级】基地总表1', target: '【二级】生产系统-1线', value: prod1 },
+                    { source: '【一级】基地总表1', target: '【二级】生产系统-2线', value: prod2 },
+                    { source: '【一级】基地总表1', target: '【二级】生产系统-配料', value: pl },
+                    { source: '【一级】基地总表1', target: '【二级】生产系统-制水', value: zs },
+                    { source: '【一级】基地总表1', target: '【二级】辅助-空压机', value: ky },
+                    { source: '【一级】基地总表1', target: '【二级】辅助-锅炉', value: gl },
+                    { source: '【一级】基地总表1', target: '【二级】辅助-中央空调', value: k3 + k2 + k1 + k9 },
+                    { source: '【一级】基地总表1', target: '【二级】辅助-污水处理', value: ws2 + ws },
+                    { source: '【一级】基地总表1', target: '【二级】辅助-维修间', value: wx },
+                    { source: '【一级】基地总表1', target: '【二级】辅助-充电桩', value: cd },
+                    { source: '【一级】基地总表1', target: '【二级】消防/通风', value: xf }
                 ];
+                
+                // 二级分表 -> 三级子表
+                devNames.forEach((name, idx) => {
+                    const ratio = devRatio[idx];
+                    links.push({ source: '【二级】生产系统-1线', target: '【三级】1线-' + name, value: tE * ratio });
+                    links.push({ source: '【二级】生产系统-2线', target: '【三级】2线-' + name, value: tE * ratio });
+                });
+                
             } else if (sankeyMode === 'steam') {
                 const pl = tS * 0.4048, l1 = tS * 0.2687, l2 = tS * 0.2690, loss = tS * 0.0574;
+                
                 data = [
-                    { name: lblS, itemStyle: { color: '#ff7d00' } }, { name: '蒸汽总表' },
-                    { name: '配料', itemStyle: { color: '#1e80ff' } },
-                    { name: '一线APV', itemStyle: { color: '#00b42a' } },
-                    { name: '二线APV', itemStyle: { color: '#722ed1' } },
-                    { name: '管网损耗', itemStyle: { color: '#f53f3f' } }
+                    { name: lblS, itemStyle: { color: '#ff7d00' } },
+                    { name: '【一级】蒸汽总表', itemStyle: { color: '#722ed1' } },
+                    { name: '【二级】配料', itemStyle: { color: '#1e80ff' } },
+                    { name: '【二级】一线APV', itemStyle: { color: '#00b42a' } },
+                    { name: '【二级】二线APV', itemStyle: { color: '#14c9c9' } },
+                    { name: '【二级】管网损耗', itemStyle: { color: '#f53f3f' } }
                 ];
+                
                 links = [
-                    { source: lblS, target: '蒸汽总表', value: tS },
-                    { source: '蒸汽总表', target: '配料', value: pl },
-                    { source: '蒸汽总表', target: '一线APV', value: l1 },
-                    { source: '蒸汽总表', target: '二线APV', value: l2 },
-                    { source: '蒸汽总表', target: '管网损耗', value: loss }
+                    { source: lblS, target: '【一级】蒸汽总表', value: tS },
+                    { source: '【一级】蒸汽总表', target: '【二级】配料', value: pl },
+                    { source: '【一级】蒸汽总表', target: '【二级】一线APV', value: l1 },
+                    { source: '【一级】蒸汽总表', target: '【二级】二线APV', value: l2 },
+                    { source: '【一级】蒸汽总表', target: '【二级】管网损耗', value: loss }
                 ];
+                
             } else if (sankeyMode === 'water') {
                 const b30 = tW * 0.55, b15 = tW * 0.22, b16 = tW * 0.23;
                 const roPl = b30 * 0.35, roGl = b30 * 0.35, ns = b30 * 0.20, px = b30 * 0.10;
                 const ck = b15 * 0.35, xj = b15 * 0.20, bg15 = b15 * 0.45;
                 const cj16 = b16 * 0.5, cs16 = b16 * 0.2, bg16 = b16 * 0.3;
+                
                 data = [
                     { name: lblW, itemStyle: { color: '#14c9c9' } },
-                    { name: '30栋制水车间', itemStyle: { color: '#1e80ff' } },
-                    { name: '15栋厂房', itemStyle: { color: '#00b42a' } },
-                    { name: '16栋厂房', itemStyle: { color: '#ff7d00' } },
-                    { name: '配料间-RO水', itemStyle: { color: '#722ed1' } },
-                    { name: '锅炉间-RO水', itemStyle: { color: '#f53f3f' } },
-                    { name: '浓水排放', itemStyle: { color: '#86909c' } },
-                    { name: '30栋培训室', itemStyle: { color: '#4a90d9' } },
-                    { name: '15栋仓库卫生间', itemStyle: { color: '#e8654a' } },
-                    { name: '15栋香精房消防', itemStyle: { color: '#f7ba1e' } },
-                    { name: '15栋行政办公室', itemStyle: { color: '#b37feb' } },
-                    { name: '16栋车间', itemStyle: { color: '#36cfc9' } },
-                    { name: '16栋卫生间', itemStyle: { color: '#d3adf7' } },
-                    { name: '16栋综合办公室', itemStyle: { color: '#ffadd2' } }
+                    // 一级总表
+                    { name: '【一级】30栋制水车间-自来水', itemStyle: { color: '#722ed1' } },
+                    { name: '【一级】15栋厂房-自来水', itemStyle: { color: '#722ed1' } },
+                    { name: '【一级】16栋厂房-自来水', itemStyle: { color: '#722ed1' } },
+                    // 二级分表
+                    { name: '【二级】制水间-自来水', itemStyle: { color: '#1e80ff' } },
+                    { name: '【二级】30栋培训室-自来水', itemStyle: { color: '#4a90d9' } },
+                    { name: '【二级】15栋仓库卫生间', itemStyle: { color: '#e8654a' } },
+                    { name: '【二级】15栋香精房消防', itemStyle: { color: '#f7ba1e' } },
+                    { name: '【二级】15栋行政办公室', itemStyle: { color: '#b37feb' } },
+                    { name: '【二级】16栋车间-自来水', itemStyle: { color: '#36cfc9' } },
+                    { name: '【二级】16栋卫生间-自来水', itemStyle: { color: '#d3adf7' } },
+                    { name: '【二级】16栋综合办公室', itemStyle: { color: '#ffadd2' } },
+                    // 三级子表
+                    { name: '【三级】配料间-RO水', itemStyle: { color: '#00b42a' } },
+                    { name: '【三级】锅炉间-RO水', itemStyle: { color: '#ff7d00' } },
+                    { name: '【三级】浓水', itemStyle: { color: '#86909c' } }
                 ];
+                
                 links = [
-                    { source: lblW, target: '30栋制水车间', value: b30 },
-                    { source: lblW, target: '15栋厂房', value: b15 },
-                    { source: lblW, target: '16栋厂房', value: b16 },
-                    { source: '30栋制水车间', target: '配料间-RO水', value: roPl },
-                    { source: '30栋制水车间', target: '锅炉间-RO水', value: roGl },
-                    { source: '30栋制水车间', target: '浓水排放', value: ns },
-                    { source: '30栋制水车间', target: '30栋培训室', value: px },
-                    { source: '15栋厂房', target: '15栋仓库卫生间', value: ck },
-                    { source: '15栋厂房', target: '15栋香精房消防', value: xj },
-                    { source: '15栋厂房', target: '15栋行政办公室', value: bg15 },
-                    { source: '16栋厂房', target: '16栋车间', value: cj16 },
-                    { source: '16栋厂房', target: '16栋卫生间', value: cs16 },
-                    { source: '16栋厂房', target: '16栋综合办公室', value: bg16 }
+                    // 输入 -> 一级总表
+                    { source: lblW, target: '【一级】30栋制水车间-自来水', value: b30 },
+                    { source: lblW, target: '【一级】15栋厂房-自来水', value: b15 },
+                    { source: lblW, target: '【一级】16栋厂房-自来水', value: b16 },
+                    // 一级总表 -> 二级分表
+                    { source: '【一级】30栋制水车间-自来水', target: '【二级】制水间-自来水', value: b30 * 0.9 },
+                    { source: '【一级】30栋制水车间-自来水', target: '【二级】30栋培训室-自来水', value: px },
+                    { source: '【一级】15栋厂房-自来水', target: '【二级】15栋仓库卫生间', value: ck },
+                    { source: '【一级】15栋厂房-自来水', target: '【二级】15栋香精房消防', value: xj },
+                    { source: '【一级】15栋厂房-自来水', target: '【二级】15栋行政办公室', value: bg15 },
+                    { source: '【一级】16栋厂房-自来水', target: '【二级】16栋车间-自来水', value: cj16 },
+                    { source: '【一级】16栋厂房-自来水', target: '【二级】16栋卫生间-自来水', value: cs16 },
+                    { source: '【一级】16栋厂房-自来水', target: '【二级】16栋综合办公室', value: bg16 },
+                    // 二级分表 -> 三级子表
+                    { source: '【二级】制水间-自来水', target: '【三级】配料间-RO水', value: roPl },
+                    { source: '【二级】制水间-自来水', target: '【三级】锅炉间-RO水', value: roGl },
+                    { source: '【二级】制水间-自来水', target: '【三级】浓水', value: ns }
                 ];
+                
             } else {
+                const natGas = tS * 0.7 * 0.7;
+                
                 data = [
-                    { name: '天然气\n输入', itemStyle: { color: '#ff7d00' } }, { name: '燃气总表' },
-                    { name: '1号锅炉', itemStyle: { color: '#f53f3f' } },
-                    { name: '2号锅炉', itemStyle: { color: '#1e80ff' } },
+                    { name: lblG, itemStyle: { color: '#ff7d00' } },
+                    { name: '【一级】燃气总表', itemStyle: { color: '#722ed1' } },
+                    { name: '【二级】1号锅炉', itemStyle: { color: '#f53f3f' } },
+                    { name: '【二级】2号锅炉', itemStyle: { color: '#1e80ff' } },
                     { name: '自产蒸汽', itemStyle: { color: '#00b42a' } },
                     { name: '排烟损失', itemStyle: { color: '#86909c' } }
                 ];
-                const natGas = tS * 0.7 * 0.7;
+                
                 links = [
-                    { source: '天然气\n输入', target: '燃气总表', value: natGas },
-                    { source: '燃气总表', target: '1号锅炉', value: natGas * 0.5 },
-                    { source: '燃气总表', target: '2号锅炉', value: natGas * 0.5 },
-                    { source: '1号锅炉', target: '自产蒸汽', value: natGas * 0.5 * 0.85 },
-                    { source: '1号锅炉', target: '排烟损失', value: natGas * 0.5 * 0.15 },
-                    { source: '2号锅炉', target: '自产蒸汽', value: natGas * 0.5 * 0.85 },
-                    { source: '2号锅炉', target: '排烟损失', value: natGas * 0.5 * 0.15 }
+                    { source: lblG, target: '【一级】燃气总表', value: natGas },
+                    { source: '【一级】燃气总表', target: '【二级】1号锅炉', value: natGas * 0.5 },
+                    { source: '【一级】燃气总表', target: '【二级】2号锅炉', value: natGas * 0.5 },
+                    { source: '【二级】1号锅炉', target: '自产蒸汽', value: natGas * 0.5 * 0.85 },
+                    { source: '【二级】1号锅炉', target: '排烟损失', value: natGas * 0.5 * 0.15 },
+                    { source: '【二级】2号锅炉', target: '自产蒸汽', value: natGas * 0.5 * 0.85 },
+                    { source: '【二级】2号锅炉', target: '排烟损失', value: natGas * 0.5 * 0.15 }
                 ];
             }
+            
             chart.setOption({
-                tooltip: { trigger: 'item', triggerOn: 'mousemove', formatter: function(p) { if (p.dataType === 'edge') return p.data.source + ' → ' + p.data.target + '<br/>流量: ' + fmtNum(p.data.value, 1); return p.name.replace('\n', ' '); } },
-                series: [{ type: 'sankey', layout: 'none', emphasis: { focus: 'adjacency' }, nodeWidth: 22, nodeGap: 16, label: { show: true, fontSize: 11 }, lineStyle: { color: 'gradient', curveness: 0.5, opacity: 0.4 }, data: data, links: links }]
+                tooltip: { 
+                    trigger: 'item', 
+                    triggerOn: 'mousemove', 
+                    formatter: function(p) { 
+                        if (p.dataType === 'edge') {
+                            return p.data.source.replace(/【\w+级】/g, '') + ' → ' + p.data.target.replace(/【\w+级】/g, '') + 
+                                   '<br/>流量: ' + (sankeyMode === 'electricity' ? fmtNum(p.data.value / 10000, 2) + ' 万kWh' : fmtNum(p.data.value, 1) + ' t/m³');
+                        }
+                        return p.name.replace(/【\w+级】/g, '').replace('\n', ' '); 
+                    } 
+                },
+                series: [{ 
+                    type: 'sankey', 
+                    layout: 'none', 
+                    emphasis: { focus: 'adjacency' }, 
+                    nodeWidth: 24, 
+                    nodeGap: 12, 
+                    label: { show: true, fontSize: 10, formatter: function(params) {
+                        return params.name.replace(/【(\w+)级】/g, '{titleColor|[$1]}\n');
+                    }, rich: { titleColor: { color: '#999', fontSize: 9 } } }, 
+                    lineStyle: { color: 'gradient', curveness: 0.5, opacity: 0.35 }, 
+                    data: data, 
+                    links: links 
+                }]
             });
             window.addEventListener('resize', () => chart.resize());
         }

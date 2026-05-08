@@ -8,12 +8,10 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; color: #333; }
-        .container { max-width: 1920px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1920px; margin: 0 auto; padding: 20px; width: 100%; }
         .header { background: linear-gradient(135deg, #722ed1 0%, #531dab 100%); color: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(114, 46, 209, 0.25); }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .header h1 { font-size: 2rem; font-weight: 600; }
-        .back-btn { background: rgba(255,255,255,0.25); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
-        .back-btn:hover { background: rgba(255,255,255,0.35); }
         .header p { font-size: 1rem; opacity: 0.92; }
         .selector-bar { background: white; padding: 16px 24px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
         .selector-group { display: flex; align-items: center; gap: 8px; }
@@ -107,6 +105,23 @@
         .coef-key { color: #555; font-weight: 600; }
         .coef-val { color: #722ed1; font-weight: 700; }
         @media (max-width: 1400px) { .kpi-section { grid-template-columns: repeat(3, 1fr); } .charts-row { grid-template-columns: 1fr; } .optimization-grid { grid-template-columns: 1fr; } }
+        @media (min-width: 2560px) {
+            .container { max-width: 3440px; padding: 30px; }
+            .header { padding: 32px 40px; }
+            .header h1 { font-size: 2.2rem; }
+            .header p { font-size: 1.1rem; }
+            .kpi-section { grid-template-columns: repeat(8, 1fr); gap: 20px; }
+            .kpi-card { min-height: 150px; padding: 32px 20px; }
+            .kpi-value { font-size: 2rem; }
+            .charts-row { grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+            .chart-panel { padding: 24px 30px; }
+            .chart-box { height: 580px; }
+            .chart-box-sm { height: 500px; }
+            .optimization-grid { grid-template-columns: repeat(4, 1fr); }
+            .section-panel { border-radius: 12px; }
+            .section-panel-header { padding: 20px 30px; }
+            table th, table td { padding: 12px 16px; font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -114,7 +129,7 @@
         <div class="header">
             <div class="header-top">
                 <h1>⚖️ 能效平衡计算模块</h1>
-                <a href="0.index.html" class="back-btn">← 返回首页</a>
+
             </div>
             <p>依据GB/T 3484-2009《企业能量平衡通则》| GB/T 2589-2020《综合能耗计算通则》| GB/T 28751-2012《企业能量平衡表编制方法》 | 当量值口径 | 贵州基地一车间</p>
         </div>

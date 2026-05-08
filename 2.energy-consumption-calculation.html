@@ -8,13 +8,11 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; color: #333; }
-        .container { max-width: 1920px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1920px; margin: 0 auto; padding: 20px; width: 100%; }
 
         .header { background: linear-gradient(135deg, #00b42a 0%, #0a8730 100%); color: white; padding: 28px 32px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(0, 180, 42, 0.25); }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .header h1 { font-size: 2rem; font-weight: 600; }
-        .back-btn { background: rgba(255,255,255,0.25); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
-        .back-btn:hover { background: rgba(255,255,255,0.35); }
         .header p { font-size: 1rem; opacity: 0.92; }
 
         .selector-bar { background: white; padding: 16px 24px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
@@ -116,6 +114,21 @@
             .kpi-section { grid-template-columns: repeat(3, 1fr); }
             .charts-row { grid-template-columns: 1fr; }
         }
+        @media (min-width: 2560px) {
+            .container { max-width: 3440px; padding: 30px; }
+            .header { padding: 32px 40px; }
+            .header h1 { font-size: 2.2rem; }
+            .header p { font-size: 1.1rem; }
+            .kpi-section { grid-template-columns: repeat(8, 1fr); gap: 20px; }
+            .kpi-card { min-height: 150px; padding: 32px 20px; }
+            .kpi-value { font-size: 2rem; }
+            .charts-row { grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+            .chart-panel { padding: 24px 30px; }
+            .chart-box { height: 550px; }
+            .section-panel { border-radius: 12px; }
+            .section-panel-header { padding: 20px 30px; }
+            table th, table td { padding: 12px 16px; font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -123,7 +136,6 @@
         <div class="header">
             <div class="header-top">
                 <h1>🧮 能源消费量计算模块</h1>
-                <a href="0.index.html" class="back-btn">← 返回首页</a>
             </div>
             <p>基于实际用量数据的能源折标煤计算 | 多层级能耗指标核算 | 自产蒸汽能耗分析 | 车间电耗设备级明细 | 贵州基地一车间</p>
         </div>
@@ -436,6 +448,34 @@
             renderElecDistChart();
             renderElecDetailTable();
             renderMonthlyDetailTable();
+            updateViewModeDisplay();
+        }
+
+        function updateViewModeDisplay() {
+            const indicatorPanel = document.getElementById('indicatorPanel');
+            const elecDetailPanel = document.querySelector('#elecDetailTable').closest('.section-panel');
+            const monthlyDetailPanel = document.querySelector('#monthlyDetailTable').closest('.section-panel');
+            const chartsRows = document.querySelectorAll('.charts-row');
+            const kpiSection = document.getElementById('kpiSection');
+            const coefficientBar = document.querySelector('.coefficient-bar');
+            
+            if (currentViewMode === 'summary') {
+                // 汇总视图：显示概览图表和层级核算表，隐藏详细表格
+                kpiSection.style.display = 'grid';
+                coefficientBar.style.display = 'flex';
+                indicatorPanel.style.display = 'block';
+                elecDetailPanel.style.display = 'none';
+                monthlyDetailPanel.style.display = 'none';
+                chartsRows.forEach(row => row.style.display = 'grid');
+            } else {
+                // 明细视图：显示详细表格，隐藏部分图表
+                kpiSection.style.display = 'grid';
+                coefficientBar.style.display = 'flex';
+                indicatorPanel.style.display = 'block';
+                elecDetailPanel.style.display = 'block';
+                monthlyDetailPanel.style.display = 'block';
+                chartsRows.forEach(row => row.style.display = 'none');
+            }
         }
 
         // ==================== KPI卡片 ====================

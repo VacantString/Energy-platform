@@ -8,12 +8,11 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f0f2f5;color:#333}
-        .container{max-width:1920px;margin:0 auto;padding:20px}
+        .container{max-width:1920px;margin:0 auto;padding:20px;width:100%}
         .header{background:linear-gradient(135deg,#1e80ff 0%,#0e5fd8 100%);color:white;padding:28px 32px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 16px rgba(30,128,255,0.25)}
         .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
         .header h1{font-size:2rem;font-weight:600}
-        .back-btn{background:rgba(255,255,255,0.25);color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;font-size:0.95rem}
-        .back-btn:hover{background:rgba(255,255,255,0.35)}.header p{font-size:1rem;opacity:0.92}
+        .header p{font-size:1rem;opacity:0.92}
         .selector-bar{background:white;padding:16px 24px;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;gap:20px;flex-wrap:wrap}
         .selector-group{display:flex;align-items:center;gap:8px}
         .selector-label{font-weight:600;color:#555;font-size:0.9rem;white-space:nowrap}
@@ -48,11 +47,27 @@
         .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.72rem;font-weight:600}
         .tag-green{background:#e8ffea;color:#00b42a}.tag-red{background:#fff2f0;color:#f53f3f}.tag-orange{background:#fff7e6;color:#ff7d00}.tag-blue{background:#e8f3ff;color:#1e80ff}
         @media(max-width:1400px){.kpi-section{grid-template-columns:repeat(3,1fr)}.charts-row{grid-template-columns:1fr}}
+        @media(min-width:2560px){
+            .container{max-width:3440px;padding:30px}
+            .header{padding:32px 40px}
+            .header h1{font-size:2.2rem}
+            .header p{font-size:1.1rem}
+            .kpi-section{grid-template-columns:repeat(8,1fr);gap:20px}
+            .kpi-card{min-height:150px;padding:32px 20px}
+            .kpi-value{font-size:2rem}
+            .charts-row{grid-template-columns:1fr 1fr 1fr;gap:24px}
+            .chart-panel{padding:24px 30px}
+            .chart-box{height:550px}
+            .chart-box-sm{height:450px}
+            .section-panel{border-radius:12px}
+            .section-panel-header{padding:20px 30px}
+            table th,table td{padding:12px 16px;font-size:0.9rem}
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header"><div class="header-top"><h1>📊 能耗查询模块</h1><a href="0.index.html" class="back-btn">← 返回首页</a></div><p>多维度能源数据查询 | 逐日钻取 | 月度对比 | 跨年同比 | 支持电力/水/蒸汽三类能源 | 贵州基地一车间</p></div>
+        <div class="header"><div class="header-top"><h1>📊 能耗查询模块</h1></div><p>多维度能源数据查询 | 逐日钻取 | 月度对比 | 跨年同比 | 支持电力/水/蒸汽三类能源 | 贵州基地一车间</p></div>
         <div class="selector-bar">
             <div class="selector-group"><span class="selector-label">📅 年度：</span><button class="selector-btn active" data-year="2025" onclick="switchYear('2025')">2025年</button><button class="selector-btn" data-year="2026" onclick="switchYear('2026')">2026年</button></div><div class="selector-divider"></div>
             <div class="selector-group"><span class="selector-label">月份：</span><select class="selector-select" id="monthSelect" onchange="switchMonth()"><option value="all">全年汇总</option><option value="1">1月</option><option value="2">2月</option><option value="3">3月</option><option value="4">4月</option><option value="5">5月</option><option value="6">6月</option><option value="7">7月</option><option value="8">8月</option><option value="9">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option></select></div><div class="selector-divider"></div>
@@ -121,7 +136,7 @@
             const dom=document.getElementById('heatmapChart');if(!dom)return;const chart=echarts.init(dom);const d=getData();const mc=getMonthCount();
             if(energyType!=='electricity'){chart.setOption({title:{text:'热力日历仅支持电力日数据',left:'center',top:'center',textStyle:{color:'#999',fontSize:14}}});window.addEventListener('resize',()=>chart.resize());return}
             const data=[];const maxDays=31;for(let m=0;m<mc;m++){const dv=getDailyData(m);for(let day=0;day<maxDays;day++){if(dv[day]!=null)data.push([day,m,dv[day]])}}const maxV=data.reduce((mx,d)=>Math.max(mx,d[2]),0);
-            chart.setOption({tooltip:{position:'top',formatter:function(p){return(p.data[1]+1)+'月'+(p.data[0]+1)+'日<br/>'+fmtNum(p.data[2],0)+' kWh'}},grid:{left:'8%',right:'5%',bottom:'3%',top:'5%'},xAxis:{type:'category',data:Array.from({length:maxDays},(_,i)=>(i+1)+'日'),splitArea:{show:true},axisLabel:{fontSize:9}},yAxis:{type:'category',data:d.production.months.slice(0,mc),splitArea:{show:true},axisLabel:{fontSize:10}},visualMap:{min:0,max:maxV,calculable:true,orient:'horizontal',left:'center',bottom:'0%',inRange:{color:['#e8f4ff','#1e80ff','#0e5fd8','#722ed1']}},series:[{type:'heatmap',data:data,label:{show:false},emphasis:{itemStyle:{shadowBlur:10,shadowColor:'rgba(0,0,0,0.5)'}}}]});
+            chart.setOption({tooltip:{position:'top',formatter:function(p){return(p.data[1]+1)+'月'+(p.data[0]+1)+'日<br/>'+fmtNum(p.data[2],0)+' kWh'}},grid:{left:'8%',right:'5%',bottom:'3%',top:'5%'},xAxis:{type:'category',data:Array.from({length:maxDays},(_,i)=>(i+1)+'日'),splitArea:{show:true},axisLabel:{fontSize:9}},yAxis:{type:'category',data:d.production.months.slice(0,mc),splitArea:{show:true},axisLabel:{fontSize:10}},visualMap:{min:0,max:maxV,calculable:true,orient:'horizontal',left:'center',bottom:'0%',inRange:{color:['#E6F4FF','#BAE0FF','#69B1FF','#1677FF','#0A58CA','#531DAB','#FA8C16','#F5222D']}},series:[{type:'heatmap',data:data,label:{show:false},emphasis:{itemStyle:{shadowBlur:10,shadowColor:'rgba(0,0,0,0.5)'}}}]});
             window.addEventListener('resize',()=>chart.resize());
         }
 
