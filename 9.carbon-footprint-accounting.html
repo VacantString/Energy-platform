@@ -178,8 +178,8 @@
         function renderTable(){
             const d=getData();const totalC=sum(d.electricity.map((v,i)=>calcCarbon(i)));const prod=sum(d.production.actualOutput);
             const rows=[{stage:'上游原材料',source:'原料采购及运输',val:totalC*0.20,ratio:20},{stage:'上游原材料',source:'辅助材料',val:totalC*0.06,ratio:6},{stage:'生产制造',source:'电力消耗（范围2）',val:sum(d.electricity)*CF.electricity,ratio:0},{stage:'生产制造',source:'蒸汽消耗（范围1）',val:sum(d.steam)*CF.steam,ratio:0},{stage:'生产制造',source:'用水排放（范围1）',val:sum(d.water)*CF.water,ratio:0},{stage:'物流运输',source:'成品运输',val:totalC*0.12,ratio:12},{stage:'物流运输',source:'入厂物流',val:totalC*0.05,ratio:5},{stage:'产品使用',source:'使用阶段',val:totalC*0.05,ratio:5},{stage:'废弃处置',source:'废弃回收',val:totalC*0.03,ratio:3}];
-            let html='';rows.forEach(r=>{const per=prod>0?r.val*1000/prod:0;const totalRat=totalC>0?r.val/totalC*100:0;html+='<tr><td class="fw-600">'+r.stage+'</td><td>'+r.source+'</td><td class="text-right">'+fmtNum(r.val,2)+'</td><td class="text-right">'+fmtNum(totalRat,1)+'%</td><td class="text-right fw-600">'+fmtNum(per,2)+'</td><td class="text-center"><span class="tag tag-blue">实测数据</span></td></tr>'});
-            html+='<tr class="row-total"><td><strong>合计</strong></td><td>-</td><td class="text-right"><strong>'+fmtNum(totalC,2)+'</strong></td><td class="text-right"><strong>100%</strong></td><td class="text-right"><strong>'+fmtNum(prod>0?totalC*1000/prod:0,2)+'</strong></td><td class="text-center">-</td></tr>';
+            let html='';rows.forEach(r=>{const per=prod>0?r.val*1000/prod:0;const totalRat=totalC>0?r.val/totalC*100:0;html+='<tr><td class="fw-600">'+r.stage+'</td><td>'+r.source+'</td><td>'+fmtNum(r.val,2)+'</td><td>'+fmtNum(totalRat,1)+'%</td><td class="fw-600">'+fmtNum(per,2)+'</td><td><span class="tag tag-blue">实测数据</span></td></tr>'});
+            html+='<tr class="row-total"><td><strong>合计</strong></td><td>-</td><td><strong>'+fmtNum(totalC,2)+'</strong></td><td><strong>100%</strong></td><td><strong>'+fmtNum(prod>0?totalC*1000/prod:0,2)+'</strong></td><td>-</td></tr>';
             document.getElementById('footprintBody').innerHTML=html;
         }
 

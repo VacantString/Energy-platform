@@ -107,7 +107,7 @@
             const assets=[{type:'免费配额',id:'QF-2025-001',qty:totalC*0.95,date:'2025-01-15',unitPrice:0},{type:'CCER项目',id:'CC-2025-056',qty:totalC*0.08,date:'2025-03-20',unitPrice:55},{type:'市场购买',id:'QB-2025-123',qty:totalC*0.05,date:'2025-05-10',unitPrice:78},{type:'履约使用',id:'QU-2025-078',qty:-totalC*0.35,date:'2025-12-31',unitPrice:cp}];
             document.getElementById('assetBody').innerHTML=assets.map(a=>{
                 const mv=a.qty>0?a.qty*cp:0;const st=a.qty>0?'可用':'已注销';const sc=a.qty>0?'tag-green':'tag-red';
-                return'<tr><td class="fw-600">'+a.type+'</td><td>'+a.id+'</td><td class="text-right">'+fmtNum(Math.abs(a.qty),1)+'</td><td>'+a.date+'</td><td class="text-right">¥'+fmtNum(a.unitPrice,0)+'</td><td class="text-right text-blue fw-600">¥'+fmtNum(mv,0)+'</td><td class="text-center"><span class="tag '+sc+'">'+st+'</span></td></tr>';
+                return'<tr><td class="fw-600">'+a.type+'</td><td>'+a.id+'</td><td>'+fmtNum(Math.abs(a.qty),1)+'</td><td>'+a.date+'</td><td>¥'+fmtNum(a.unitPrice,0)+'</td><td class="text-blue fw-600">¥'+fmtNum(mv,0)+'</td><td><span class="tag '+sc+'">'+st+'</span></td></tr>';
             }).join('');
         }
 

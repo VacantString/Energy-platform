@@ -81,8 +81,8 @@
         .row-subtotal { background: #fafafa; font-weight: 600; }
 
         .hierarchy-table .level-0 { padding-left: 8px; }
-        .hierarchy-table .level-1 { padding-left: 32px; }
-        .hierarchy-table .level-2 { padding-left: 56px; }
+        .hierarchy-table .level-1 { padding-left: 2em; }
+        .hierarchy-table .level-2 { padding-left: 4em; }
         .hierarchy-table .expand-icon { cursor: pointer; display: inline-block; width: 18px; text-align: center; user-select: none; transition: transform 0.2s; font-size: 0.75rem; }
         .hierarchy-table .expand-icon.expanded { transform: rotate(90deg); }
 
@@ -666,18 +666,18 @@
                     const isParent = !item.tce;
                     const cls = isParent ? 'level-0' : 'level-1';
 
-                    html += '<tr class="' + cls + '" data-id="' + id + '"' + (parentId ? ' data-parent="' + parentId + '" style="display:none;"' : '') + '>';
-                    html += '<td class="text-center">' + (hasChildren ? '<span class="expand-icon" onclick="toggleTreeRow(\'' + id + '\')">▶</span>' : '') + '</td>';
+                    html += '<tr class="' + cls + '" data-id="' + id + '"' + (parentId ? ' data-parent="' + parentId + '"' : '') + '>';
+                    html += '<td>' + (hasChildren ? '<span class="expand-icon expanded" onclick="toggleTreeRow(\'' + id + '\')">▼</span>' : '') + '</td>';
                     html += '<td class="' + (isParent ? 'fw-600' : '') + '">' + item.name + '</td>';
-                    html += '<td class="text-right ' + (isParent ? 'fw-600' : '') + '">' + (item.tce != null ? fmtNum(item.tce, 2) : '-') + '</td>';
-                    html += '<td class="text-right">' + (item.pct != null ? fmtNum(item.pct, 2) + '%' : '-') + '</td>';
-                    html += '<td class="text-center">';
+                    html += '<td class="' + (isParent ? 'fw-600' : '') + '">' + (item.tce != null ? fmtNum(item.tce, 2) : '-') + '</td>';
+                    html += '<td>' + (item.pct != null ? fmtNum(item.pct, 2) + '%' : '-') + '</td>';
+                    html += '<td>';
                     if (item.change != null) {
                         const cls2 = item.anomaly ? 'text-red' : (Math.abs(item.change) > 3 ? 'text-red' : 'text-green');
                         html += '<span class="' + cls2 + '">' + (item.change > 0 ? '+' : '') + fmtNum(item.change, 2) + '%</span>';
                     } else { html += '-'; }
                     html += '</td>';
-                    html += '<td class="text-center">';
+                    html += '<td>';
                     if (item.anomaly) {
                         html += '<span class="tag tag-red">异常预警（↑）</span>';
                     } else if (item.name === '锅炉' && item.tce === 0) {

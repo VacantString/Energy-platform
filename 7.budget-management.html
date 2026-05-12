@@ -248,14 +248,16 @@
         function renderBudgetTable(){
             const d=getData();const mc=getMonthCount();const threshold=parseInt(document.getElementById('thresholdSelect').value);
             let html='';
+            let totalBudget=0,totalActual=0;
             for(let i=0;i<mc;i++){
                 const actual=calcCarbon(i),budget=actual*0.95,dev=actual-budget,devRate=budget>0?dev/budget*100:0,rate=budget>0?actual/budget*100:0,prod=d.production.actualOutput[i],unit=prod>0?actual/prod:0;
+                totalBudget+=budget;
+                totalActual+=actual;
                 let status='正常',sc='tag-green';
                 if(rate>threshold&&rate<=105){status='预警';sc='tag-orange'}else if(rate>105){status='超支';sc='tag-red'}
-                html+='<tr><td class="fw-600">'+d.production.months[i]+'</td><td class="text-right">'+fmtNum(budget,1)+'</td><td class="text-right">'+fmtNum(actual,1)+'</td><td class="text-right '+(dev>0?'text-red':'text-green')+'">'+(dev>0?'+':'')+fmtNum(dev,1)+'</td><td class="text-right '+(devRate>0?'text-red':'text-green')+'">'+(devRate>0?'+':'')+fmtNum(devRate,1)+'%</td><td class="text-right fw-600 '+(rate>threshold?'text-red':'text-green')+'">'+fmtNum(rate,1)+'%</td><td class="text-center"><span class="tag '+sc+'">'+status+'</span></td><td class="text-right">'+fmtNum(prod,1)+'</td><td class="text-right">'+fmtNum(unit,4)+'</td></tr>';
+                html+='<tr><td class="fw-600">'+d.production.months[i]+'</td><td>'+fmtNum(budget,1)+'</td><td>'+fmtNum(actual,1)+'</td><td class="'+(dev>0?'text-red':'text-green')+'">'+(dev>0?'+':'')+fmtNum(dev,1)+'</td><td class="'+(devRate>0?'text-red':'text-green')+'">'+(devRate>0?'+':'')+fmtNum(devRate,1)+'%</td><td class="fw-600 '+(rate>threshold?'text-red':'text-green')+'">'+fmtNum(rate,1)+'%</td><td><span class="tag '+sc+'">'+status+'</span></td><td>'+fmtNum(prod,1)+'</td><td>'+fmtNum(unit,4)+'</td></tr>';
             }
-            const totalActual=sum(d.electricity.map((v,i)=>calcCarbon(i))),totalBudget=totalActual*0.95;
-            html+='<tr style="background:#e8ffea;font-weight:700"><td>年度合计</td><td class="text-right">'+fmtNum(totalBudget,1)+'</td><td class="text-right">'+fmtNum(totalActual,1)+'</td><td class="text-right">'+fmtNum(totalActual-totalBudget,1)+'</td><td class="text-right">'+fmtNum(totalBudget>0?(totalActual-totalBudget)/totalBudget*100:0,1)+'%</td><td class="text-right">'+fmtNum(totalBudget>0?totalActual/totalBudget*100:0,1)+'%</td><td class="text-center">-</td><td class="text-right">'+fmtNum(sum(d.production.actualOutput),1)+'</td><td class="text-right">'+fmtNum(sum(d.production.actualOutput)>0?totalActual/sum(d.production.actualOutput):0,4)+'</td></tr>';
+            html+='<tr style="background:#e8ffea;font-weight:700"><td>年度合计</td><td>'+fmtNum(totalBudget,1)+'</td><td>'+fmtNum(totalActual,1)+'</td><td>'+fmtNum(totalActual-totalBudget,1)+'</td><td>'+fmtNum(totalBudget>0?(totalActual-totalBudget)/totalBudget*100:0,1)+'%</td><td>'+fmtNum(totalBudget>0?totalActual/totalBudget*100:0,1)+'%</td><td>-</td><td>'+fmtNum(sum(d.production.actualOutput),1)+'</td><td>'+fmtNum(sum(d.production.actualOutput)>0?totalActual/sum(d.production.actualOutput):0,4)+'</td></tr>';
             document.getElementById('budgetBody').innerHTML=html;
         }
 

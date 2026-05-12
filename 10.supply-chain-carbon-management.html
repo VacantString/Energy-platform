@@ -114,9 +114,9 @@
 
         function renderTable(){
             const sups=getSuppliers();let html='';
-            sups.forEach(s=>{const rcls=s.rating==='A'?'tag-green':s.rating==='B'?'tag-blue':s.rating==='C'?'tag-orange':'tag-orange';const riskCls=s.risk==='低'?'tag-green':s.risk==='中'?'tag-orange':'tag-red';html+='<tr><td class="fw-600">'+s.name+'</td><td>'+s.type+'</td><td class="text-center"><span class="tag '+(s.status==='已填报'?'tag-green':'tag-orange')+'">'+s.status+'</span></td><td class="text-right">'+fmtNum(s.scope1,1)+'</td><td class="text-right">'+fmtNum(s.scope2,1)+'</td><td class="text-right fw-600">'+fmtNum(s.intensity,2)+'</td><td class="text-center"><span class="tag '+rcls+'">'+s.rating+'级</span></td><td class="text-center"><span class="tag '+riskCls+'">'+s.risk+'风险</span></td></tr>'});
+            sups.forEach(s=>{const rcls=s.rating==='A'?'tag-green':s.rating==='B'?'tag-blue':s.rating==='C'?'tag-orange':'tag-orange';const riskCls=s.risk==='低'?'tag-green':s.risk==='中'?'tag-orange':'tag-red';html+='<tr><td class="fw-600">'+s.name+'</td><td>'+s.type+'</td><td><span class="tag '+(s.status==='已填报'?'tag-green':'tag-orange')+'">'+s.status+'</span></td><td>'+fmtNum(s.scope1,1)+'</td><td>'+fmtNum(s.scope2,1)+'</td><td class="fw-600">'+fmtNum(s.intensity,2)+'</td><td><span class="tag '+rcls+'">'+s.rating+'级</span></td><td><span class="tag '+riskCls+'">'+s.risk+'风险</span></td></tr>'});
             const totalS1=sups.reduce((a,s)=>a+s.scope1,0),totalS2=sups.reduce((a,s)=>a+s.scope2,0);
-            html+='<tr class="row-total"><td><strong>合计</strong></td><td>-</td><td class="text-center">'+sups.length+'家</td><td class="text-right"><strong>'+fmtNum(totalS1,1)+'</strong></td><td class="text-right"><strong>'+fmtNum(totalS2,1)+'</strong></td><td class="text-right"><strong>'+fmtNum(totalS1+totalS2>0?(totalS1+totalS2)/sups.length/10:0,2)+'</strong></td><td class="text-center">-</td><td class="text-center">-</td></tr>';
+            html+='<tr class="row-total"><td><strong>合计</strong></td><td>-</td><td>'+sups.length+'家</td><td><strong>'+fmtNum(totalS1,1)+'</strong></td><td><strong>'+fmtNum(totalS2,1)+'</strong></td><td><strong>'+fmtNum(totalS1+totalS2>0?(totalS1+totalS2)/sups.length/10:0,2)+'</strong></td><td>-</td><td>-</td></tr>';
             document.getElementById('supplierBody').innerHTML=html;
         }
 

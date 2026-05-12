@@ -195,6 +195,27 @@
                 </div>
                 <div class="chart-box" id="trendChart"></div>
             </div>
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">📊 综合能耗结构（折标煤）</div>
+                </div>
+                <div class="chart-box" id="structureChart"></div>
+            </div>
+        </div>
+
+        <div class="charts-row">
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">♨️ 自产蒸汽能耗分布</div>
+                </div>
+                <div class="chart-box" id="steamChart"></div>
+            </div>
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <div class="chart-panel-title">⚡ 车间电耗系统分布</div>
+                </div>
+                <div class="chart-box" id="elecDistChart"></div>
+            </div>
         </div>
 
         <div class="section-panel" id="indicatorPanel">
@@ -223,30 +244,6 @@
                     </thead>
                     <tbody id="indicatorBody"></tbody>
                 </table>
-            </div>
-        </div>
-
-        <div class="charts-row">
-            <div class="chart-panel">
-                <div class="chart-panel-header">
-                    <div class="chart-panel-title">📊 综合能耗结构（折标煤）</div>
-                </div>
-                <div class="chart-box" id="structureChart"></div>
-            </div>
-            <div class="chart-panel">
-                <div class="chart-panel-header">
-                    <div class="chart-panel-title">♨️ 自产蒸汽能耗分布</div>
-                </div>
-                <div class="chart-box" id="steamChart"></div>
-            </div>
-        </div>
-
-        <div class="charts-row">
-            <div class="chart-panel">
-                <div class="chart-panel-header">
-                    <div class="chart-panel-title">⚡ 车间电耗系统分布</div>
-                </div>
-                <div class="chart-box" id="elecDistChart"></div>
             </div>
         </div>
 
@@ -685,16 +682,17 @@
                         }
                     }
 
-                    html += '<tr class="' + padClass + '" data-id="' + id + '"' + (item.level > 0 && parentId ? ' data-parent="' + parentId + '" style="display:none;"' : '') + '>';
-                    html += '<td class="text-center">' + (hasChildren ? '<span class="expand-icon" onclick="toggleRow(\'' + id + '\')">▶</span>' : '') + '</td>';
-                    html += '<td class="fw-600">' + item.unit + '</td>';
+                    const indentStyle = item.level > 0 ? ' style="text-indent:' + (item.level * 2) + 'em;"' : '';
+                    html += '<tr class="' + padClass + '" data-id="' + id + '"' + (item.level > 0 && parentId ? ' data-parent="' + parentId + '"' : '') + '>';
+                    html += '<td>' + (hasChildren ? '<span class="expand-icon expanded" onclick="toggleRow(\'' + id + '\')">▼</span>' : '') + '</td>';
+                    html += '<td class="fw-600"' + indentStyle + '>' + item.unit + '</td>';
                     html += '<td>' + item.param + '</td>';
                     html += '<td>' + item.uom + '</td>';
-                    html += '<td class="text-right">' + consumptionDisplay + '</td>';
-                    html += '<td class="text-right text-green">' + tceDisplay + '</td>';
-                    html += '<td class="text-right">' + outputDisplay + '</td>';
-                    html += '<td class="text-right fw-600 text-blue">' + unitValDisplay + '</td>';
-                    html += '<td class="text-center ' + yoyClass + '">' + yoyDisplay + '</td>';
+                    html += '<td>' + consumptionDisplay + '</td>';
+                    html += '<td class="text-green">' + tceDisplay + '</td>';
+                    html += '<td>' + outputDisplay + '</td>';
+                    html += '<td class="fw-600 text-blue">' + unitValDisplay + '</td>';
+                    html += '<td class="' + yoyClass + '">' + yoyDisplay + '</td>';
                     html += '</tr>';
 
                     if (hasChildren) {

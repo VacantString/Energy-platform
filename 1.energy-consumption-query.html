@@ -40,7 +40,7 @@
         .btn-sm{padding:4px 10px;font-size:0.8rem}.btn-primary{background:#1e80ff;color:white}.btn-primary:hover{background:#0e5fd8}
         .btn-outline{background:white;color:#1e80ff;border:1px solid #1e80ff}.btn-outline:hover{background:#e8f4ff}
         .table-wrap{overflow-x:auto;max-height:520px;overflow-y:auto}
-        table{width:100%;border-collapse:collapse}table th,table td{padding:10px 14px;text-align:left;border-bottom:1px solid #f0f0f0;font-size:0.85rem;vertical-align:middle}table th{background:#fafafa;font-weight:600;color:#666;white-space:nowrap;position:sticky;top:0;z-index:1;text-align:center}tbody tr:hover{background:#f8f9fa}
+        table{width:100%;border-collapse:collapse}table th,table td{padding:10px 14px;text-align:left;border-bottom:1px solid #f0f0f0;font-size:0.85rem;vertical-align:middle}table th{background:#fafafa;font-weight:600;color:#666;white-space:nowrap;position:sticky;top:0;z-index:1}tbody tr:hover{background:#f8f9fa}
         .text-right{text-align:right}.text-center{text-align:center}
         .text-green{color:#00b42a;font-weight:600}.text-blue{color:#1e80ff;font-weight:600}.text-red{color:#f53f3f;font-weight:600}.text-orange{color:#ff7d00;font-weight:600}.text-purple{color:#722ed1;font-weight:600}
         .fw-600{font-weight:600}.row-total{background:#e8f4ff;font-weight:700}
@@ -285,9 +285,9 @@
                 level.data.forEach(item=>{
                     const tce=item.elec*COEF.electricity*10000+item.water*COEF.water*1000+item.steam*COEF.steam+item.gas*COEF.gas*1000;
                     if(dataLevel==='region'){
-                        html+='<tr><td class="fw-600">'+item.name+'</td><td class="text-right">'+fmtNum(item.elec*10000,0)+'</td><td class="text-right">'+fmtNum(item.water*1000,0)+'</td><td class="text-right">'+fmtNum(item.steam,0)+'</td><td class="text-right">'+fmtNum(item.gas*1000,0)+'</td><td class="text-right fw-600">'+fmtNum(tce,2)+'</td><td class="text-center"><span class="tag tag-blue">'+item.tce+'%</span></td></tr>';
+                        html+='<tr><td class="fw-600">'+item.name+'</td><td>'+fmtNum(item.elec*10000,0)+'</td><td>'+fmtNum(item.water*1000,0)+'</td><td>'+fmtNum(item.steam,0)+'</td><td>'+fmtNum(item.gas*1000,0)+'</td><td class="fw-600">'+fmtNum(tce,2)+'</td><td><span class="tag tag-blue">'+item.tce+'%</span></td></tr>';
                     }else{
-                        html+='<tr><td class="fw-600">'+item.name+'</td><td class="text-right">'+fmtNum(item.elec*1000,0)+'</td><td class="text-right">'+fmtNum(item.water*100,0)+'</td><td class="text-right">'+fmtNum(item.steam,0)+'</td><td class="text-right">'+fmtNum(item.gas*100,0)+'</td><td class="text-center"><span class="tag tag-green">'+item.region+'</span></td></tr>';
+                        html+='<tr><td class="fw-600">'+item.name+'</td><td>'+fmtNum(item.elec*1000,0)+'</td><td>'+fmtNum(item.water*100,0)+'</td><td>'+fmtNum(item.steam,0)+'</td><td>'+fmtNum(item.gas*100,0)+'</td><td><span class="tag tag-green">'+item.region+'</span></td></tr>';
                     }
                 });
                 document.getElementById('detailBody').innerHTML=html;
@@ -337,11 +337,11 @@
                         totalGas+=gas;
                         totalTce+=tce;
                         
-                        html+='<tr><td class="fw-600">'+year+'年'+months[m]+'</td><td class="text-right">'+fmtNum(elec,0)+'</td><td class="text-right">'+fmtNum(water,0)+'</td><td class="text-right">'+fmtNum(steam,0)+'</td><td class="text-right">'+fmtNum(gas,0)+'</td><td class="text-right fw-600">'+fmtNum(tce,2)+'</td><td class="text-right">'+fmtNum(yearData.production.actualOutput[m],1)+'</td><td class="text-center">'+(chg!=null?'<span class="tag '+(chg>0?'tag-red':'tag-green')+'">'+(chg>0?'+':'')+fmt(chg,1)+'%</span>':'-')+'</td><td class="text-center">-</td></tr>';
+                        html+='<tr><td class="fw-600">'+year+'年'+months[m]+'</td><td>'+fmtNum(elec,0)+'</td><td>'+fmtNum(water,0)+'</td><td>'+fmtNum(steam,0)+'</td><td>'+fmtNum(gas,0)+'</td><td class="fw-600">'+fmtNum(tce,2)+'</td><td>'+fmtNum(yearData.production.actualOutput[m],1)+'</td><td>'+(chg!=null?'<span class="tag '+(chg>0?'tag-red':'tag-green')+'">'+(chg>0?'+':'')+fmt(chg,1)+'%</span>':'-')+'</td><td>-</td></tr>';
                     }
                 }
                 
-                html+='<tr class="row-total"><td><strong>合计</strong></td><td class="text-right"><strong>'+fmtNum(totalElec,0)+'</strong></td><td class="text-right"><strong>'+fmtNum(totalWater,0)+'</strong></td><td class="text-right"><strong>'+fmtNum(totalSteam,0)+'</strong></td><td class="text-right"><strong>'+fmtNum(totalGas,0)+'</strong></td><td class="text-right"><strong>'+fmtNum(totalTce,2)+'</strong></td><td class="text-center">-</td><td class="text-center">-</td><td class="text-center">-</td></tr>';
+                html+='<tr class="row-total"><td><strong>合计</strong></td><td><strong>'+fmtNum(totalElec,0)+'</strong></td><td><strong>'+fmtNum(totalWater,0)+'</strong></td><td><strong>'+fmtNum(totalSteam,0)+'</strong></td><td><strong>'+fmtNum(totalGas,0)+'</strong></td><td><strong>'+fmtNum(totalTce,2)+'</strong></td><td>-</td><td>-</td><td>-</td></tr>';
                 document.getElementById('detailBody').innerHTML=html;
                 return;
             }
@@ -354,9 +354,9 @@
                     const chg=i>0&&prevTce>0?((tce-prevTce)/prevTce*100):null;
                     const allAvg=avg(d.electricity.map((v,j)=>v*COEF.electricity+d.water[j]*COEF.water+d.steam[j]*COEF.steam+d.gas[j]*COEF.gas));
                     const dChg=allAvg>0?((tce-allAvg)/allAvg*100):0;
-                    html+='<tr><td class="fw-600">'+currentYear+'年'+d.production.months[i]+'</td><td class="text-right">'+fmtNum(d.electricity[i],0)+'</td><td class="text-right">'+fmtNum(d.water[i],0)+'</td><td class="text-right">'+fmtNum(d.steam[i],0)+'</td><td class="text-right">'+fmtNum(d.gas[i],0)+'</td><td class="text-right fw-600">'+fmtNum(tce,2)+'</td><td class="text-right">'+fmtNum(d.production.actualOutput[i],1)+'</td><td class="text-center">'+(chg!=null?'<span class="tag '+(chg>0?'tag-red':'tag-green')+'">'+(chg>0?'+':'')+fmt(chg,1)+'%</span>':'-')+'</td><td class="text-center"><span class="tag '+(dChg>0?'tag-red':'tag-green')+'">'+(dChg>0?'+':'')+fmt(dChg,1)+'%</span></td></tr>';
+                    html+='<tr><td class="fw-600">'+currentYear+'年'+d.production.months[i]+'</td><td>'+fmtNum(d.electricity[i],0)+'</td><td>'+fmtNum(d.water[i],0)+'</td><td>'+fmtNum(d.steam[i],0)+'</td><td>'+fmtNum(d.gas[i],0)+'</td><td class="fw-600">'+fmtNum(tce,2)+'</td><td>'+fmtNum(d.production.actualOutput[i],1)+'</td><td>'+(chg!=null?'<span class="tag '+(chg>0?'tag-red':'tag-green')+'">'+(chg>0?'+':'')+fmt(chg,1)+'%</span>':'-')+'</td><td><span class="tag '+(dChg>0?'tag-red':'tag-green')+'">'+(dChg>0?'+':'')+fmt(dChg,1)+'%</span></td></tr>';
                 }
-                html+='<tr class="row-total"><td><strong>合计</strong></td><td class="text-right"><strong>'+fmtNum(sum(d.electricity),0)+'</strong></td><td class="text-right"><strong>'+fmtNum(sum(d.water),0)+'</strong></td><td class="text-right"><strong>'+fmtNum(sum(d.steam),0)+'</strong></td><td class="text-right"><strong>'+fmtNum(sum(d.gas),0)+'</strong></td><td class="text-right"><strong>'+fmtNum(sum(d.electricity)*COEF.electricity+sum(d.water)*COEF.water+sum(d.steam)*COEF.steam+sum(d.gas)*COEF.gas,2)+'</strong></td><td class="text-right"><strong>'+fmtNum(sum(d.production.actualOutput),1)+'</strong></td><td class="text-center">-</td><td class="text-center">-</td></tr>';
+                html+='<tr class="row-total"><td><strong>合计</strong></td><td><strong>'+fmtNum(sum(d.electricity),0)+'</strong></td><td><strong>'+fmtNum(sum(d.water),0)+'</strong></td><td><strong>'+fmtNum(sum(d.steam),0)+'</strong></td><td><strong>'+fmtNum(sum(d.gas),0)+'</strong></td><td><strong>'+fmtNum(sum(d.electricity)*COEF.electricity+sum(d.water)*COEF.water+sum(d.steam)*COEF.steam+sum(d.gas)*COEF.gas,2)+'</strong></td><td><strong>'+fmtNum(sum(d.production.actualOutput),1)+'</strong></td><td>-</td><td>-</td></tr>';
                 document.getElementById('detailBody').innerHTML=html;
                 return;
             }
@@ -373,20 +373,19 @@
                 const dChg=val!=null&&prev!=null&&prev>0?((val-prev)/prev*100):null;
                 const mChg=val!=null&&aV>0?((val-aV)/aV*100):null;
                 const tce=val!=null?val*COEF.electricity:0;
-                html+='<tr><td class="fw-600">'+date+'</td><td class="text-right '+(val!=null?'':'text-muted')+'">'+(val!=null?fmtNum(val,0):'-')+'</td><td class="text-right text-muted">-</td><td class="text-right text-muted">-</td><td class="text-right text-muted">-</td><td class="text-right">'+fmtNum(tce,2)+'</td><td class="text-right">'+fmtNum(prodPerDay,1)+'</td><td class="text-center">'+(dChg!=null?'<span class="tag '+(dChg>0?'tag-red':'tag-green')+'">'+(dChg>0?'+':'')+fmt(dChg,1)+'%</span>':'-')+'</td><td class="text-center">'+(mChg!=null?'<span class="tag '+(mChg>0?'tag-red':'tag-green')+'">'+(mChg>0?'+':'')+fmt(mChg,1)+'%</span>':'-')+'</td></tr>';
+                html+='<tr><td class="fw-600">'+date+'</td><td '+(val!=null?'':'class="text-muted"')+'>'+(val!=null?fmtNum(val,0):'-')+'</td><td class="text-muted">-</td><td class="text-muted">-</td><td class="text-muted">-</td><td>'+fmtNum(tce,2)+'</td><td>'+fmtNum(prodPerDay,1)+'</td><td>'+(dChg!=null?'<span class="tag '+(dChg>0?'tag-red':'tag-green')+'">'+(dChg>0?'+':'')+fmt(dChg,1)+'%</span>':'-')+'</td><td>'+(mChg!=null?'<span class="tag '+(mChg>0?'tag-red':'tag-green')+'">'+(mChg>0?'+':'')+fmt(mChg,1)+'%</span>':'-')+'</td></tr>';
             }
             
             const validSum=dVals.filter(v=>v!=null).reduce((a,b)=>a+b,0);
             const gasVal=currentMonth==='all'?sum(d.gas):d.gas[monthIdx];
-            html+='<tr class="row-total"><td><strong>'+currentYear+'年'+d.production.months[monthIdx]+'合计</strong></td><td class="text-right"><strong>'+fmtNum(validSum,0)+'</strong></td><td class="text-right"><strong>'+fmtNum(currentMonth==='all'?sum(d.water):d.water[monthIdx],0)+'</strong></td><td class="text-right"><strong>'+fmtNum(currentMonth==='all'?sum(d.steam):d.steam[monthIdx],0)+'</strong></td><td class="text-right"><strong>'+fmtNum(gasVal,0)+'</strong></td><td class="text-right"><strong>'+fmtNum(validSum*COEF.electricity+d.water[monthIdx]*COEF.water+d.steam[monthIdx]*COEF.steam+gasVal*COEF.gas,2)+'</strong></td><td class="text-right"><strong>'+fmtNum(getMonthProd(monthIdx),1)+'</strong></td><td class="text-center">-</td><td class="text-center">-</td></tr>';
+            html+='<tr class="row-total"><td><strong>'+currentYear+'年'+d.production.months[monthIdx]+'合计</strong></td><td><strong>'+fmtNum(validSum,0)+'</strong></td><td><strong>'+fmtNum(currentMonth==='all'?sum(d.water):d.water[monthIdx],0)+'</strong></td><td><strong>'+fmtNum(currentMonth==='all'?sum(d.steam):d.steam[monthIdx],0)+'</strong></td><td><strong>'+fmtNum(gasVal,0)+'</strong></td><td><strong>'+fmtNum(validSum*COEF.electricity+d.water[monthIdx]*COEF.water+d.steam[monthIdx]*COEF.steam+gasVal*COEF.gas,2)+'</strong></td><td><strong>'+fmtNum(getMonthProd(monthIdx),1)+'</strong></td><td>-</td><td>-</td></tr>';
             document.getElementById('detailBody').innerHTML=html;
         }
 
         document.addEventListener('DOMContentLoaded',function(){
             refreshAll();
-            const now=new Date();
-            document.getElementById('dateStart').value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
-            document.getElementById('dateEnd').value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+            document.getElementById('dateStart').value='2025-01-01';
+            document.getElementById('dateEnd').value='2025-12-31';
         });
     </script>
 </body>

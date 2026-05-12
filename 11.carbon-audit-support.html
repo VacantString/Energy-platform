@@ -125,7 +125,7 @@
 
         function renderIssues(){
             const issues=[{id:'ISS-2025-001',date:'2025-06',desc:'6月用电量数据波动超出正常范围±20%，需核实电表读数',priority:'高',status:'整改中',owner:'张工',deadline:'2025-07-15'},{id:'ISS-2025-002',date:'2025-08',desc:'蒸汽排放因子佐证材料不完整，缺少天然气低位发热值检测报告',priority:'中',status:'待整改',owner:'李工',deadline:'2025-07-30'},{id:'ISS-2025-003',date:'2025-04',desc:'4月产量数据与能耗数据比例偏差超过10%，需核查计量数据',priority:'低',status:'已关闭',owner:'王工',deadline:'2025-06-30'}];
-            document.getElementById('issueBody').innerHTML=issues.map(iss=>'<tr><td class="fw-600">'+iss.id+'</td><td>'+iss.date+'</td><td>'+iss.desc+'</td><td class="text-center"><span class="tag '+(iss.priority==='高'?'tag-red':iss.priority==='中'?'tag-orange':'tag-blue')+'">'+iss.priority+'</span></td><td class="text-center"><span class="tag '+(iss.status==='已关闭'?'tag-green':iss.status==='整改中'?'tag-blue':'tag-orange')+'">'+iss.status+'</span></td><td>'+iss.owner+'</td><td>'+iss.deadline+'</td></tr>').join('');
+            document.getElementById('issueBody').innerHTML=issues.map(iss=>'<tr><td class="fw-600">'+iss.id+'</td><td>'+iss.date+'</td><td>'+iss.desc+'</td><td><span class="tag '+(iss.priority==='高'?'tag-red':iss.priority==='中'?'tag-orange':'tag-blue')+'">'+iss.priority+'</span></td><td><span class="tag '+(iss.status==='已关闭'?'tag-green':iss.status==='整改中'?'tag-blue':'tag-orange')+'">'+iss.status+'</span></td><td>'+iss.owner+'</td><td>'+iss.deadline+'</td></tr>').join('');
         }
 
         function getAuditData(){return AUDIT_DATA[currentYear]}
@@ -180,14 +180,14 @@
                     const diff=a.companyCarbon[i]-a.auditCarbon[i];
                     const rate=(diff/a.auditCarbon[i]*100).toFixed(2);
                     const status=Math.abs(diff)<2?'tag-green':(Math.abs(diff)<5?'tag-orange':'tag-red');
-                    html+=`<tr><td>${m}</td><td class="text-right">${a.companyCarbon[i].toFixed(2)}</td><td class="text-right">${a.auditCarbon[i].toFixed(2)}</td><td class="text-right ${diff>=0?'text-red':'text-green'}">${diff>=0?'+'+diff.toFixed(2):diff.toFixed(2)}</td><td class="text-right">${rate}%</td><td>${a.diffReasons[i]||'无差异'}</td><td class="text-center"><span class="tag ${Math.abs(diff)<2?'tag-green':'tag-orange'}">${Math.abs(diff)<2?'一致':'待核实'}</span></td></tr>`;
+                    html+=`<tr><td>${m}</td><td>${a.companyCarbon[i].toFixed(2)}</td><td>${a.auditCarbon[i].toFixed(2)}</td><td class="${diff>=0?'text-red':'text-green'}">${diff>=0?'+'+diff.toFixed(2):diff.toFixed(2)}</td><td>${rate}%</td><td>${a.diffReasons[i]||'无差异'}</td><td><span class="tag ${Math.abs(diff)<2?'tag-green':'tag-orange'}">${Math.abs(diff)<2?'一致':'待核实'}</span></td></tr>`;
                 });
             }else{
                 const items=[{name:'电力碳排放',comp:192.8,audit:189.2,reason:'电网排放因子更新'},{name:'蒸汽碳排放',comp:48.3,audit:47.5,reason:'蒸汽损耗调整'},{name:'水碳排放',comp:1.4,audit:1.4,reason:'无差异'},{name:'合计',comp:242.5,audit:238.1,reason:'综合调整'}];
                 items.forEach(it=>{
                     const diff=it.comp-it.audit;
                     const rate=(diff/it.audit*100).toFixed(2);
-                    html+=`<tr><td>${it.name}</td><td class="text-right">${it.comp.toFixed(2)}</td><td class="text-right">${it.audit.toFixed(2)}</td><td class="text-right ${diff>=0?'text-red':'text-green'}">${diff>=0?'+'+diff.toFixed(2):diff.toFixed(2)}</td><td class="text-right">${rate}%</td><td>${it.reason}</td><td class="text-center"><span class="tag ${Math.abs(diff)<2?'tag-green':'tag-orange'}">${Math.abs(diff)<2?'一致':'待核实'}</span></td></tr>`;
+                    html+=`<tr><td>${it.name}</td><td>${it.comp.toFixed(2)}</td><td>${it.audit.toFixed(2)}</td><td class="${diff>=0?'text-red':'text-green'}">${diff>=0?'+'+diff.toFixed(2):diff.toFixed(2)}</td><td>${rate}%</td><td>${it.reason}</td><td><span class="tag ${Math.abs(diff)<2?'tag-green':'tag-orange'}">${Math.abs(diff)<2?'一致':'待核实'}</span></td></tr>`;
                 });
             }
             document.getElementById('diffBody').innerHTML=html;
@@ -200,7 +200,7 @@
                 const custom=customCF[it.key]||{};
                 const newValue=custom.value!==undefined?custom.value:it.value;
                 const reason=custom.reason||'';
-                cfHtml+=`<tr><td>${it.name}</td><td class="text-right">${it.value.toFixed(6)} ${it.unit}</td><td class="text-right"><input type="number" step="0.000001" value="${newValue.toFixed(6)}" data-key="${it.key}" data-field="value" style="width:100px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td><td><input type="text" value="${reason}" data-key="${it.key}" data-field="reason" placeholder="输入修正原因..." style="width:150px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td></tr>`;
+                cfHtml+=`<tr><td>${it.name}</td><td>${it.value.toFixed(6)} ${it.unit}</td><td><input type="number" step="0.000001" value="${newValue.toFixed(6)}" data-key="${it.key}" data-field="value" style="width:100px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td><td><input type="text" value="${reason}" data-key="${it.key}" data-field="reason" placeholder="输入修正原因..." style="width:150px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td></tr>`;
             });
             document.getElementById('cfBody').innerHTML=cfHtml;
 
@@ -211,7 +211,7 @@
                 const custom=customData[it.key]||{};
                 const newValue=custom.value!==undefined?custom.value:it.value;
                 const reason=custom.reason||'';
-                dataHtml+=`<tr><td>${it.name}</td><td class="text-right">${fmtNum(it.value)} ${it.unit}</td><td class="text-right"><input type="number" step="1" value="${newValue}" data-key="${it.key}" data-field="value" style="width:100px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td><td><input type="text" value="${reason}" data-key="${it.key}" data-field="reason" placeholder="输入修正原因..." style="width:150px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td></tr>`;
+                dataHtml+=`<tr><td>${it.name}</td><td>${fmtNum(it.value)} ${it.unit}</td><td><input type="number" step="1" value="${newValue}" data-key="${it.key}" data-field="value" style="width:100px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td><td><input type="text" value="${reason}" data-key="${it.key}" data-field="reason" placeholder="输入修正原因..." style="width:150px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td></tr>`;
             });
             document.getElementById('dataBody').innerHTML=dataHtml;
 
