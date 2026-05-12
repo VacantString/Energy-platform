@@ -119,7 +119,7 @@
         </div>
         <div class="charts-row">
             <div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">📈 碳排放强度趋势（单位产品 / 单位产值）</div></div><div class="chart-box" id="intensityChart"></div></div>
-            <div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">🔍 排放维度钻取分析</div><div class="chart-tabs"><button class="chart-tab active" onclick="switchDrillChartType('treemap', this)">矩形树图</button><button class="chart-tab" onclick="switchDrillChartType('sunburst', this)">旭日图</button></div></div><div class="chart-box" id="drillChart"></div></div>
+            <div class="chart-panel"><div class="chart-panel-header"><div class="chart-panel-title">🔍 排放维度钻取分析（旭日图）</div></div><div class="chart-box" id="drillChart"></div></div>
         </div>
         <div class="section-panel">
             <div class="section-panel-header"><div class="section-panel-title">📋 月度碳排放核算明细表</div><div class="section-panel-actions"><button class="btn btn-outline btn-sm" onclick="exportTable('emissionTable')">导出CSV</button></div></div>
@@ -133,7 +133,6 @@
         const CF={electricity:0.000581,steam:0.3,water:0.00091};
         const OUTPUT_PRICE=0.8;
         let currentYear='2025';
-        let drillChartType='treemap';
         let drillChartInst=null;
 
         function getData(){return RAW_DATA[currentYear]}
@@ -200,13 +199,6 @@
             window.addEventListener('resize',()=>chart.resize());
         }
 
-        function switchDrillChartType(type, btn) {
-            drillChartType = type;
-            document.querySelectorAll('.chart-tabs .chart-tab').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderDrillChart();
-        }
-
         function renderDrillChart(){
             const dom=document.getElementById('drillChart');if(!dom)return;
             if(drillChartInst){drillChartInst.dispose();}
@@ -248,59 +240,32 @@
                 }
             };
             
-            if (drillChartType === 'treemap') {
-                chart.setOption({
-                    tooltip: tooltipCfg,
-                    series: [{
-                        type: 'treemap',
-                        roam: false,
-                        width: '96%',
-                        height: '90%',
-                        breadcrumb: { show: true, height: 28, bottom: 0 },
-                        label: {
-                            show: true,
-                            formatter: function(p) {
-                                return p.name + '\n' + fmtNum(p.value, 1) + ' tCO₂';
-                            },
-                            fontSize: 9
-                        },
-                        itemStyle: {
-                            borderColor: '#fff',
-                            borderWidth: 1
-                        },
-                        data: drillData,
-                        animationDurationUpdate: 800,
-                        animationEasingUpdate: 'cubicOut'
-                    }]
-                });
-            } else {
-                // 旭日图（Sunburst）
-                chart.setOption({
-                    tooltip: tooltipCfg,
-                    series: [{
-                        type: 'sunburst',
-                        radius: ['5%', '90%'],
-                        center: ['50%', '50%'],
-                        sort: null,
-                        emphasis: {
-                            focus: 'ancestor'
-                        },
-                        label: {
-                            show: true,
-                            fontSize: 10,
-                            rotate: 'radial'
-                        },
-                        itemStyle: {
-                            borderColor: '#fff',
-                            borderWidth: 2,
-                            borderRadius: 4
-                        },
-                        data: drillData,
-                        animationDurationUpdate: 800,
-                        animationEasingUpdate: 'cubicOut'
-                    }]
-                });
-            }
+            // 旭日图（Sunburst）
+            chart.setOption({
+                tooltip: tooltipCfg,
+                series: [{
+                    type: 'sunburst',
+                    radius: ['5%', '90%'],
+                    center: ['50%', '50%'],
+                    sort: null,
+                    emphasis: {
+                        focus: 'ancestor'
+                    },
+                    label: {
+                        show: true,
+                        fontSize: 10,
+                        rotate: 'radial'
+                    },
+                    itemStyle: {
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        borderRadius: 4
+                    },
+                    data: drillData,
+                    animationDurationUpdate: 800,
+                    animationEasingUpdate: 'cubicOut'
+                }]
+            });
             window.addEventListener('resize',()=>chart.resize());
         }
 

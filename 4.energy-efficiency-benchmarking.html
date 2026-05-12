@@ -476,16 +476,49 @@
                 { ns: b.steam.ns, nb: b.steam.nb, hb: m.bestUnitSteam, actual: m.unitSteam }
             ];
             const names = ['综合能耗', '电耗', '蒸汽消耗'];
+            const colors = ['#1e80ff', '#722ed1', '#ff7d00'];
             const series = dims.map((d, i) => {
                 const vals = [
                     +(d.ns ? ((d.actual - d.ns) / d.ns * 100) : 0).toFixed(1),
                     +(d.nb ? ((d.actual - d.nb) / d.nb * 100) : 0).toFixed(1),
                     +(d.hb > 0 ? ((d.actual - d.hb) / d.hb * 100) : 0).toFixed(1)
                 ];
-                return { name: names[i], type: 'bar', data: vals, barWidth: '30%', itemStyle: { color: function(p) { return p.value > 0 ? '#f53f3f' : '#00b42a'; } }, label: { show: true, position: 'top', formatter: '{c}%', fontSize: 10 } };
+                return { 
+                    name: names[i], 
+                    type: 'bar', 
+                    data: vals.map((v, j) => ({ 
+                        value: v, 
+                        itemStyle: { 
+                            color: colors[i],
+                            opacity: parseFloat(v) > 0 ? 0.9 : 0.4,
+                            borderColor: parseFloat(v) > 0 ? '#f53f3f' : '#00b42a',
+                            borderWidth: parseFloat(v) > 0 ? 2 : 1
+                        } 
+                    })), 
+                    barWidth: '30%', 
+                    label: { 
+                        show: true, 
+                        position: 'top', 
+                        formatter: function(p) { 
+                            const status = parseFloat(p.value) > 0 ? '落后' : '领先';
+                            return p.value + '%';
+                        }, 
+                        fontSize: 10 
+                    } 
+                };
             });
             chart.setOption({
-                tooltip: { trigger: 'axis', formatter: function(ps) { let s = ps[0].name + '<br/>'; ps.forEach(p => s += p.marker + p.seriesName + ': ' + p.value + '%<br/>'); return s; } },
+                tooltip: { 
+                    trigger: 'axis', 
+                    formatter: function(ps) { 
+                        let s = ps[0].name + '<br/>'; 
+                        ps.forEach(p => {
+                            const status = parseFloat(p.value) >= 0 ? '落后' : '领先';
+                            s += p.marker + p.seriesName + ': ' + p.value + '% (' + status + ')<br/>'; 
+                        }); 
+                        return s; 
+                    } 
+                },
                 legend: { data: names, top: 0 },
                 grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
                 xAxis: { type: 'category', data: labels },
