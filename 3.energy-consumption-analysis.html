@@ -181,17 +181,13 @@
         <div class="charts-row">
             <div class="chart-panel">
                 <div class="chart-panel-header">
-                    <div class="chart-panel-title">🌳 能耗结构树状图（全周期综合能耗）</div>
-                    <div class="chart-panel-actions">
-                        <button class="btn btn-sm" id="treemapBtn" onclick="switchChartType('treemap')" style="background:#ff7d00;color:white;border:1px solid #ff7d00">矩形树图</button>
-                        <button class="btn btn-sm" id="sunburstBtn" onclick="switchChartType('sunburst')" style="background:white;color:#666;border:1px solid #d9d9d9">旭日图</button>
-                    </div>
+                    <div class="chart-panel-title">🌳 能耗结构旭日图（全周期综合能耗）</div>
                 </div>
                 <div class="chart-box" id="treemapChart"></div>
             </div>
             <div class="chart-panel">
                 <div class="chart-panel-header">
-                    <div class="chart-panel-title">📊 全周期 vs 半周期 工序能耗对比</div>
+                    <div class="chart-panel-title">📊 能耗对比</div>
                 </div>
                 <div class="chart-box" id="compareChart"></div>
             </div>
@@ -211,9 +207,7 @@
                     <thead>
                         <tr>
                             <th style="width:36px;"></th>
-                            <th>一级层级</th>
-                            <th>二级层级（统计周期/能耗类型）</th>
-                            <th>三级层级（用能环节/模块）</th>
+                            <th>用能环节/模块</th>
                             <th>综合能耗(tce)</th>
                             <th>占比</th>
                             <th>环比/对比变化</th>
@@ -482,43 +476,17 @@
             `).join('');
         }
 
-        // ==================== 图表类型切换 ====================
-        let currentChartType = 'treemap';
-        let treemapChartInstance = null;
+        // ==================== 能耗结构旭日图 ====================
+        let sunburstChartInstance = null;
 
-        function switchChartType(type) {
-            currentChartType = type;
-            const treemapBtn = document.getElementById('treemapBtn');
-            const sunburstBtn = document.getElementById('sunburstBtn');
-            
-            if (type === 'treemap') {
-                treemapBtn.style.background = '#ff7d00';
-                treemapBtn.style.color = 'white';
-                treemapBtn.style.border = '1px solid #ff7d00';
-                sunburstBtn.style.background = 'white';
-                sunburstBtn.style.color = '#666';
-                sunburstBtn.style.border = '1px solid #d9d9d9';
-            } else {
-                sunburstBtn.style.background = '#ff7d00';
-                sunburstBtn.style.color = 'white';
-                sunburstBtn.style.border = '1px solid #ff7d00';
-                treemapBtn.style.background = 'white';
-                treemapBtn.style.color = '#666';
-                treemapBtn.style.border = '1px solid #d9d9d9';
-            }
-            
-            renderTreemapChart();
-        }
-
-        // ==================== 能耗结构树状图 ====================
         function renderTreemapChart() {
             const dom = document.getElementById('treemapChart');
             if (!dom) return;
             
-            if (treemapChartInstance) {
-                treemapChartInstance.dispose();
+            if (sunburstChartInstance) {
+                sunburstChartInstance.dispose();
             }
-            treemapChartInstance = echarts.init(dom);
+            sunburstChartInstance = echarts.init(dom);
 
             const totalTce = getPeriodSum('electricity') * COEF.electricity + getPeriodSum('water') * COEF.water + getPeriodSum('steam') * COEF.steam;
             const refData = currentPeriod === 'second' ? STRUCTURE_DATA.secondHalf : STRUCTURE_DATA.fullCycle;
@@ -532,129 +500,127 @@
 
             const colors = ['#1e80ff','#00b42a','#ff7d00','#722ed1','#f53f3f','#14c9c9','#f7ba1e','#86909c','#e8654a','#4a90d9'];
 
-            let option;
+            // 旭日图配置
+            const sunburstData = [
+                {
+                    name: '生产系统',
+                    itemStyle: { color: '#1e80ff' },
+                    children: prodItems.map((item, idx) => ({
+                        name: item.name,
+                        value: item.value,
+                        itemStyle: { color: colors[idx % colors.length] }
+                    }))
+                },
+                {
+                    name: '辅助系统',
+                    itemStyle: { color: '#ff7d00' },
+                    children: auxItems.map((item, idx) => ({
+                        name: item.name,
+                        value: item.value,
+                        itemStyle: { color: colors[(idx + 5) % colors.length] }
+                    }))
+                }
+            ];
             
-            if (currentChartType === 'treemap') {
-                // 矩形树图配置
-                option = {
-                    tooltip: { 
-                        formatter: function(p) { 
-                            return p.name + '<br/>综合能耗: ' + fmtNum(p.value, 2) + ' tce'; 
-                        } 
+            const option = {
+                tooltip: { 
+                    formatter: function(p) { 
+                        return p.name + '<br/>综合能耗: ' + fmtNum(p.value, 2) + ' tce<br/>占比: ' + fmtNum(p.percent, 1) + '%'; 
+                    } 
+                },
+                animationDuration: 1000,
+                animationEasing: 'cubicOut',
+                series: [{
+                    type: 'sunburst',
+                    data: sunburstData,
+                    radius: [0, '90%'],
+                    label: {
+                        rotate: 'radial',
+                        formatter: function(p) {
+                            return p.name.length > 6 ? p.name.substring(0, 5) + '...' : p.name;
+                        }
                     },
-                    animationDuration: 800,
-                    animationEasing: 'cubicOut',
-                    series: [{
-                        type: 'treemap', 
-                        roam: false, 
-                        width: '100%', 
-                        height: '92%',
-                        breadcrumb: { show: true, height: 28, bottom: 0 },
-                        label: { 
-                            show: true, 
-                            formatter: function(p) { 
-                                return p.name + '\n' + fmtNum(p.value, 1) + ' tce'; 
-                            } 
-                        },
-                        upperLabel: { show: true, height: 28 },
-                        itemStyle: { borderColor: '#fff', borderWidth: 2 },
-                        levels: [
-                            { colorMapping: 'value', visualMin: 0, visualMax: totalTce, color: colors },
-                            { itemStyle: { borderWidth: 2, gapWidth: 2 }, upperLabel: { show: true } }
-                        ],
-                        data: [
-                            { name: '生产系统', children: prodItems },
-                            { name: '辅助系统', children: auxItems }
-                        ]
-                    }]
-                };
-            } else {
-                // 旭日图配置
-                const sunburstData = [
-                    {
-                        name: '生产系统',
-                        itemStyle: { color: '#1e80ff' },
-                        children: prodItems.map((item, idx) => ({
-                            name: item.name,
-                            value: item.value,
-                            itemStyle: { color: colors[idx % colors.length] }
-                        }))
+                    itemStyle: {
+                        borderRadius: 4,
+                        borderWidth: 2,
+                        borderColor: '#fff'
                     },
-                    {
-                        name: '辅助系统',
-                        itemStyle: { color: '#ff7d00' },
-                        children: auxItems.map((item, idx) => ({
-                            name: item.name,
-                            value: item.value,
-                            itemStyle: { color: colors[(idx + 5) % colors.length] }
-                        }))
-                    }
-                ];
-                
-                option = {
-                    tooltip: { 
-                        formatter: function(p) { 
-                            return p.name + '<br/>综合能耗: ' + fmtNum(p.value, 2) + ' tce<br/>占比: ' + fmtNum(p.percent, 1) + '%'; 
-                        } 
+                    emphasis: {
+                        focus: 'ancestor'
                     },
-                    animationDuration: 1000,
-                    animationEasing: 'cubicOut',
-                    series: [{
-                        type: 'sunburst',
-                        data: sunburstData,
-                        radius: [0, '90%'],
-                        label: {
-                            rotate: 'radial',
-                            formatter: function(p) {
-                                return p.name.length > 6 ? p.name.substring(0, 5) + '...' : p.name;
-                            }
-                        },
-                        itemStyle: {
-                            borderRadius: 4,
-                            borderWidth: 2,
-                            borderColor: '#fff'
-                        },
-                        emphasis: {
-                            focus: 'ancestor'
-                        },
-                        levels: [
-                            {},
-                            { r0: '15%', r: '45%', label: { rotate: 'tangential' } },
-                            { r0: '45%', r: '75%', label: { align: 'right' } },
-                            { r0: '75%', r: '85%', label: { position: 'outside', padding: 3, silent: false } }
-                        ]
-                    }]
-                };
-            }
+                    levels: [
+                        {},
+                        { r0: '15%', r: '45%', label: { rotate: 'tangential' } },
+                        { r0: '45%', r: '75%', label: { align: 'right' } },
+                        { r0: '75%', r: '85%', label: { position: 'outside', padding: 3, silent: false } }
+                    ]
+                }]
+            };
 
-            treemapChartInstance.setOption(option);
-            window.addEventListener('resize', () => treemapChartInstance && treemapChartInstance.resize());
+            sunburstChartInstance.setOption(option);
+            window.addEventListener('resize', () => sunburstChartInstance && sunburstChartInstance.resize());
         }
 
-        // ==================== 全周期 vs 半周期对比图 ====================
+        // ==================== 能耗对比图（同比、环比） ====================
         function renderCompareChart() {
             const dom = document.getElementById('compareChart');
             if (!dom) return;
             const chart = echarts.init(dom);
 
             const totalTce = getPeriodSum('electricity') * COEF.electricity + getPeriodSum('water') * COEF.water + getPeriodSum('steam') * COEF.steam;
-            const fullData = STRUCTURE_DATA.fullCycle.processes;
-            const halfData = STRUCTURE_DATA.secondHalf.processes;
+            const refData = currentPeriod === 'second' ? STRUCTURE_DATA.secondHalf : STRUCTURE_DATA.fullCycle;
+            
+            const names = refData.processes.map(p => p.name);
+            const currentValues = refData.processes.map(p => +(totalTce * p.pct / 100).toFixed(2));
+            
+            let compareValues = [];
+            let legendData = ['当前周期能耗'];
+            
+            if (compareMode === 'yoy') {
+                // 同比：与去年同期对比
+                const prevYear = currentYear === '2026' ? '2025' : '2025';
+                const prevYearData = RAW_DATA[prevYear];
+                if (prevYearData) {
+                    const prevPeriodSum = sum(getPeriodData('electricity').map((_, i) => prevYearData.electricity[i] || 0)) * COEF.electricity +
+                                         sum(getPeriodData('water').map((_, i) => prevYearData.water[i] || 0)) * COEF.water +
+                                         sum(getPeriodData('steam').map((_, i) => prevYearData.steam[i] || 0)) * COEF.steam;
+                    compareValues = refData.processes.map(p => +(prevPeriodSum * p.pct / 100).toFixed(2));
+                    legendData.push('去年同期能耗');
+                }
+            } else if (compareMode === 'mom') {
+                // 环比：与上一周期对比
+                const otherPeriod = currentPeriod === 'first' ? 'second' : 'first';
+                const otherData = otherPeriod === 'second' ? STRUCTURE_DATA.secondHalf : STRUCTURE_DATA.fullCycle;
+                const otherTotal = totalTce * (otherData.total / STRUCTURE_DATA.fullCycle.total);
+                compareValues = otherData.processes.map(p => +(otherTotal * p.pct / 100).toFixed(2));
+                legendData.push('上一周期能耗');
+            }
 
-            const names = fullData.map(p => p.name);
-            const fullValues = fullData.map(p => +(totalTce * p.pct / 100).toFixed(2));
-            const halfValues = halfData.map(p => +(totalTce * p.pct / 100).toFixed(2));
+            const series = [{ 
+                name: legendData[0], 
+                type: 'bar', 
+                data: currentValues, 
+                itemStyle: { color: '#1e80ff' }, 
+                barWidth: compareValues.length > 0 ? '40%' : '60%' 
+            }];
+            
+            if (compareValues.length > 0) {
+                series.push({ 
+                    name: legendData[1], 
+                    type: 'bar', 
+                    data: compareValues, 
+                    itemStyle: { color: '#ff7d00' }, 
+                    barWidth: '40%' 
+                });
+            }
 
             chart.setOption({
                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                legend: { data: ['全周期综合能耗', '7-12月综合能耗'], top: 0 },
+                legend: { data: legendData, top: 0 },
                 grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
                 xAxis: { type: 'category', data: names, axisLabel: { rotate: 30, fontSize: 10 } },
                 yAxis: { type: 'value', name: 'tce' },
-                series: [
-                    { name: '全周期综合能耗', type: 'bar', data: fullValues, itemStyle: { color: '#1e80ff' }, barWidth: '40%' },
-                    { name: '7-12月综合能耗', type: 'bar', data: halfValues, itemStyle: { color: '#ff7d00' }, barWidth: '40%' }
-                ]
+                series: series
             });
             window.addEventListener('resize', () => chart.resize());
         }
@@ -663,36 +629,32 @@
         function renderTreeTable() {
             const totalTce = getPeriodSum('electricity') * COEF.electricity + getPeriodSum('water') * COEF.water + getPeriodSum('steam') * COEF.steam;
 
-            const rows = [
-                {
-                    id: 'root', level: 0, l1: '公司能耗结构', l2: '全周期综合能耗', l3: '', tce: totalTce, pct: 100, change: null, anomaly: false,
-                    children: STRUCTURE_DATA.fullCycle.processes.map(p => ({
-                        id: 'fc_' + p.name, level: 1, l1: '', l2: '', l3: p.name,
-                        tce: totalTce * p.pct / 100, pct: p.pct, change: null, anomaly: false
-                    }))
-                },
-                {
-                    id: 'sh', level: 0, l1: '公司能耗结构', l2: '7-12月综合能耗', l3: '', tce: totalTce * 0.4635, pct: 46.35, change: null, anomaly: false,
-                    children: STRUCTURE_DATA.secondHalf.processes.map(p => ({
-                        id: 'sh_' + p.name, level: 1, l1: '', l2: '', l3: p.name,
-                        tce: totalTce * p.pct / 100, pct: p.pct, change: p.change, anomaly: p.anomaly
-                    }))
-                },
-                {
-                    id: 'steam', level: 0, l1: '公司能耗结构', l2: '7-12月蒸汽消耗', l3: '', tce: getPeriodSum('steam') * COEF.steam * 0.5, pct: null, change: null, anomaly: false,
-                    children: STRUCTURE_DATA.steamSecondHalf.processes.map(p => ({
-                        id: 'st_' + p.name, level: 1, l1: '', l2: '', l3: p.name,
-                        tce: getPeriodSum('steam') * COEF.steam * 0.5 * p.pct / 100, pct: p.pct, change: null, anomaly: false
-                    }))
-                },
-                {
-                    id: 'boiler', level: 0, l1: '公司能耗结构', l2: '7-12月锅炉能耗', l3: '', tce: null, pct: null, change: null, anomaly: false,
-                    children: STRUCTURE_DATA.boilerSecondHalf.sources.map(p => ({
-                        id: 'bl_' + p.name, level: 1, l1: '', l2: '', l3: p.name,
-                        tce: null, pct: p.pct, change: null, anomaly: false
-                    }))
-                }
-            ];
+            const fullData = STRUCTURE_DATA.fullCycle.processes;
+            const halfData = STRUCTURE_DATA.secondHalf.processes;
+
+            const prodSystem = {
+                name: '生产系统',
+                children: [
+                    { name: '配料工序', tce: 557.77, pct: 31.25, change: -2.35, anomaly: false },
+                    { name: '水处理工序', tce: 27.97, pct: 1.57, change: 0.03, anomaly: false },
+                    { name: '灌装工序一线', tce: 356.25, pct: 19.96, change: 1.09, anomaly: false },
+                    { name: '灌装工序二线', tce: 370.42, pct: 20.75, change: 5.28, anomaly: true },
+                    { name: '包装工序一线', tce: 72.05, pct: 4.04, change: -0.11, anomaly: false },
+                    { name: '包装工序二线', tce: 74.24, pct: 4.16, change: 0, anomaly: false }
+                ]
+            };
+
+            const auxSystem = {
+                name: '辅助系统',
+                children: [
+                    { name: '空压机及供气系统', tce: 43.66, pct: 2.45, change: 0.06, anomaly: false },
+                    { name: '锅炉', tce: 0, pct: 0, change: null, anomaly: false },
+                    { name: '制冷（中央空调）', tce: 62.31, pct: 3.49, change: 0.45, anomaly: false },
+                    { name: '其他（污水站等）', tce: 22.35, pct: 1.25, change: 0.35, anomaly: false }
+                ]
+            };
+
+            const rows = [prodSystem, auxSystem];
 
             let html = '';
             let rid = 0;
@@ -701,14 +663,12 @@
                 items.forEach(item => {
                     const id = 'tr_' + (rid++);
                     const hasChildren = item.children && item.children.length > 0;
-                    const cls = 'level-' + item.level;
-                    const isParent = item.level === 0;
+                    const isParent = !item.tce;
+                    const cls = isParent ? 'level-0' : 'level-1';
 
                     html += '<tr class="' + cls + '" data-id="' + id + '"' + (parentId ? ' data-parent="' + parentId + '" style="display:none;"' : '') + '>';
                     html += '<td class="text-center">' + (hasChildren ? '<span class="expand-icon" onclick="toggleTreeRow(\'' + id + '\')">▶</span>' : '') + '</td>';
-                    html += '<td class="fw-600">' + item.l1 + '</td>';
-                    html += '<td class="' + (isParent ? 'fw-600' : '') + '">' + item.l2 + '</td>';
-                    html += '<td>' + item.l3 + '</td>';
+                    html += '<td class="' + (isParent ? 'fw-600' : '') + '">' + item.name + '</td>';
                     html += '<td class="text-right ' + (isParent ? 'fw-600' : '') + '">' + (item.tce != null ? fmtNum(item.tce, 2) : '-') + '</td>';
                     html += '<td class="text-right">' + (item.pct != null ? fmtNum(item.pct, 2) + '%' : '-') + '</td>';
                     html += '<td class="text-center">';
@@ -720,12 +680,10 @@
                     html += '<td class="text-center">';
                     if (item.anomaly) {
                         html += '<span class="tag tag-red">异常预警（↑）</span>';
-                    } else if (item.l3 === '锅炉' && item.tce === 0) {
+                    } else if (item.name === '锅炉' && item.tce === 0) {
                         html += '<span class="tag tag-gray">无数据/需关注</span>';
-                    } else if (item.l3 && item.change !== null && item.change !== undefined) {
+                    } else if (item.name && item.change !== null && item.change !== undefined) {
                         html += '<span class="tag tag-green">正常</span>';
-                    } else if (item.l3 === '灌装工序二线' && item.l2 === '7-12月蒸汽消耗') {
-                        html += '<span class="tag tag-orange">趋势异常（偏高）</span>';
                     } else {
                         html += '<span class="tag tag-green">正常</span>';
                     }
@@ -779,26 +737,85 @@
             document.querySelectorAll('#treeBody tr[data-parent]').forEach(r => r.style.display = 'none');
         }
 
-        // ==================== 蒸汽消耗分布图 ====================
+        // ==================== 蒸汽消耗分布图（桑基图） ====================
         function renderSteamDistChart() {
             const dom = document.getElementById('steamDistChart');
             if (!dom) return;
             const chart = echarts.init(dom);
 
             const sd = STRUCTURE_DATA.steamSecondHalf;
-            const colors = ['#1e80ff', '#ff7d00', '#722ed1'];
+            const totalSteam = sd.total;
+            const prodSum = sd.processes.reduce((sum, p) => sum + p.tce, 0);
+            const loss = totalSteam - prodSum;
+
+            const nodes = [
+                { name: '蒸汽总表' },
+                { name: '配料工序' },
+                { name: '一线APV' },
+                { name: '二线APV' },
+                { name: '损耗' },
+                { name: '实际消耗' }
+            ];
+
+            const links = [
+                { source: '蒸汽总表', target: '配料工序', value: sd.processes[0].tce },
+                { source: '蒸汽总表', target: '一线APV', value: sd.processes[1].tce },
+                { source: '蒸汽总表', target: '二线APV', value: sd.processes[2].tce },
+                { source: '蒸汽总表', target: '损耗', value: loss },
+                { source: '配料工序', target: '实际消耗', value: sd.processes[0].tce },
+                { source: '一线APV', target: '实际消耗', value: sd.processes[1].tce },
+                { source: '二线APV', target: '实际消耗', value: sd.processes[2].tce }
+            ];
 
             chart.setOption({
-                tooltip: { trigger: 'item', formatter: '{b}: {c} tce ({d}%)' },
-                legend: { orient: 'vertical', right: '5%', top: 'center' },
+                tooltip: {
+                    trigger: 'item',
+                    triggerOn: 'mousemove',
+                    formatter: function(params) {
+                        if (params.dataType === 'edge') {
+                            return `${params.data.source} → ${params.data.target}<br/>能耗: ${fmtNum(params.data.value, 2)} t`;
+                        } else {
+                            let total = 0;
+                            if (params.name === '蒸汽总表') {
+                                total = totalSteam;
+                            } else if (params.name === '损耗') {
+                                total = loss;
+                            } else if (params.name === '实际消耗') {
+                                total = prodSum;
+                            } else {
+                                const p = sd.processes.find(item => item.name.includes(params.name));
+                                total = p ? p.tce : 0;
+                            }
+                            return `${params.name}<br/>能耗: ${fmtNum(total, 2)} t`;
+                        }
+                    }
+                },
                 series: [{
-                    name: '蒸汽消耗分布', type: 'pie', radius: ['45%', '72%'], center: ['38%', '50%'],
-                    itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
-                    label: { show: false },
-                    emphasis: { label: { show: true, fontSize: '13', fontWeight: 'bold' } },
-                    data: sd.processes.map((p, i) => ({
-                        value: p.tce, name: p.name, itemStyle: { color: colors[i] }
-                    }))
+                    type: 'sankey',
+                    layout: 'none',
+                    emphasis: { focus: 'adjacency' },
+                    data: nodes,
+                    links: links,
+                    top: '10%',
+                    bottom: '10%',
+                    left: '15%',
+                    right: '15%',
+                    nodeWidth: 30,
+                    nodeGap: 15,
+                    orient: 'horizontal',
+                    label: {
+                        show: true,
+                        fontSize: 11,
+                        fontWeight: 'bold'
+                    },
+                    itemStyle: {
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    },
+                    lineStyle: {
+                        color: 'source',
+                        curveness: 0.3
+                    }
                 }]
             });
             window.addEventListener('resize', () => chart.resize());
@@ -810,20 +827,49 @@
             if (!dom) return;
             const chart = echarts.init(dom);
 
-            const bd = STRUCTURE_DATA.boilerSecondHalf;
+            const d = getData();
+            const labels = d.production.months.slice(0, getMonthCount());
+            const { start, end } = getPeriodIndices();
+            const periodLabels = labels.slice(start, end + 1);
+            
+            const elecData = getPeriodData('electricity');
+            const waterData = getPeriodData('water');
+            const steamData = getPeriodData('steam');
+            
+            const steamUsage = steamData.map(v => +(v * COEF.steam).toFixed(2));
+            const gasUsage = elecData.map(v => +(v * 0.1).toFixed(2));
+            
+            const gasSteamRatio = steamUsage.map((s, i) => s > 0 ? gasUsage[i] / s : 0);
 
             chart.setOption({
-                tooltip: { trigger: 'item', formatter: '{b}: {d}%' },
-                legend: { orient: 'vertical', right: '5%', top: 'center' },
-                series: [{
-                    name: '锅炉能耗结构', type: 'pie', radius: ['45%', '72%'], center: ['38%', '50%'],
-                    itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
-                    label: { show: true, formatter: '{b}\n{d}%' },
-                    data: bd.sources.map((s, i) => ({
-                        value: s.pct, name: s.name,
-                        itemStyle: { color: i === 0 ? '#ff7d00' : '#1e80ff' }
-                    }))
-                }]
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: function(params) {
+                        let result = `<strong>${params[0].axisValue}</strong>\n`;
+                        params.forEach(item => {
+                            if (item.seriesName === '燃气蒸汽比') {
+                                result += `${item.marker} ${item.seriesName}: ${item.value.toFixed(3)}\n`;
+                            } else {
+                                result += `${item.marker} ${item.seriesName}: ${item.value.toFixed(2)} tce\n`;
+                            }
+                        });
+                        return result;
+                    }
+                },
+                legend: { data: ['燃气用量', '蒸汽用量', '燃气蒸汽比'], top: 0 },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: { type: 'category', data: periodLabels, axisLabel: { rotate: 30, fontSize: 10 } },
+                yAxis: [
+                    { type: 'value', name: 'tce', position: 'left' },
+                    { type: 'value', name: '比值', position: 'right', axisLabel: { formatter: '{value}' } }
+                ],
+                series: [
+                    { name: '燃气用量', type: 'bar', data: gasUsage, itemStyle: { color: '#ff7d00' }, barWidth: '30%' },
+                    { name: '蒸汽用量', type: 'bar', data: steamUsage, itemStyle: { color: '#1e80ff' }, barWidth: '30%' },
+                    { name: '燃气蒸汽比', type: 'line', yAxisIndex: 1, data: gasSteamRatio, 
+                      itemStyle: { color: '#f53f3f' }, lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 6 }
+                ]
             });
             window.addEventListener('resize', () => chart.resize());
         }

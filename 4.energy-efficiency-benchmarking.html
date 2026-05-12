@@ -128,21 +128,6 @@
         </div>
         <div class="selector-bar">
             <div class="selector-group">
-                <span class="selector-label">📅 年度：</span>
-                <button class="selector-btn active" data-year="2025" onclick="switchYear('2025')">2025年</button>
-                <button class="selector-btn" data-year="2026" onclick="switchYear('2026')">2026年</button>
-            </div>
-            <div class="selector-divider"></div>
-            <div class="selector-group">
-                <span class="selector-label">核算周期：</span>
-                <select class="selector-select" id="periodSelect" onchange="switchPeriod()">
-                    <option value="all">年度累计</option>
-                    <option value="first">上半年（1-6月）</option>
-                    <option value="second">下半年（7-12月）</option>
-                </select>
-            </div>
-            <div class="selector-divider"></div>
-            <div class="selector-group">
                 <span class="selector-label">电价：</span>
                 <input type="number" id="elecPrice" value="0.75" step="0.01" min="0.3" max="3" style="width:80px;padding:6px 10px;border:1px solid #d9d9d9;border-radius:6px;font-size:0.9rem;" onchange="refreshAll()">
                 <span style="font-size:0.8rem;color:#999;">元/kWh</span>
@@ -173,9 +158,6 @@
         <div class="section-panel">
             <div class="section-panel-header">
                 <div class="section-panel-title">📋 标准化能效对标分析表</div>
-                <div class="section-panel-actions">
-                    <button class="btn btn-outline btn-sm" onclick="exportTable('benchmarkTable')">导出CSV</button>
-                </div>
             </div>
             <div class="table-wrap">
                 <table id="benchmarkTable">
@@ -196,6 +178,42 @@
             </div>
             <div class="savings-grid" id="savingsGrid"></div>
         </div>
+        <div class="section-panel">
+            <div class="section-panel-header">
+                <div class="section-panel-title">📊 实测值修正</div>
+                <div class="section-panel-actions">
+                    <button class="btn btn-primary btn-sm" onclick="saveCorrections()">保存修正</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table id="correctionTable">
+                    <thead>
+                        <tr>
+                            <th>能效指标</th><th>原始实测值</th><th>修正系数</th><th>修正后值</th><th>单位</th>
+                        </tr>
+                    </thead>
+                    <tbody id="correctionBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="section-panel">
+            <div class="section-panel-header">
+                <div class="section-panel-title">⚙️ 对标值管理（管理员）</div>
+                <div class="section-panel-actions">
+                    <button class="btn btn-primary btn-sm" onclick="saveBenchmarks()">保存修改</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table id="adminTable">
+                    <thead>
+                        <tr>
+                            <th>能效指标</th><th>基准值(限定值)</th><th>通用值(准入值)</th><th>先进值(标杆值)</th><th>单位</th><th>基准值来源</th><th>先进值来源</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminBody"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
     <script>
         const RAW_DATA = {
@@ -203,41 +221,27 @@
             '2026': { production: { months: ['1月','2月','3月','4月'], actualOutput: [4945.632,2834.961,4416.6993,2387.1303] }, water: [20543,12165,18367,10380], steam: [1740,1020,1532,823], electricity: [374779.4,227895.6,345636.8,189917.2] }
         };
         const COEF = { electricity: 0.1229 / 1000, water: 0.0857 / 1000, steam: 0.1000 };
-        let currentYear = '2025', currentPeriod = 'all';
+        let currentYear = '2025';
 
         function getData() { return RAW_DATA[currentYear]; }
         function getMonthCount() { return getData().water.length; }
         function sum(arr) { return arr.reduce((a, b) => a + b, 0); }
         function fmt(n, d) { d = d || 2; return Number(n).toFixed(d); }
         function fmtNum(n, d) { d = d || 2; const v = Number(n).toFixed(d); return parseFloat(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
-        function getPeriodIndices() { const mc = getMonthCount(); if (currentPeriod === 'all') return { start: 0, end: mc - 1 }; if (currentPeriod === 'first') return { start: 0, end: Math.min(5, mc - 1) }; return { start: Math.min(6, mc - 1), end: mc - 1 }; }
-        function getPeriodData(k) { const d = getData(); const s = getPeriodIndices(); return d[k].slice(s.start, s.end + 1); }
-        function getPeriodSum(k) { return sum(getPeriodData(k)); }
-        function getPeriodProd() { const d = getData(); const s = getPeriodIndices(); return sum(d.production.actualOutput.slice(s.start, s.end + 1)); }
+        function getPeriodSum(k) { return sum(getData()[k]); }
+        function getPeriodProd() { return sum(getData().production.actualOutput); }
         function getAnnualProd() { return sum(getData().production.actualOutput); }
         function getElecPrice() { const v = parseFloat(document.getElementById('elecPrice').value); return isNaN(v) || v <= 0 ? 0.75 : v; }
-
-        function switchYear(year) {
-            currentYear = year;
-            document.querySelectorAll('[data-year]').forEach(b => b.classList.remove('active'));
-            document.querySelector('[data-year="' + year + '"]').classList.add('active');
-            const sel = document.getElementById('periodSelect'), mc = getMonthCount();
-            if (mc < 12) { sel.querySelector('option[value="second"]').disabled = mc <= 6; }
-            else { sel.querySelectorAll('option').forEach(o => o.disabled = false); }
-            if (currentPeriod === 'second' && mc <= 6) { currentPeriod = 'all'; sel.value = 'all'; }
-            refreshAll();
-        }
-        function switchPeriod() { currentPeriod = document.getElementById('periodSelect').value; refreshAll(); }
-        function refreshAll() { renderKPIs(); renderGauges(); renderCompareChart(); renderGapChart(); renderBenchmarkTable(); renderSavingsGrid(); }
+        function refreshAll() { renderKPIs(); renderGauges(); renderCompareChart(); renderGapChart(); renderBenchmarkTable(); renderSavingsGrid(); renderAdminTable(); renderCorrectionTable(); }
 
         function calcMetrics() {
             const tE = getPeriodSum('electricity'), tW = getPeriodSum('water'), tS = getPeriodSum('steam');
             const prod = getPeriodProd(), annualProd = getAnnualProd();
             const totalTce = tE * COEF.electricity + tW * COEF.water + tS * COEF.steam;
-            const unitComp = prod > 0 ? totalTce / prod : 0;
-            const unitElec = prod > 0 ? tE / prod : 0;
-            const unitSteam = prod > 0 ? tS / prod : 0;
-            const unitWater = prod > 0 ? tW / prod : 0;
+            let unitComp = prod > 0 ? totalTce / prod : 0;
+            let unitElec = prod > 0 ? tE / prod : 0;
+            let unitSteam = prod > 0 ? tS / prod : 0;
+            let unitWater = prod > 0 ? tW / prod : 0;
             const effRate = 82;
             const months = getMonthCount();
             let bestUnitComp = Infinity, bestUnitElec = Infinity, bestUnitSteam = Infinity;
@@ -252,17 +256,35 @@
             if (bestUnitComp === Infinity) bestUnitComp = 0;
             if (bestUnitElec === Infinity) bestUnitElec = 0;
             if (bestUnitSteam === Infinity) bestUnitSteam = 0;
+            
+            unitComp *= (customCorrections.comp || 1);
+            unitElec *= (customCorrections.elec || 1);
+            unitSteam *= (customCorrections.steam || 1);
+            unitWater *= (customCorrections.water || 1);
+            
             return { totalTce, prod, annualProd, unitComp, unitElec, unitSteam, unitWater, effRate, bestUnitComp, bestUnitElec, bestUnitSteam, elecPrice: getElecPrice() };
         }
 
         function getBenchmarks() {
-            return {
-                comp: { key: '单位产品综合能耗', unit: 'tce/t', type: 'reverse', fmt: 4, ns: 0.055, nb: 0.048, actualKey: 'unitComp', hbKey: 'bestUnitComp', unitPrice: 1200 },
-                elec: { key: '单位产品电耗', unit: 'kWh/t', type: 'reverse', fmt: 1, ns: 95, nb: 85, actualKey: 'unitElec', hbKey: 'bestUnitElec', unitPrice: null },
-                steam: { key: '单位产品蒸汽消耗', unit: 't/t', type: 'reverse', fmt: 3, ns: 0.42, nb: 0.35, actualKey: 'unitSteam', hbKey: 'bestUnitSteam', unitPrice: 350 },
-                water: { key: '单位产品水耗', unit: 'm³/t', type: 'reverse', fmt: 2, ns: 4.5, nb: 3.8, actualKey: 'unitWater', hbKey: 'unitWater', unitPrice: 6 },
-                eff: { key: '能源利用率', unit: '%', type: 'forward', fmt: 1, ns: 78, nb: 83, actualKey: 'effRate', hbKey: 'effRate', unitPrice: null }
+            const baseBenchmarks = {
+                comp: { key: '单位产品综合能耗', unit: 'tce/t', type: 'reverse', fmt: 4, ns: 0.055, nb: 0.048, actualKey: 'unitComp', hbKey: 'bestUnitComp', unitPrice: 1200, nsSource: 'GB 21252-2013', nbSource: '行业先进水平' },
+                elec: { key: '单位产品电耗', unit: 'kWh/t', type: 'reverse', fmt: 1, ns: 95, nb: 85, actualKey: 'unitElec', hbKey: 'bestUnitElec', unitPrice: null, nsSource: 'GB 21252-2013', nbSource: '行业先进水平' },
+                steam: { key: '单位产品蒸汽消耗', unit: 't/t', type: 'reverse', fmt: 3, ns: 0.42, nb: 0.35, actualKey: 'unitSteam', hbKey: 'bestUnitSteam', unitPrice: 350, nsSource: 'GB 21252-2013', nbSource: '行业先进水平' },
+                water: { key: '单位产品水耗', unit: 'm³/t', type: 'reverse', fmt: 2, ns: 4.5, nb: 3.8, actualKey: 'unitWater', hbKey: 'unitWater', unitPrice: 6, nsSource: 'GB 21252-2013', nbSource: '行业先进水平' },
+                eff: { key: '能源利用率', unit: '%', type: 'forward', fmt: 1, ns: 78, nb: 83, actualKey: 'effRate', hbKey: 'effRate', unitPrice: null, nsSource: 'GB 21252-2013', nbSource: '行业先进水平' }
             };
+            
+            Object.keys(baseBenchmarks).forEach(key => {
+                if (customBenchmarks[key]) {
+                    if (customBenchmarks[key].ns !== undefined) baseBenchmarks[key].ns = customBenchmarks[key].ns;
+                    if (customBenchmarks[key].nb !== undefined) baseBenchmarks[key].nb = customBenchmarks[key].nb;
+                    if (customBenchmarks[key].adv !== undefined) baseBenchmarks[key].adv = customBenchmarks[key].adv;
+                    if (customBenchmarks[key].nsSource !== undefined) baseBenchmarks[key].nsSource = customBenchmarks[key].nsSource;
+                    if (customBenchmarks[key].nbSource !== undefined) baseBenchmarks[key].nbSource = customBenchmarks[key].nbSource;
+                }
+            });
+            
+            return baseBenchmarks;
         }
 
         function computeAchievement(actual, benchmark, type) {
@@ -289,6 +311,81 @@
             if (dim === '国家标准') return { label: '未达标⚠', cls: 'tag-red' };
             if (dim === '行业标杆') return { label: '差距较大', cls: 'tag-orange' };
             return { label: '退步明显', cls: 'tag-orange' };
+        }
+
+        let customBenchmarks = JSON.parse(localStorage.getItem('customBenchmarks') || '{}');
+        let customCorrections = JSON.parse(localStorage.getItem('customCorrections') || '{}');
+
+        function renderAdminTable() {
+            const b = getBenchmarks();
+            const indicators = [b.comp, b.elec, b.steam, b.water, b.eff];
+            let html = '';
+            indicators.forEach((ind, idx) => {
+                const key = Object.keys(b)[idx];
+                const custom = customBenchmarks[key] || {};
+                const ns = custom.ns !== undefined ? custom.ns : ind.ns;
+                const nb = custom.nb !== undefined ? custom.nb : ind.nb;
+                const adv = custom.adv !== undefined ? custom.adv : ind.nb * 0.9;
+                html += '<tr>';
+                html += '<td class="fw-600">' + ind.key + '</td>';
+                html += '<td><input type="number" step="0.001" value="' + ns + '" data-key="' + key + '" data-field="ns" style="width:80px;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;"></td>';
+                html += '<td><input type="number" step="0.001" value="' + nb + '" data-key="' + key + '" data-field="nb" style="width:80px;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;"></td>';
+                html += '<td><input type="number" step="0.001" value="' + adv + '" data-key="' + key + '" data-field="adv" style="width:80px;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;"></td>';
+                html += '<td>' + ind.unit + '</td>';
+                html += '<td><input type="text" value="' + (ind.nsSource || '') + '" data-key="' + key + '" data-field="nsSource" style="width:150px;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;"></td>';
+                html += '<td><input type="text" value="' + (ind.nbSource || '') + '" data-key="' + key + '" data-field="nbSource" style="width:150px;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;"></td>';
+                html += '</tr>';
+            });
+            document.getElementById('adminBody').innerHTML = html;
+        }
+
+        function saveBenchmarks() {
+            const inputs = document.querySelectorAll('#adminBody input');
+            inputs.forEach(input => {
+                const key = input.dataset.key;
+                const field = input.dataset.field;
+                if (!customBenchmarks[key]) customBenchmarks[key] = {};
+                if (field === 'nsSource' || field === 'nbSource') {
+                    customBenchmarks[key][field] = input.value;
+                } else {
+                    customBenchmarks[key][field] = parseFloat(input.value);
+                }
+            });
+            localStorage.setItem('customBenchmarks', JSON.stringify(customBenchmarks));
+            alert('对标值已保存！');
+            refreshAll();
+        }
+
+        function renderCorrectionTable() {
+            const m = calcMetrics();
+            const b = getBenchmarks();
+            const indicators = [b.comp, b.elec, b.steam, b.water, b.eff];
+            let html = '';
+            indicators.forEach((ind, idx) => {
+                const key = Object.keys(b)[idx];
+                const original = m[ind.actualKey];
+                const correction = customCorrections[key] || 1;
+                const corrected = original * correction;
+                html += '<tr>';
+                html += '<td class="fw-600">' + ind.key + '</td>';
+                html += '<td>' + fmtNum(original, ind.fmt) + '</td>';
+                html += '<td><input type="number" step="0.01" min="0.5" max="1.5" value="' + correction + '" data-key="' + key + '" style="width:80px;padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;"></td>';
+                html += '<td class="fw-600 text-blue">' + fmtNum(corrected, ind.fmt) + '</td>';
+                html += '<td>' + ind.unit + '</td>';
+                html += '</tr>';
+            });
+            document.getElementById('correctionBody').innerHTML = html;
+        }
+
+        function saveCorrections() {
+            const inputs = document.querySelectorAll('#correctionBody input');
+            inputs.forEach(input => {
+                const key = input.dataset.key;
+                customCorrections[key] = parseFloat(input.value);
+            });
+            localStorage.setItem('customCorrections', JSON.stringify(customCorrections));
+            alert('修正系数已保存！');
+            refreshAll();
         }
 
         function getSuggestion(label) {
@@ -452,19 +549,6 @@
                 { title: '电耗节能量（vs 行业标杆）', value: (elecR.absoluteGap > 0 ? fmtNum(elecR.absoluteGap * m.annualProd, 0) : '0') + ' kWh', desc: '理论年节电量：' + (elecR.absoluteGap > 0 ? fmtNum(elecR.absoluteGap * m.annualProd, 0) + ' kWh' : '已领先，无节能空间') + ' | 可实现70%：收益 ¥' + fmtNum(revElec, 0) },
                 { title: '三指标合计年节能收益', value: '¥' + fmtNum(totalRevenue, 0), desc: '单位产品综合能耗 + 电耗 + 蒸汽消耗对标行业标杆的可实现节能收益合计 | 可实现系数取70%' }
             ].map(s => '<div class="savings-card"><div class="savings-title">' + s.title + '</div><div class="savings-value">' + s.value + '</div><div class="savings-desc">' + s.desc + '</div></div>').join('');
-        }
-
-        function exportTable(tableId) {
-            const table = document.getElementById(tableId);
-            let csv = '\uFEFF';
-            table.querySelectorAll('tr').forEach(row => {
-                const rd = []; row.querySelectorAll('th, td').forEach(c => rd.push('"' + c.textContent.trim().replace(/"/g, '""') + '"'));
-                csv += rd.join(',') + '\n';
-            });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-            a.download = tableId + '_' + currentYear + '_' + currentPeriod + '.csv';
-            a.click();
         }
 
         document.addEventListener('DOMContentLoaded', function() { refreshAll(); });

@@ -10,7 +10,7 @@
         .header{background:linear-gradient(135deg,#1e80ff 0%,#0e5fd8 100%);color:white;padding:28px 32px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 16px rgba(30,128,255,0.25)}.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.header h1{font-size:2rem;font-weight:600}.header p{font-size:1rem;opacity:0.92}
         .selector-bar{background:white;padding:16px 24px;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;gap:20px;flex-wrap:wrap}.selector-group{display:flex;align-items:center;gap:8px}.selector-label{font-weight:600;color:#555;font-size:0.9rem}.selector-btn{padding:8px 18px;border:1px solid #d9d9d9;background:white;border-radius:6px;cursor:pointer;font-size:0.9rem;transition:all 0.2s}.selector-btn:hover{border-color:#1e80ff;color:#1e80ff}.selector-btn.active{background:#1e80ff;color:white;border-color:#1e80ff}.selector-divider{width:1px;height:24px;background:#e8e8e8}.selector-select{padding:8px 14px;border:1px solid #d9d9d9;border-radius:6px;font-size:0.9rem;cursor:pointer;background:white;min-width:100px}.selector-select:focus{border-color:#1e80ff;outline:none}
         .kpi-section{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:20px}.kpi-card{background:white;padding:28px 16px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:center;border-top:4px solid #1e80ff;transition:transform 0.2s;overflow:visible;min-height:140px;display:flex;flex-direction:column;justify-content:center}.kpi-card:hover{transform:translateY(-2px)}.kpi-card:nth-child(2){border-top-color:#00b42a}.kpi-card:nth-child(3){border-top-color:#ff7d00}.kpi-card:nth-child(4){border-top-color:#722ed1}.kpi-card:nth-child(5){border-top-color:#f53f3f}.kpi-card:nth-child(6){border-top-color:#14c9c9}.kpi-value{font-size:1.8rem;font-weight:700;color:#1e80ff;margin-bottom:4px;line-height:1.3}.kpi-card:nth-child(2) .kpi-value{color:#00b42a}.kpi-card:nth-child(3) .kpi-value{color:#ff7d00}.kpi-card:nth-child(4) .kpi-value{color:#722ed1}.kpi-card:nth-child(5) .kpi-value{color:#f53f3f}.kpi-card:nth-child(6) .kpi-value{color:#14c9c9}.kpi-label{color:#666;font-size:0.85rem;font-weight:500;margin-bottom:6px;line-height:1.4}.kpi-unit{color:#999;font-size:0.78rem;line-height:1.4}.kpi-sub{font-size:0.8rem;color:#999;margin-top:4px;line-height:1.4}
-        .section-panel{background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px;overflow:hidden}.section-panel-header{padding:18px 24px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}.section-panel-title{font-size:1.05rem;font-weight:600;color:#333;display:flex;align-items:center;gap:8px}.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500}.btn-sm{padding:4px 10px;font-size:0.8rem}.btn-primary{background:#1e80ff;color:white}.btn-outline{background:white;color:#1e80ff;border:1px solid #1e80ff}
+        .section-panel{background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px;overflow:hidden}.section-panel-header{padding:18px 24px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}.section-panel-title{font-size:1.05rem;font-weight:600;color:#333;display:flex;align-items:center;gap:8px}.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500}.btn-sm{padding:4px 10px;font-size:0.8rem}.btn-primary{background:#1e80ff;color:white}.btn-outline{background:white;color:#1e80ff;border:1px solid #1e80ff}.btn-success{background:#00b42a;color:white}.btn-warning{background:#ff7d00;color:white}.chart-container{height:360px;width:100%}.analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px 24px}.correction-panel{padding:20px 24px}
         .audit-layout{display:grid;grid-template-columns:280px 1fr;gap:20px;padding:20px 24px}.task-sidebar{background:#fafafa;padding:16px;border-radius:8px}.task-item{padding:14px 16px;margin-bottom:8px;background:white;border-radius:6px;cursor:pointer;border-left:4px solid transparent;font-size:0.85rem}.task-item:hover,.task-item.active{background:#e8f4ff;border-left-color:#1e80ff}.task-title{font-weight:600;color:#333;margin-bottom:4px}.task-status{font-size:0.75rem}
         .material-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.material-card{background:#fafafa;padding:16px;border-radius:8px}.material-title{font-weight:600;color:#333;margin-bottom:10px;font-size:0.9rem;display:flex;justify-content:space-between}.material-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:white;border-radius:4px;margin-bottom:6px;font-size:0.82rem}
         .badge{padding:3px 8px;border-radius:3px;font-size:0.7rem;font-weight:600}.badge-ok{background:#e8ffea;color:#00b42a}.badge-warn{background:#fff7e6;color:#ff7d00}.badge-err{background:#fff2f0;color:#f53f3f}
@@ -40,11 +40,45 @@
         <div class="section-panel"><div class="section-panel-header"><div class="section-panel-title">📋 核查任务与材料归集</div></div><div class="audit-layout"><div class="task-sidebar" id="taskSidebar"></div><div class="material-grid" id="materialGrid"></div></div></div>
         <div class="section-panel"><div class="section-panel-header"><div class="section-panel-title">🔗 碳排放证据链追溯树</div></div><div class="trace-tree" id="traceTree"></div></div>
         <div class="section-panel"><div class="section-panel-header"><div class="section-panel-title">⚠️ 异常报告与整改跟踪</div></div><div class="table-wrap"><table id="issueTable"><thead><tr><th>问题编号</th><th>发现时间</th><th>问题描述</th><th>优先级</th><th>整改状态</th><th>负责人</th><th>截止日期</th></tr></thead><tbody id="issueBody"></tbody></table></div></div>
+        <div class="section-panel">
+            <div class="section-panel-header"><div class="section-panel-title">🤝 第三方碳核查结果对比分析</div><span class="selector-select">对比维度：<select onchange="renderCompareChart();renderDiffTable()" id="compareDim"><option value="month">按月份</option><option value="type">按排放类型</option></select></span></div>
+            <div class="analysis-grid">
+                <div><div class="chart-container" id="compareChart"></div></div>
+                <div><div class="chart-container" id="diffChart"></div></div>
+            </div>
+        </div>
+        <div class="section-panel">
+            <div class="section-panel-header"><div class="section-panel-title">📊 核查差异明细分析</div></div>
+            <div class="table-wrap"><table id="diffTable"><thead><tr><th>项目</th><th>企业自算值(tCO₂)</th><th>第三方核查值(tCO₂)</th><th>差异值(tCO₂)</th><th>差异率</th><th>差异原因</th><th>状态</th></tr></thead><tbody id="diffBody"></tbody></table></div>
+        </div>
+        <div class="section-panel">
+            <div class="section-panel-header"><div class="section-panel-title">✏️ 数据修正模块</div><button class="btn btn-success" onclick="saveCorrections()">💾 保存修正数据</button></div>
+            <div class="correction-panel">
+                <div class="analysis-grid">
+                    <div>
+                        <h4 style="margin-bottom:12px;color:#333;font-weight:600;">排放因子修正</h4>
+                        <table style="width:100%;"><thead><tr><th style="text-align:left;">能源类型</th><th style="text-align:right;">原排放因子</th><th style="text-align:right;">修正后因子</th><th style="text-align:left;">修正原因</th></tr></thead><tbody id="cfBody"></tbody></table>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:12px;color:#333;font-weight:600;">活动数据修正</h4>
+                        <table style="width:100%;"><thead><tr><th style="text-align:left;">项目</th><th style="text-align:right;">原值</th><th style="text-align:right;">修正值</th><th style="text-align:left;">修正原因</th></tr></thead><tbody id="dataBody"></tbody></table>
+                    </div>
+                </div>
+                <div style="margin-top:20px;padding-top:20px;border-top:1px solid #f0f0f0;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><span style="font-weight:600;color:#333;">修正后碳排放总量计算</span><span class="kpi-value" style="color:#1e80ff;font-size:2rem;">---</span></div>
+                    <div class="chart-container" id="correctionChart"></div>
+                </div>
+            </div>
+        </div>
     </div>
+    </body>
     <script>
         const RAW_DATA={'2025':{production:{months:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],actualOutput:[4274.6653,2902.1028,3486.0048,1707.0695,3063.5683,3584.5896,2034.9612,3025.3746,3401.2965,2177.4818,2708.5219,3603.3521]},water:[17386,12949,15143,6768,12579,14614,8813,12421,13803,9131,11312,15117],steam:[1712,1126,1292,574,1061,1186,669,1009,1125,750,954,1269],electricity:[345621,252416.4,290533.2,159854,281599.68,320937.2,211425.8,282957.8,302547.4,210993.6,236026.8,288701]},'2026':{production:{months:['1月','2月','3月','4月'],actualOutput:[4945.632,2834.961,4416.6993,2387.1303]},water:[20543,12165,18367,10380],steam:[1740,1020,1532,823],electricity:[374779.4,227895.6,345636.8,189917.2]}};
         const CF={electricity:0.000581,steam:0.3,water:0.00091};
+        const AUDIT_DATA={'2025':{months:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],companyCarbon:[202.8,147.2,171.5,89.8,166.5,189.2,124.5,164.2,178.5,126.8,139.5,170.2],auditCarbon:[198.5,145.8,168.2,91.2,162.8,185.6,121.8,161.5,175.2,124.5,137.8,168.5],diffReasons:['电网因子调整','无差异','蒸汽计量偏差','无差异','数据完整性调整','无差异','无差异','排放因子更新','无差异','无差异','无差异','边界调整']},'2026':{months:['1月','2月','3月','4月'],companyCarbon:[226.5,136.8,205.8,112.5],auditCarbon:[224.2,134.5,202.5,110.8],diffReasons:['无差异','蒸汽损耗调整','无差异','无差异']}};
         let currentYear='2025';
+        let customCF = JSON.parse(localStorage.getItem('customCF') || '{}');
+        let customData = JSON.parse(localStorage.getItem('customData') || '{}');
 
         function getData(){return RAW_DATA[currentYear]}
         function sum(arr){return arr.reduce((a,b)=>a+b,0)}
@@ -53,7 +87,7 @@
         function getTotalCarbon(){return sum(getData().electricity.map((v,i)=>calcCarbon(i)))}
 
         function switchYear(year){currentYear=year;document.querySelectorAll('[data-year]').forEach(b=>b.classList.remove('active'));document.querySelector('[data-year="'+year+'"]').classList.add('active');refreshAll()}
-        function refreshAll(){renderKPIs();renderTasks();renderTrace();renderIssues()}
+        function refreshAll(){renderKPIs();renderTasks();renderTrace();renderIssues();renderCompareChart();renderDiffChart();renderDiffTable();renderCorrectionPanel()}
 
         function renderKPIs(){
             const totalC=getTotalCarbon();const d=getData();const mc=d.water.length;
@@ -93,7 +127,156 @@
             const issues=[{id:'ISS-2025-001',date:'2025-06',desc:'6月用电量数据波动超出正常范围±20%，需核实电表读数',priority:'高',status:'整改中',owner:'张工',deadline:'2025-07-15'},{id:'ISS-2025-002',date:'2025-08',desc:'蒸汽排放因子佐证材料不完整，缺少天然气低位发热值检测报告',priority:'中',status:'待整改',owner:'李工',deadline:'2025-07-30'},{id:'ISS-2025-003',date:'2025-04',desc:'4月产量数据与能耗数据比例偏差超过10%，需核查计量数据',priority:'低',status:'已关闭',owner:'王工',deadline:'2025-06-30'}];
             document.getElementById('issueBody').innerHTML=issues.map(iss=>'<tr><td class="fw-600">'+iss.id+'</td><td>'+iss.date+'</td><td>'+iss.desc+'</td><td class="text-center"><span class="tag '+(iss.priority==='高'?'tag-red':iss.priority==='中'?'tag-orange':'tag-blue')+'">'+iss.priority+'</span></td><td class="text-center"><span class="tag '+(iss.status==='已关闭'?'tag-green':iss.status==='整改中'?'tag-blue':'tag-orange')+'">'+iss.status+'</span></td><td>'+iss.owner+'</td><td>'+iss.deadline+'</td></tr>').join('');
         }
-        document.addEventListener('DOMContentLoaded',function(){refreshAll()});
+
+        function getAuditData(){return AUDIT_DATA[currentYear]}
+
+        function renderCompareChart(){
+            const dim=document.getElementById('compareDim').value;
+            const a=getAuditData();
+            const dom=document.getElementById('compareChart');
+            if(!dom)return;
+            const chart=echarts.init(dom);
+            const option={
+                tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+                legend:{data:['企业自算','第三方核查'],top:10},
+                grid:{left:'3%',right:'4%',bottom:'3%',containLabel:true},
+                xAxis:{type:'category',data:dim==='month'?a.months:['电力碳排放','蒸汽碳排放','水碳排放','合计'],axisLabel:{interval:0,rotate:dim==='month'&&a.months.length>6?30:0}},
+                yAxis:{type:'value',name:'tCO₂'},
+                series:[
+                    {name:'企业自算',type:'bar',data:dim==='month'?a.companyCarbon:[192.8,48.3,1.4,242.5],barWidth:'40%',itemStyle:{color:'#1e80ff'}},
+                    {name:'第三方核查',type:'bar',data:dim==='month'?a.auditCarbon:[189.2,47.5,1.4,238.1],barWidth:'40%',itemStyle:{color:'#00b42a'}}
+                ]
+            };
+            chart.setOption(option);
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderDiffChart(){
+            const a=getAuditData();
+            const diffs=a.companyCarbon.map((c,i)=>c-a.auditCarbon[i]);
+            const dom=document.getElementById('diffChart');
+            if(!dom)return;
+            const chart=echarts.init(dom);
+            const option={
+                tooltip:{trigger:'axis',formatter:function(params){
+                    const idx=params[0].dataIndex;
+                    const diff=diffs[idx];
+                    return `${a.months[idx]}<br/>差异值: ${diff>0?'+'+diff.toFixed(2):diff.toFixed(2)} tCO₂<br/>差异率: ${((a.companyCarbon[idx]-a.auditCarbon[idx])/a.auditCarbon[idx]*100).toFixed(2)}%`;
+                }},
+                grid:{left:'3%',right:'4%',bottom:'3%',containLabel:true},
+                xAxis:{type:'category',data:a.months,axisLabel:{interval:0,rotate:a.months.length>6?30:0}},
+                yAxis:{type:'value',name:'差异值(tCO₂)'},
+                series:[{type:'bar',data:diffs,itemStyle:{color:function(params){return params.value>=0?'#f53f3f':'#00b42a';}}}]};
+            chart.setOption(option);
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function renderDiffTable(){
+            const dim=document.getElementById('compareDim').value;
+            const a=getAuditData();
+            let html='';
+            if(dim==='month'){
+                a.months.forEach((m,i)=>{
+                    const diff=a.companyCarbon[i]-a.auditCarbon[i];
+                    const rate=(diff/a.auditCarbon[i]*100).toFixed(2);
+                    const status=Math.abs(diff)<2?'tag-green':(Math.abs(diff)<5?'tag-orange':'tag-red');
+                    html+=`<tr><td>${m}</td><td class="text-right">${a.companyCarbon[i].toFixed(2)}</td><td class="text-right">${a.auditCarbon[i].toFixed(2)}</td><td class="text-right ${diff>=0?'text-red':'text-green'}">${diff>=0?'+'+diff.toFixed(2):diff.toFixed(2)}</td><td class="text-right">${rate}%</td><td>${a.diffReasons[i]||'无差异'}</td><td class="text-center"><span class="tag ${Math.abs(diff)<2?'tag-green':'tag-orange'}">${Math.abs(diff)<2?'一致':'待核实'}</span></td></tr>`;
+                });
+            }else{
+                const items=[{name:'电力碳排放',comp:192.8,audit:189.2,reason:'电网排放因子更新'},{name:'蒸汽碳排放',comp:48.3,audit:47.5,reason:'蒸汽损耗调整'},{name:'水碳排放',comp:1.4,audit:1.4,reason:'无差异'},{name:'合计',comp:242.5,audit:238.1,reason:'综合调整'}];
+                items.forEach(it=>{
+                    const diff=it.comp-it.audit;
+                    const rate=(diff/it.audit*100).toFixed(2);
+                    html+=`<tr><td>${it.name}</td><td class="text-right">${it.comp.toFixed(2)}</td><td class="text-right">${it.audit.toFixed(2)}</td><td class="text-right ${diff>=0?'text-red':'text-green'}">${diff>=0?'+'+diff.toFixed(2):diff.toFixed(2)}</td><td class="text-right">${rate}%</td><td>${it.reason}</td><td class="text-center"><span class="tag ${Math.abs(diff)<2?'tag-green':'tag-orange'}">${Math.abs(diff)<2?'一致':'待核实'}</span></td></tr>`;
+                });
+            }
+            document.getElementById('diffBody').innerHTML=html;
+        }
+
+        function renderCorrectionPanel(){
+            let cfHtml='';
+            const cfItems=[{name:'电力',key:'electricity',value:CF.electricity,unit:'tCO₂/kWh'},{name:'蒸汽',key:'steam',value:CF.steam,unit:'tCO₂/t'},{name:'水',key:'water',value:CF.water,unit:'tCO₂/t'}];
+            cfItems.forEach(it=>{
+                const custom=customCF[it.key]||{};
+                const newValue=custom.value!==undefined?custom.value:it.value;
+                const reason=custom.reason||'';
+                cfHtml+=`<tr><td>${it.name}</td><td class="text-right">${it.value.toFixed(6)} ${it.unit}</td><td class="text-right"><input type="number" step="0.000001" value="${newValue.toFixed(6)}" data-key="${it.key}" data-field="value" style="width:100px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td><td><input type="text" value="${reason}" data-key="${it.key}" data-field="reason" placeholder="输入修正原因..." style="width:150px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td></tr>`;
+            });
+            document.getElementById('cfBody').innerHTML=cfHtml;
+
+            const d=getData();
+            let dataHtml='';
+            const dataItems=[{name:'年度电力总量',key:'elec_total',value:sum(d.electricity),unit:'kWh'},{name:'年度蒸汽总量',key:'steam_total',value:sum(d.steam),unit:'t'},{name:'年度用水总量',key:'water_total',value:sum(d.water),unit:'t'}];
+            dataItems.forEach(it=>{
+                const custom=customData[it.key]||{};
+                const newValue=custom.value!==undefined?custom.value:it.value;
+                const reason=custom.reason||'';
+                dataHtml+=`<tr><td>${it.name}</td><td class="text-right">${fmtNum(it.value)} ${it.unit}</td><td class="text-right"><input type="number" step="1" value="${newValue}" data-key="${it.key}" data-field="value" style="width:100px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td><td><input type="text" value="${reason}" data-key="${it.key}" data-field="reason" placeholder="输入修正原因..." style="width:150px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;"></td></tr>`;
+            });
+            document.getElementById('dataBody').innerHTML=dataHtml;
+
+            renderCorrectionChart();
+        }
+
+        function renderCorrectionChart(){
+            const a=getAuditData();
+            const origTotal=sum(a.companyCarbon);
+            const auditTotal=sum(a.auditCarbon);
+            let corrTotal=origTotal;
+            const cfItems=[{key:'electricity',orig:CF.electricity},{key:'steam',orig:CF.steam},{key:'water',orig:CF.water}];
+            cfItems.forEach(it=>{
+                if(customCF[it.key]&&customCF[it.key].value!==undefined){
+                    const ratio=customCF[it.key].value/it.orig;
+                    corrTotal*=ratio;
+                }
+            });
+            const dom=document.getElementById('correctionChart');
+            if(!dom)return;
+            const chart=echarts.init(dom);
+            const option={
+                tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+                legend:{data:['企业自算','第三方核查','修正后计算'],top:10},
+                grid:{left:'3%',right:'4%',bottom:'3%',containLabel:true},
+                xAxis:{type:'category',data:['碳排放总量']},
+                yAxis:{type:'value',name:'tCO₂'},
+                series:[
+                    {name:'企业自算',type:'bar',data:[origTotal.toFixed(1)],barWidth:'25%',itemStyle:{color:'#1e80ff'}},
+                    {name:'第三方核查',type:'bar',data:[auditTotal.toFixed(1)],barWidth:'25%',itemStyle:{color:'#00b42a'}},
+                    {name:'修正后计算',type:'bar',data:[corrTotal.toFixed(1)],barWidth:'25%',itemStyle:{color:'#ff7d00'}}
+                ]
+            };
+            chart.setOption(option);
+            window.addEventListener('resize',()=>chart.resize());
+        }
+
+        function saveCorrections(){
+            document.querySelectorAll('#cfBody input').forEach(input=>{
+                const key=input.dataset.key;
+                const field=input.dataset.field;
+                if(!customCF[key])customCF[key]={};
+                if(field==='value'){
+                    customCF[key][field]=parseFloat(input.value);
+                }else{
+                    customCF[key][field]=input.value;
+                }
+            });
+            document.querySelectorAll('#dataBody input').forEach(input=>{
+                const key=input.dataset.key;
+                const field=input.dataset.field;
+                if(!customData[key])customData[key]={};
+                if(field==='value'){
+                    customData[key][field]=parseFloat(input.value);
+                }else{
+                    customData[key][field]=input.value;
+                }
+            });
+            localStorage.setItem('customCF',JSON.stringify(customCF));
+            localStorage.setItem('customData',JSON.stringify(customData));
+            alert('修正数据已保存！');
+            renderCorrectionChart();
+        }
+
+        document.addEventListener('DOMContentLoaded',function(){renderKPIs();renderTasks();renderTrace();renderIssues();renderCompareChart();renderDiffChart();renderDiffTable();renderCorrectionPanel()});
     </script>
 </body>
 </html>

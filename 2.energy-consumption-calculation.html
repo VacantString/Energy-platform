@@ -195,12 +195,6 @@
                 </div>
                 <div class="chart-box" id="trendChart"></div>
             </div>
-            <div class="chart-panel">
-                <div class="chart-panel-header">
-                    <div class="chart-panel-title">📊 综合能耗结构（折标煤）</div>
-                </div>
-                <div class="chart-box" id="structureChart"></div>
-            </div>
         </div>
 
         <div class="section-panel" id="indicatorPanel">
@@ -235,10 +229,19 @@
         <div class="charts-row">
             <div class="chart-panel">
                 <div class="chart-panel-header">
+                    <div class="chart-panel-title">📊 综合能耗结构（折标煤）</div>
+                </div>
+                <div class="chart-box" id="structureChart"></div>
+            </div>
+            <div class="chart-panel">
+                <div class="chart-panel-header">
                     <div class="chart-panel-title">♨️ 自产蒸汽能耗分布</div>
                 </div>
                 <div class="chart-box" id="steamChart"></div>
             </div>
+        </div>
+
+        <div class="charts-row">
             <div class="chart-panel">
                 <div class="chart-panel-header">
                     <div class="chart-panel-title">⚡ 车间电耗系统分布</div>
@@ -594,35 +597,65 @@
             const totalTce = totalElec * COEF.electricity + totalWater * COEF.water + totalSteam * COEF.steam;
             const prodSum = getProductionSum();
 
-            const unitComprehensiveTce = prodSum > 0 ? totalTce / prodSum : 0;
-            const unitElec = prodSum > 0 ? totalElec / prodSum : 0;
-            const unitSteam = prodSum > 0 ? totalSteam / prodSum : 0;
+            const prevYearData = currentYear === '2025' ? null : RAW_DATA['2025'];
+            const prevTotalTce = prevYearData ? (prevYearData.electricity.reduce((a, b) => a + b, 0) * COEF.electricity + 
+                prevYearData.water.reduce((a, b) => a + b, 0) * COEF.water + 
+                prevYearData.steam.reduce((a, b) => a + b, 0) * COEF.steam) : null;
+            const prevProdSum = prevYearData ? prevYearData.production.actualOutput.reduce((a, b) => a + b, 0) : null;
 
             const rows = [
-                { level: 0, unit: '公司', param: '单位产品综合能耗', uom: 'tce/t', consumption: totalTce, tce: totalTce, output: prodSum, unitVal: unitComprehensiveTce, expandable: true, children: [
-                    { level: 1, unit: '生产系统', param: '单位产品综合能耗', uom: 'tce/t', consumption: totalTce, tce: totalTce, output: prodSum, unitVal: unitComprehensiveTce, expandable: true, children: [
-                        { level: 1, unit: '生产系统', param: '单位产品电耗', uom: 'kwh/t', consumption: totalElec, tce: totalElec * COEF.electricity, output: prodSum, unitVal: unitElec, expandable: false },
-                        { level: 1, unit: '生产系统', param: '单位产品蒸汽消耗', uom: 't/t', consumption: totalSteam, tce: totalSteam * COEF.steam, output: prodSum, unitVal: unitSteam, expandable: false },
+                { level: 0, unit: '公司', param: '单位产品综合能耗', uom: 'tce/t', 
+                  consumption: totalTce, tce: totalTce, output: prodSum, 
+                  unitVal: prodSum > 0 ? totalTce / prodSum : 0, 
+                  yoy: prodSum > 0 && prevProdSum > 0 && prevTotalTce ? ((totalTce/prodSum) - (prevTotalTce/prevProdSum)) / (prevTotalTce/prevProdSum) * 100 : null,
+                  expandable: true, children: [
+                    { level: 1, unit: '生产系统', param: '单位产品综合能耗', uom: 'tce/t', 
+                      consumption: totalTce * 0.82, tce: totalTce * 0.82, output: prodSum, 
+                      unitVal: prodSum > 0 ? (totalTce * 0.82) / prodSum : 0, 
+                      yoy: null, expandable: true, children: [
+                        { level: 2, unit: '制水工序', param: '制水工序综合能耗', uom: 'tce/t', 
+                          consumption: totalTce * 0.0157, tce: totalTce * 0.0157, output: prodSum, 
+                          unitVal: prodSum > 0 ? (totalTce * 0.0157) / prodSum : 0, yoy: null, expandable: false },
+                        { level: 2, unit: '配料工序', param: '配料工序综合能耗', uom: 'tce/t', 
+                          consumption: totalTce * 0.3125, tce: totalTce * 0.3125, output: prodSum, 
+                          unitVal: prodSum > 0 ? (totalTce * 0.3125) / prodSum : 0, yoy: -2.35, expandable: false },
+                        { level: 2, unit: '灌装工序一线', param: '灌装工序综合能耗', uom: 'tce/t', 
+                          consumption: totalTce * 0.1996, tce: totalTce * 0.1996, output: prodSum, 
+                          unitVal: prodSum > 0 ? (totalTce * 0.1996) / prodSum : 0, yoy: 1.09, expandable: false },
+                        { level: 2, unit: '灌装工序二线', param: '灌装工序综合能耗', uom: 'tce/t', 
+                          consumption: totalTce * 0.2075, tce: totalTce * 0.2075, output: prodSum, 
+                          unitVal: prodSum > 0 ? (totalTce * 0.2075) / prodSum : 0, yoy: 5.28, expandable: false },
+                        { level: 2, unit: '包装工序一线', param: '包装工序综合能耗', uom: 'tce/t', 
+                          consumption: totalTce * 0.0404, tce: totalTce * 0.0404, output: prodSum, 
+                          unitVal: prodSum > 0 ? (totalTce * 0.0404) / prodSum : 0, yoy: -0.11, expandable: false },
+                        { level: 2, unit: '包装工序二线', param: '包装工序综合能耗', uom: 'tce/t', 
+                          consumption: totalTce * 0.0416, tce: totalTce * 0.0416, output: prodSum, 
+                          unitVal: prodSum > 0 ? (totalTce * 0.0416) / prodSum : 0, yoy: 0, expandable: false },
                     ]},
-                    { level: 1, unit: '制水工序', param: '制水工序纯水电耗', uom: 'kwh/t', consumption: totalElec * 0.05, tce: totalElec * 0.05 * COEF.electricity, output: prodSum, unitVal: prodSum > 0 ? (totalElec * 0.05) / prodSum : 0, expandable: false },
-                    { level: 1, unit: '配料工序', param: '配料工序产品蒸汽消耗', uom: 't/t', consumption: totalSteam * 0.4048, tce: totalSteam * 0.4048 * COEF.steam, output: prodSum, unitVal: prodSum > 0 ? (totalSteam * 0.4048) / prodSum : 0, expandable: false },
-                    { level: 1, unit: '配料工序', param: '配料工序产品电耗', uom: 'kwh/t', consumption: totalElec * 0.08, tce: totalElec * 0.08 * COEF.electricity, output: prodSum, unitVal: prodSum > 0 ? (totalElec * 0.08) / prodSum : 0, expandable: false },
-                    { level: 1, unit: '灌装工序', param: '灌装工序一线产品蒸汽消耗', uom: 't/t', consumption: totalSteam * 0.2687, tce: totalSteam * 0.2687 * COEF.steam, output: prodSum, unitVal: prodSum > 0 ? (totalSteam * 0.2687) / prodSum : 0, expandable: false },
-                    { level: 1, unit: '灌装工序', param: '灌装工序二线产品蒸汽消耗', uom: 't/t', consumption: totalSteam * 0.2690, tce: totalSteam * 0.2690 * COEF.steam, output: prodSum, unitVal: prodSum > 0 ? (totalSteam * 0.2690) / prodSum : 0, expandable: false },
-                    { level: 1, unit: '灌装工序', param: '灌装工序一线单位产品电耗', uom: 'kwh/t', consumption: totalElec * 0.12, tce: totalElec * 0.12 * COEF.electricity, output: prodSum, unitVal: prodSum > 0 ? (totalElec * 0.12) / prodSum : 0, expandable: false },
-                    { level: 1, unit: '灌装工序', param: '灌装工序二线单位产品电耗', uom: 'kwh/t', consumption: totalElec * 0.12, tce: totalElec * 0.12 * COEF.electricity, output: prodSum, unitVal: prodSum > 0 ? (totalElec * 0.12) / prodSum : 0, expandable: false },
-                    { level: 1, unit: '包装工序', param: '包装一线单位产品电耗', uom: 'kwh/t', consumption: totalElec * 0.06, tce: totalElec * 0.06 * COEF.electricity, output: prodSum, unitVal: prodSum > 0 ? (totalElec * 0.06) / prodSum : 0, expandable: false },
-                    { level: 1, unit: '包装工序', param: '包装二线单位产品电耗', uom: 'kwh/t', consumption: totalElec * 0.06, tce: totalElec * 0.06 * COEF.electricity, output: prodSum, unitVal: prodSum > 0 ? (totalElec * 0.06) / prodSum : 0, expandable: false },
-                ]},
-                { level: 0, unit: '辅助生产系统', param: '单位产品综合能耗', uom: 'tce/t', consumption: totalTce * 0.15, tce: totalTce * 0.15, output: prodSum, unitVal: prodSum > 0 ? (totalTce * 0.15) / prodSum : 0, expandable: true, children: [
-                    { level: 1, unit: '辅助生产系统', param: '单位产品电耗', uom: 'kwh/t', consumption: totalElec * 0.15, tce: totalElec * 0.15 * COEF.electricity, output: prodSum, unitVal: prodSum > 0 ? (totalElec * 0.15) / prodSum : 0, expandable: false },
-                    { level: 1, unit: '空压', param: '空压单位产品电耗', uom: 'kwh/t', consumption: totalElec * 0.06, tce: totalElec * 0.06 * COEF.electricity, output: prodSum, unitVal: prodSum > 0 ? (totalElec * 0.06) / prodSum : 0, expandable: false },
-                    { level: 1, unit: '锅炉', param: '锅炉吨蒸汽燃气消耗', uom: 'm³/t', consumption: totalSteam * 0.08, tce: totalSteam * 0.08 * COEF.steam, output: totalSteam, unitVal: totalSteam > 0 ? (totalSteam * 0.08) / totalSteam : 0, expandable: false },
-                    { level: 1, unit: '制冷控制', param: '单位制冷面积电耗', uom: 'kwh/m²', consumption: totalElec * 0.04, tce: totalElec * 0.04 * COEF.electricity, output: 1200, unitVal: 1200 > 0 ? (totalElec * 0.04) / 1200 : 0, expandable: false },
-                    { level: 1, unit: '其他辅助设施', param: '单位产品电耗', uom: 'kwh/t', consumption: totalElec * 0.03, tce: totalElec * 0.03 * COEF.electricity, output: prodSum, unitVal: prodSum > 0 ? (totalElec * 0.03) / prodSum : 0, expandable: false },
-                ]},
-                { level: 0, unit: '附属生产系统', param: '附属单位综合能耗', uom: 'tce/m²', consumption: totalTce * 0.03, tce: totalTce * 0.03, output: 3500, unitVal: 3500 > 0 ? (totalTce * 0.03) / 3500 : 0, expandable: false },
+                    { level: 1, unit: '辅助生产系统', param: '单位产品综合能耗', uom: 'tce/t', 
+                      consumption: totalTce * 0.15, tce: totalTce * 0.15, output: prodSum, 
+                      unitVal: prodSum > 0 ? (totalTce * 0.15) / prodSum : 0, 
+                      yoy: null, expandable: true, children: [
+                        { level: 2, unit: '空压机及供气系统', param: '空压机系统综合能耗', uom: 'tce/t', 
+                          consumption: totalTce * 0.0245, tce: totalTce * 0.0245, output: prodSum, 
+                          unitVal: prodSum > 0 ? (totalTce * 0.0245) / prodSum : 0, yoy: 0.06, expandable: false },
+                        { level: 2, unit: '锅炉', param: '锅炉系统综合能耗', uom: 'tce/t', 
+                          consumption: 0, tce: 0, output: prodSum, 
+                          unitVal: 0, yoy: null, expandable: false },
+                        { level: 2, unit: '制冷（中央空调）', param: '中央空调综合能耗', uom: 'tce/t', 
+                          consumption: totalTce * 0.0349, tce: totalTce * 0.0349, output: prodSum, 
+                          unitVal: prodSum > 0 ? (totalTce * 0.0349) / prodSum : 0, yoy: 0.45, expandable: false },
+                        { level: 2, unit: '其他（污水站等）', param: '其他辅助系统能耗', uom: 'tce/t', 
+                          consumption: totalTce * 0.0125, tce: totalTce * 0.0125, output: prodSum, 
+                          unitVal: prodSum > 0 ? (totalTce * 0.0125) / prodSum : 0, yoy: 0.35, expandable: false },
+                    ]},
+                    { level: 1, unit: '附属生产系统', param: '附属系统综合能耗', uom: 'tce/t', 
+                      consumption: totalTce * 0.03, tce: totalTce * 0.03, output: prodSum, 
+                      unitVal: prodSum > 0 ? (totalTce * 0.03) / prodSum : 0, 
+                      yoy: null, expandable: false },
+                ]}
             ];
+
 
             let html = '';
             let rowId = 0;
@@ -631,10 +664,26 @@
                     const id = 'row_' + (rowId++);
                     const hasChildren = item.children && item.children.length > 0;
                     const padClass = 'level-' + item.level;
-                    const consumptionDisplay = item.uom.includes('tce') || item.uom.includes('m²') ? fmtNum(item.consumption, 2) : fmtNum(item.consumption, 1);
+                    const consumptionDisplay = item.uom.includes('tce') ? fmtNum(item.consumption, 2) : fmtNum(item.consumption, 1);
                     const tceDisplay = fmtNum(item.tce, 2);
                     const outputDisplay = fmtNum(item.output, 1);
                     const unitValDisplay = fmtNum(item.unitVal, item.uom === 'tce/t' ? 4 : 2);
+                    
+                    let yoyDisplay = '-';
+                    let yoyClass = 'text-muted';
+                    if (item.yoy !== null) {
+                        const yoyVal = +item.yoy.toFixed(1);
+                        if (yoyVal > 0) {
+                            yoyDisplay = '+' + yoyVal + '%';
+                            yoyClass = 'text-red';
+                        } else if (yoyVal < 0) {
+                            yoyDisplay = yoyVal + '%';
+                            yoyClass = 'text-green';
+                        } else {
+                            yoyDisplay = '0.0%';
+                            yoyClass = 'text-muted';
+                        }
+                    }
 
                     html += '<tr class="' + padClass + '" data-id="' + id + '"' + (item.level > 0 && parentId ? ' data-parent="' + parentId + '" style="display:none;"' : '') + '>';
                     html += '<td class="text-center">' + (hasChildren ? '<span class="expand-icon" onclick="toggleRow(\'' + id + '\')">▶</span>' : '') + '</td>';
@@ -645,7 +694,7 @@
                     html += '<td class="text-right text-green">' + tceDisplay + '</td>';
                     html += '<td class="text-right">' + outputDisplay + '</td>';
                     html += '<td class="text-right fw-600 text-blue">' + unitValDisplay + '</td>';
-                    html += '<td class="text-center text-muted">-</td>';
+                    html += '<td class="text-center ' + yoyClass + '">' + yoyDisplay + '</td>';
                     html += '</tr>';
 
                     if (hasChildren) {
