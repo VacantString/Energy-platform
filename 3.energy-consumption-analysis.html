@@ -25,7 +25,7 @@
         .selector-select { padding: 8px 14px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 0.9rem; cursor: pointer; background: white; min-width: 110px; }
         .selector-select:focus { border-color: #ff7d00; outline: none; }
 
-        .kpi-section { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 20px; }
+        .kpi-section { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; margin-bottom: 20px; }
         .kpi-card { background: white; padding: 28px 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; border-top: 4px solid #ff7d00; transition: transform 0.2s; cursor: default; overflow: visible; min-height: 140px; display: flex; flex-direction: column; justify-content: center; }
         .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
         .kpi-card:nth-child(2) { border-top-color: #1e80ff; }
@@ -117,6 +117,27 @@
             .kpi-section { grid-template-columns: repeat(3, 1fr); }
             .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
             .strategy-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 1024px) {
+            .kpi-section { grid-template-columns: repeat(2, 1fr); }
+            .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.5rem; }
+            .header { padding: 20px 24px; }
+            .selector-bar { gap: 12px; }
+        }
+        @media (max-width: 768px) {
+            .kpi-section { grid-template-columns: 1fr; }
+            .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.3rem; }
+            .header p { font-size: 0.85rem; }
+            .container { padding: 12px; }
+            .selector-bar { padding: 12px 16px; gap: 8px; }
+            .selector-btn { padding: 6px 12px; font-size: 0.8rem; }
+            .kpi-card { min-height: 110px; padding: 20px 12px; }
+            .kpi-value { font-size: 1.4rem; }
+            .chart-box { height: 350px; }
+            .chart-box-sm { height: 300px; }
+            table th, table td { padding: 8px 10px; font-size: 0.78rem; }
         }
         @media (min-width: 2560px) {
             .container { max-width: 3440px; padding: 30px; }
